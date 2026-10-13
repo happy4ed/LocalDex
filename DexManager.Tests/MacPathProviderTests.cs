@@ -151,7 +151,7 @@ namespace DexManager.Tests
         }
 
         [Fact]
-        public void PathService_IsAdbDirectoryInProcessPath_HandlesUnixColonSeparator()
+        public void PathService_IsAdbDirectoryInProcessPath_HandlesHostPathSeparator()
         {
             var logService = new LogService();
             var settingsService = new SettingsService(logService);
@@ -159,11 +159,11 @@ namespace DexManager.Tests
             var pathService = new PathService(settingsService, logService, processRunner, _provider);
 
             var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-            var segments = pathEnv.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            var segments = pathEnv.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             if (segments.Length > 0)
             {
-                var firstDir = segments[0].Trim();
+                var firstDir = segments[0].Trim().Trim('"');
                 var mockAdbPath = Path.Combine(firstDir, "adb");
                 Assert.True(pathService.IsAdbDirectoryInProcessPath(mockAdbPath));
             }

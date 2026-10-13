@@ -75,10 +75,18 @@ namespace DexManager.Tests
             Directory.CreateDirectory(unrelatedDir);
 
             var scriptName = "dxmtest_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            if (OperatingSystem.IsWindows()) scriptName += ".exe";
             var ownedScript = Path.Combine(ownedDir, scriptName);
             var unrelatedScript = Path.Combine(unrelatedDir, scriptName);
+            var arguments = OperatingSystem.IsWindows() ? "127.0.0.1 -n 30" : "30";
 
-            if (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
+            if (OperatingSystem.IsWindows())
+            {
+                var ping = Path.Combine(Environment.SystemDirectory, "ping.exe");
+                File.Copy(ping, ownedScript);
+                File.Copy(ping, unrelatedScript);
+            }
+            else
             {
                 File.Copy("/bin/sleep", ownedScript);
                 File.Copy("/bin/sleep", unrelatedScript);
@@ -94,7 +102,7 @@ namespace DexManager.Tests
                 ownedProcess = Process.Start(new ProcessStartInfo
                 {
                     FileName = ownedScript,
-                    Arguments = "30",
+                    Arguments = arguments,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });
@@ -102,12 +110,14 @@ namespace DexManager.Tests
                 unrelatedProcess = Process.Start(new ProcessStartInfo
                 {
                     FileName = unrelatedScript,
-                    Arguments = "30",
+                    Arguments = arguments,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });
 
                 Thread.Sleep(300);
+                Assert.False(ownedProcess.HasExited, "Owned test process must start before cleanup.");
+                Assert.False(unrelatedProcess.HasExited, "Unrelated test process must start before cleanup.");
 
                 var cleanup = new BundledProcessCleanupService(new LogService());
                 cleanup.AddExecutablePath(ownedScript);

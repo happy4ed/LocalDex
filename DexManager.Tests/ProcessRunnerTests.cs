@@ -50,7 +50,7 @@ namespace DexManager.Tests
 
         private static string GetCommandProcessorPath()
         {
-            if (OperatingSystem.IsWindows()) return "cmd.exe";
+            if (OperatingSystem.IsWindows()) return Path.Combine(Environment.SystemDirectory, "cmd.exe");
             return "/bin/sh";
         }
 
@@ -62,7 +62,7 @@ namespace DexManager.Tests
 
         private static string GetPingExecutablePath()
         {
-            if (OperatingSystem.IsWindows()) return "ping.exe";
+            if (OperatingSystem.IsWindows()) return Path.Combine(Environment.SystemDirectory, "ping.exe");
             return "/bin/sleep";
         }
 

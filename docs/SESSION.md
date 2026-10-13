@@ -1,5 +1,11 @@
 # Session Handoff
 
+## Windows CI test portability — 2026-10-13
+
+The first Windows release run (`38329211017`, source `1ea0692`) built the application and transfer helper successfully, then stopped on three test-fixture failures: missing Windows cleanup-test executables, relative `ping.exe` paths rejected by ProcessRunner, and a Unix-only PATH separator assertion. The tests now create Windows executable fixtures, use absolute system executable paths, and use the host PATH separator. Linux in-process regression validation passes all 116 cases with no skips. The original push also passed both macOS packaging jobs. A new Windows CI run is still required to verify these fixes and compile/test/publish the installer; no installer release has been produced yet.
+
+첫 Windows CI는 앱·전송 도우미 빌드를 통과했으나 테스트의 Windows 처리 누락 3건으로 중단됐습니다. 테스트용 실행 파일 생성, 시스템 실행 파일의 절대 경로, 운영체제별 PATH 구분자를 수정했으며 Linux 회귀 테스트 116개가 모두 통과했습니다. 기존 커밋의 macOS 두 아키텍처 패키징도 통과했습니다. Windows 재검증과 설치 파일 생성·설치/제거 테스트·릴리스 게시는 아직 남아 있습니다.
+
 ## Windows installer and release — 2026-10-13
 
 Added an Inno Setup per-user installer and a Windows build/release workflow. Install/upgrade/uninstall smoke tests preserve runtime settings, phone recovery records and captures. Source commits exclude downloaded scrcpy binaries; the pinned runtime is verified and included in release assets. CI publication is gated on build, regression and installer checks.
