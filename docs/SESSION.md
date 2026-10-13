@@ -1,5 +1,11 @@
 # Session Handoff
 
+## Windows process-name lookup — 2026-10-13
+
+The second Windows run (`38329747057`, source `344d7d3`) passed 115/116 regression cases. The now-runnable cleanup fixture exposed a Core implementation bug: Unix's 15-character process-name truncation was also applied on Windows, so the 16-character test process was not found. Core now uses the full name on Windows and retains the Unix lookup behavior and exact executable-path ownership check. The WinForms implementation already uses full names. Windows CI must rerun before installer publication.
+
+두 번째 Windows CI는 회귀 테스트 116개 중 115개를 통과했습니다. 실행 가능해진 프로세스 정리 테스트가 공용 Core 코드의 이름 검색 오류를 드러냈습니다. Windows에도 Unix의 15자 제한을 적용하던 부분을 수정했으며, 정확한 실행 파일 경로 확인은 유지합니다. WinForms 쪽 구현은 이미 전체 이름을 사용합니다. 설치판 게시 전 Windows 재검증이 필요합니다.
+
 ## Windows CI test portability — 2026-10-13
 
 The first Windows release run (`38329211017`, source `1ea0692`) built the application and transfer helper successfully, then stopped on three test-fixture failures: missing Windows cleanup-test executables, relative `ping.exe` paths rejected by ProcessRunner, and a Unix-only PATH separator assertion. The tests now create Windows executable fixtures, use absolute system executable paths, and use the host PATH separator. Linux in-process regression validation passes all 116 cases with no skips. The original push also passed both macOS packaging jobs. A new Windows CI run is still required to verify these fixes and compile/test/publish the installer; no installer release has been produced yet.

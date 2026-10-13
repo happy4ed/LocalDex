@@ -74,6 +74,8 @@ namespace DexManager.Tests
             Directory.CreateDirectory(ownedDir);
             Directory.CreateDirectory(unrelatedDir);
 
+            // Deliberately exceed 15 characters to detect Unix name truncation
+            // accidentally applied to Windows process lookups.
             var scriptName = "dxmtest_" + Guid.NewGuid().ToString("N").Substring(0, 8);
             if (OperatingSystem.IsWindows()) scriptName += ".exe";
             var ownedScript = Path.Combine(ownedDir, scriptName);

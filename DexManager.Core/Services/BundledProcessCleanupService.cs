@@ -97,8 +97,12 @@ namespace DexManager.Services
             Process[] processes;
             try
             {
-                var shortName = processName.Length > 15 ? processName.Substring(0, 15) : processName;
-                processes = Process.GetProcessesByName(shortName);
+                // Unix process names may be truncated; Windows requires the full
+                // executable name, including names longer than 15 characters.
+                var lookupName = !OperatingSystem.IsWindows() && processName.Length > 15
+                    ? processName.Substring(0, 15)
+                    : processName;
+                processes = Process.GetProcessesByName(lookupName);
                 if (processes.Length == 0 && (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()))
                 {
                     // Fallback to all processes only if GetProcessesByName found nothing
