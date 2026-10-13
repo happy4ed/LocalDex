@@ -66,7 +66,7 @@ namespace DexManager.Models
                         System.Environment.GetFolderPath(
                             System.Environment.SpecialFolder.UserProfile),
                         "Downloads",
-                        "DX Manager")
+                        "LocalDex")
                 },
                 VirtualDisplay = new VirtualDisplaySettings
                 {
@@ -82,7 +82,7 @@ namespace DexManager.Models
                 {
                     BitRate = "8M",
                     MaxFps = 60,
-                    WindowTitle = "DX Manager - DeX Station",
+                    WindowTitle = "LocalDex - DeX Station",
                     TurnScreenOff = true,
                     UseHidKeyboard = true,
                     UseHidMouse = true,

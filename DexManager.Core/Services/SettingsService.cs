@@ -349,7 +349,7 @@ namespace DexManager.Services
                 AppSettings.CurrentSchemaVersion)
             {
                 throw new InvalidDataException(
-                    "Settings from a newer DX Manager version cannot " +
+                    "Settings from a newer LocalDex version cannot " +
                     "be overwritten.");
             }
             settings.EnsureDefaults();

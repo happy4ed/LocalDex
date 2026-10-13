@@ -935,8 +935,8 @@ namespace DexManager.MultiDeviceTests
 
             if (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
             {
-                File.WriteAllText(firstPath, "#!/bin/sh\nsleep 30\n");
-                File.WriteAllText(secondPath, "#!/bin/sh\nsleep 30\n");
+                File.Copy("/bin/sleep", firstPath);
+                File.Copy("/bin/sleep", secondPath);
                 File.SetUnixFileMode(firstPath, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
                 File.SetUnixFileMode(secondPath, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
             }
@@ -953,14 +953,14 @@ namespace DexManager.MultiDeviceTests
                 first = Process.Start(new ProcessStartInfo
                 {
                     FileName = firstPath,
-                    Arguments = OperatingSystem.IsWindows() ? GetPingArguments() : "",
+                    Arguments = OperatingSystem.IsWindows() ? GetPingArguments() : "30",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });
                 second = Process.Start(new ProcessStartInfo
                 {
                     FileName = secondPath,
-                    Arguments = OperatingSystem.IsWindows() ? GetPingArguments() : "",
+                    Arguments = OperatingSystem.IsWindows() ? GetPingArguments() : "30",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });
@@ -1070,9 +1070,6 @@ namespace DexManager.MultiDeviceTests
         private static string GetPingExecutablePath()
         {
             if (OperatingSystem.IsWindows()) return GetSystemExecutablePath("ping.exe");
-            if (File.Exists("/sbin/ping")) return "/sbin/ping";
-            if (File.Exists("/bin/ping")) return "/bin/ping";
-            if (File.Exists("/usr/bin/ping")) return "/usr/bin/ping";
             return "/bin/sleep";
         }
 

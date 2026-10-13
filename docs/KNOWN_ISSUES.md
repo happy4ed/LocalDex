@@ -1,5 +1,17 @@
 # Known Issues and Constraints
 
+## Startup follow-up — 2026-10-12
+
+- Pending: measure repeated Windows USB startup with 2.1.0-localdex.2; verify exact freeform restoration and reconnect recovery.
+- Managed ADB proxy overhead is outside this update; keep managed transfer disabled in the reported environment.
+- Windows USB 반복 연결 시간·프리폼 원복·재연결 복구 실기 확인이 필요합니다. 파일 전송 중계 성능은 별도 작업입니다.
+
+
+## LocalDex fork — 2026-10-12
+
+Current desktop behavior supersedes the inherited overlay and scrcpy 4.1 notes below. See [One UI implementation](LOCALDEX_ONEUI.md) and [build/validation](LOCALDEX_BUILD.md). App/process: `LocalDex.exe`; official bundle: scrcpy 5.0.1; per-phone freeform recovery journal and Settings reset added. Hardware validation and any GitHub publication remain pending.
+
+
 ## 네트워크 격리
 
 무선 ADB는 PC와 휴대폰의 직접 로컬 통신이 필요하다. 같은 대역이어도 게스트

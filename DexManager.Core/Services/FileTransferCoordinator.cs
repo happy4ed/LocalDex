@@ -83,23 +83,23 @@ namespace DexManager.Services
                     AppDomain.CurrentDomain.BaseDirectory,
                     "tools",
                     "adb-proxy");
-                var candidateName = OperatingSystem.IsWindows() ? "DXMAdbProxy.exe" : "DXMAdbProxy";
+                var candidateName = OperatingSystem.IsWindows() ? "LocalDexAdbProxy.exe" : "LocalDexAdbProxy";
                 var candidatePath = Path.Combine(proxyDir, candidateName);
                 if (File.Exists(candidatePath))
                 {
                     _proxyPath = candidatePath;
                 }
-                else if (File.Exists(Path.Combine(proxyDir, "DXMAdbProxy.dll")))
+                else if (File.Exists(Path.Combine(proxyDir, "LocalDexAdbProxy.dll")))
                 {
-                    _proxyPath = Path.Combine(proxyDir, "DXMAdbProxy.dll");
+                    _proxyPath = Path.Combine(proxyDir, "LocalDexAdbProxy.dll");
                 }
-                else if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DXMAdbProxy.dll")))
+                else if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LocalDexAdbProxy.dll")))
                 {
-                    _proxyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DXMAdbProxy.dll");
+                    _proxyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LocalDexAdbProxy.dll");
                 }
                 else
                 {
-                    _proxyPath = Path.Combine(proxyDir, "DXMAdbProxy.exe");
+                    _proxyPath = Path.Combine(proxyDir, "LocalDexAdbProxy.exe");
                 }
             }
             _pipeName = "DXManager.Transfer." +
@@ -111,12 +111,12 @@ namespace DexManager.Services
             _acceptThread = new Thread(AcceptLoop)
             {
                 IsBackground = true,
-                Name = "DX Manager file-transfer IPC"
+                Name = "LocalDex file-transfer IPC"
             };
             _workerThread = new Thread(WorkerLoop)
             {
                 IsBackground = true,
-                Name = "DX Manager file-transfer worker"
+                Name = "LocalDex file-transfer worker"
             };
             _acceptThread.Start();
             _workerThread.Start();
@@ -137,7 +137,7 @@ namespace DexManager.Services
             {
                 var directory = NormalizeRemoteDirectory(
                     _settings.Paths.FileTransferTargetFolder);
-                if (CanCleanupStaleTransferArtifacts())
+                if (_settings.Features.ManagedFileTransferEnabled && CanCleanupStaleTransferArtifacts())
                     CleanupStaleRemoteTransferArtifacts(serial, directory);
                 try
                 {

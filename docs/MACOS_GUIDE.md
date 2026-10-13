@@ -1,4 +1,4 @@
-# DX Manager for macOS 사용 및 개발 가이드
+# LocalDex for macOS 사용 및 개발 가이드
 
 <p align="center">
   <b>Samsung DeX & 다중 가상 디스플레이 매니저 for macOS (.NET 8 Native Edition)</b>
@@ -8,7 +8,7 @@
 
 ## 1. 개요 (Overview)
 
-**DX Manager for macOS**는 삼성 갤럭시 스마트폰의 **Samsung DeX 가상 디스플레이** 및 **앱별 독립 가상 디스플레이(단일창)**를 macOS 환경에서 고성능 저지연으로 제어하고 관리할 수 있도록 포팅된 .NET 8 기반 크로스플랫폼 도구입니다.
+**LocalDex for macOS**는 삼성 갤럭시 스마트폰의 **Samsung DeX 가상 디스플레이** 및 **앱별 독립 가상 디스플레이(단일창)**를 macOS 환경에서 고성능 저지연으로 제어하고 관리할 수 있도록 포팅된 .NET 8 기반 크로스플랫폼 도구입니다.
 
 기존 Windows 전용 WinForms 구현의 핵심 엔진(`DexManager.Core`)을 플랫폼 중립적인 .NET 8 아키텍처로 분리하고, macOS 환경에 최적화된 대화형 TUI 호스트(`DexManager.Mac`)와 네이티브 플랫폼 서비스(screencapture, launchd, POSIX 권한 관리 등)를 제공합니다.
 
@@ -22,7 +22,7 @@
   - Intel Mac (x86_64)
 - **포터블 ZIP 사용자**: Homebrew, .NET, scrcpy와 ADB를 별도로 설치하지
   않습니다. Mac 아키텍처에 맞게 미리 빌드된 ZIP에 self-contained .NET
-  런타임, scrcpy 4.1, ADB와 scrcpy 서버가 포함됩니다.
+  런타임, scrcpy 5.0.1, ADB와 scrcpy 서버가 포함됩니다.
 - **소스 개발자**: `global.json`에 지정된 .NET 8 SDK가 필요합니다.
 - **지원 스마트폰**:
   - Samsung Galaxy 기기 중 Samsung DeX를 지원하는 기기 (Galaxy S시리즈, Note시리즈, Z Fold시리즈, Tab S시리즈 등)
@@ -34,10 +34,10 @@
 
 ### 3.1 Mac에 맞는 ZIP 선택
 
-- Apple M 시리즈 Mac: `DX-Manager-v<version>-macos-arm64.zip`
-- Intel Mac: `DX-Manager-v<version>-macos-x64.zip`
+- Apple M 시리즈 Mac: `LocalDex-v<version>-macos-arm64.zip`
+- Intel Mac: `LocalDex-v<version>-macos-x64.zip`
 
-여기서 `<version>`은 공개된 Release 버전(예: `2.0.1`)으로 바꿉니다. ZIP 안의
+여기서 `<version>`은 공개된 Release 버전(예: `2.1.0-localdex.1`)으로 바꿉니다. ZIP 안의
 문서에는 패키징 시 실제 버전이 자동 반영됩니다.
 
 저장소의 GitHub Actions workflow는 `macos-15` Apple Silicon 실행 환경과
@@ -46,7 +46,7 @@
 SHA-256 파일을 포함한 GitHub Release 초안을 만들며, 유지관리자가 확인 후
 공개합니다. 이 변경의 첫 원격 workflow 성공 여부는 아직 확인해야 합니다.
 Release가 공개된 뒤 사용자는 Mac에 맞는 ZIP 하나를
-내려받아 전체 폴더의 압축을 풀고 `Start DX Manager.command`를 더블클릭합니다.
+내려받아 전체 폴더의 압축을 풀고 `Start LocalDex.command`를 더블클릭합니다.
 소스 빌드는 필요하지 않습니다.
 
 현재 자동 생성 패키지는 Apple Developer ID 서명·공증 전 단계이므로 최초 실행
@@ -81,7 +81,7 @@ dotnet build DexManager.Mac.sln -c Release /warnaserror
 
 ### 4.2 테스트 스위트 실행
 
-DX Manager for macOS는 xUnit 기반 단위/통합 테스트와 다중 기기 회귀 테스트를
+LocalDex for macOS는 xUnit 기반 단위/통합 테스트와 다중 기기 회귀 테스트를
 사용합니다.
 
 ```bash
@@ -102,8 +102,8 @@ scripts/Package-Mac-Release.sh --rid osx-arm64
 scripts/Package-Mac-Release.sh --rid osx-x64
 ```
 
-스크립트는 DX Manager와 ADB proxy를 지정한 RID로 미리 publish하고, 공식
-scrcpy 4.1 정적 빌드의 SHA-256을 확인한 뒤 번들합니다. 생성한 ZIP을 새 임시
+스크립트는 LocalDex와 ADB proxy를 지정한 RID로 미리 publish하고, 공식
+scrcpy 5.0.1 정적 빌드의 SHA-256을 확인한 뒤 번들합니다. 생성한 ZIP을 새 임시
 폴더에 다시 풀어 실행 권한, CPU 아키텍처, 외부 Homebrew 경로 의존성, 버전,
 라이선스와 사용자 데이터 제외 여부를 검사합니다.
 
@@ -124,7 +124,7 @@ scrcpy 4.1 정적 빌드의 SHA-256을 확인한 뒤 번들합니다. 생성한 
 ```bash
 dotnet run --project DexManager.Mac
 # 또는 빌드된 바이너리 직접 실행:
-./DexManager.Mac/bin/Release/net8.0/DXManager.Mac
+./DexManager.Mac/bin/Release/net8.0/LocalDex.Mac
 ```
 
 ### 5.2 CLI 인자 모드 (Command-line Arguments)
@@ -136,16 +136,16 @@ dotnet run --project DexManager.Mac
 | `--dex` | `-x` | 선택된 기기의 DeX 모드를 즉시 시작 (종료는 `Ctrl+C`) |
 | `--stop-dex` | | 현재 실행 중인 DeX 세션을 중지하고 가상 디스플레이 오버레이 정리 |
 | `--diag` | `-d` | 환경 점검 및 기기 호환성 진단 리포트를 실행하여 콘솔에 출력 |
-| `--version` | `-v` | DX Manager for macOS 버전 정보 출력 |
+| `--version` | `-v` | LocalDex for macOS 버전 정보 출력 |
 | `--help` | `-h` | CLI 사용법 및 도움말 출력 |
 
 예시:
 ```bash
 # 포터블 ZIP에서 DeX 즉시 실행
-./DXManager.Mac --dex
+./LocalDex.Mac --dex
 
 # 시스템 및 기기 진단 리포트 출력
-./DXManager.Mac --diag
+./LocalDex.Mac --diag
 ```
 
 ---
@@ -175,7 +175,7 @@ dotnet run --project DexManager.Mac
   [5] Wireless ADB Management       [6] File Transfer Coordinator
   [7] Diagnostics & Environment     [8] DX Companion Guardian
   [9] Settings & Configuration      [S] Select Active Device
-  [L] View Recent Logs              [Q] Exit DX Manager
+  [L] View Recent Logs              [Q] Exit LocalDex
 ```
 
 ### 6.1 메뉴별 상세 기능
@@ -237,7 +237,7 @@ macOS 환경에서 Scrcpy 조작 시 기본 Modifier 키는 **`Option (⌥)`** �
 > 3. 또는 스마트폰 **설정 > 개발자 옵션 > 보조 디스플레이 시뮬레이션**에서 아무 해상도를 선택했다가 다시 **'없음'**을 선택합니다.
 
 ### Q2. `scrcpy`를 실행할 수 없다는 오류가 발생합니다.
-> **포터블 ZIP 해결 방법**: `DXManager.Mac` 실행 파일만 따로 옮기지 않았는지
+> **포터블 ZIP 해결 방법**: `LocalDex.Mac` 실행 파일만 따로 옮기지 않았는지
 > 확인하고 ZIP 전체를 새 폴더에 다시 푸십시오. 같은 폴더의
 > `tools/scrcpy/scrcpy`, `tools/scrcpy/adb`와 `scrcpy-server`가 모두 있어야
 > 합니다. Homebrew 설치는 포터블 ZIP의 해결 조건이 아닙니다. 소스 개발

@@ -1,0 +1,132 @@
+name: Windows installer and release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/windows-release.yml'
+      - 'DexManager/**'
+      - 'DexManager.AdbProxy/**'
+      - 'DexManager.Core/**'
+      - 'DexManager.Tests/**'
+      - 'Shared/**'
+      - 'build/windows/**'
+      - 'scripts/**'
+      - 'docs/RELEASE_NOTES_localdex.3.md'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the verified Windows release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '8.0.422'
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          $text = Get-Content DexManager/Properties/AssemblyInfo.cs -Raw
+          $version = [regex]::Match($text, 'AssemblyInformationalVersion\("([^"]+)"\)').Groups[1].Value
+          if ($version -notmatch '^[0-9A-Za-z][0-9A-Za-z._-]*$') { throw 'Invalid version' }
+          "version=$version" >> $env:GITHUB_OUTPUT
+      - name: Prepare verified runtimes and targeting pack
+        shell: pwsh
+        run: |
+          ./scripts/Update-Scrcpy.ps1
+          ./scripts/Prepare-Companion.ps1
+          $archive = Join-Path $env:RUNNER_TEMP 'net462.zip'
+          Invoke-WebRequest 'https://api.nuget.org/v3-flatcontainer/microsoft.netframework.referenceassemblies.net462/1.0.3/microsoft.netframework.referenceassemblies.net462.1.0.3.nupkg' -OutFile $archive
+          Expand-Archive $archive .build-tools/net462
+      - name: Build Windows application and transfer helper
+        shell: pwsh
+        run: |
+          dotnet msbuild DexManager/DexManager.csproj /t:Build /p:Configuration=Release /m:1 "/p:TargetFrameworkRootPath=$pwd/.build-tools/net462/build"
+          if ($LASTEXITCODE -ne 0) { throw 'Windows build failed' }
+          dotnet publish DexManager.AdbProxy/DexManager.AdbProxy.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o DexManager/bin/Release/tools/adb-proxy
+          if ($LASTEXITCODE -ne 0) { throw 'Proxy publish failed' }
+      - name: Regression tests
+        shell: pwsh
+        run: |
+          dotnet test DexManager.Tests/DexManager.Tests.csproj -c Release --logger "trx;LogFileName=regression.trx"
+          if ($LASTEXITCODE -ne 0) { throw 'Regression tests failed' }
+          dotnet run --project DexManager.MultiDeviceTests/DexManager.MultiDeviceTests.csproj -c Release
+          if ($LASTEXITCODE -ne 0) { throw 'Multi-device tests failed' }
+      - name: Package and compile installer
+        shell: pwsh
+        run: |
+          ./scripts/Package-Release.ps1 -SkipBuild
+          ./scripts/Build-Installer.ps1
+      - name: Verify install, upgrade and uninstall
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: ./scripts/Test-Installer.ps1 -Installer "dist/LocalDex-v$env:VERSION-win-x64-setup.exe"
+      - name: Prepare update ZIP and checksums
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $update = Join-Path $env:RUNNER_TEMP 'LocalDex-update'
+          New-Item "$update/ko" -ItemType Directory -Force | Out-Null
+          Copy-Item dist/LocalDex/LocalDex.exe $update
+          Copy-Item dist/LocalDex/ko/LocalDex.resources.dll "$update/ko"
+          Copy-Item docs/UPDATE_WINDOWS.txt "$update/README-UPDATE.txt"
+          Compress-Archive "$update/*" "dist/LocalDex-v$env:VERSION-update.zip"
+          $assets = @("LocalDex-v$env:VERSION-win-x64.zip", "LocalDex-v$env:VERSION-update.zip", "LocalDex-v$env:VERSION-win-x64-setup.exe")
+          $lines = foreach ($name in $assets) {
+            $hash = (Get-FileHash "dist/$name" -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $name"
+          }
+          $lines | Set-Content "dist/LocalDex-v$env:VERSION-SHA256SUMS.txt" -Encoding utf8
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: LocalDex-Windows-${{ steps.version.outputs.version }}
+          path: |
+            dist/LocalDex-v*-win-x64.zip
+            dist/LocalDex-v*-update.zip
+            dist/LocalDex-v*-win-x64-setup.exe
+            dist/LocalDex-v*-SHA256SUMS.txt
+          if-no-files-found: error
+          compression-level: 0
+
+  publish:
+    needs: build
+    if: (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'release:')) || (github.event_name == 'workflow_dispatch' && inputs.publish)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: LocalDex-Windows-${{ needs.build.outputs.version }}
+          path: release-assets
+      - name: Verify and publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.build.outputs.version }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          (cd release-assets && sha256sum --check "LocalDex-v${VERSION}-SHA256SUMS.txt")
+          gh release create "v${VERSION}" release-assets/* \
+            --target "$COMMIT_SHA" --title "LocalDex ${VERSION}" \
+            --notes-file docs/RELEASE_NOTES_localdex.3.md --latest

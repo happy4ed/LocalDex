@@ -1,0 +1,5 @@
+LocalDex Windows update
+
+Close DeX/single-app windows and exit LocalDex. Extract this ZIP into the existing folder containing LocalDex.exe, replacing LocalDex.exe and ko/LocalDex.resources.dll. Keep the config and tools folders. Managed file-transfer OFF and saved device settings remain unchanged.
+
+DeX/단일창과 LocalDex를 완전히 종료한 뒤 기존 LocalDex.exe가 있는 폴더에 덮어쓰세요. 실행 파일과 한국어 리소스만 교체합니다. config와 tools 폴더, 기존 해상도와 파일 전송 OFF 설정은 유지됩니다.

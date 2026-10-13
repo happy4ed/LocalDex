@@ -146,7 +146,7 @@ namespace DexManager.Services
                 }
                 catch (Exception)
                 {
-                    // A stale mapping may belong to a DX Manager process
+                    // A stale mapping may belong to a LocalDex process
                     // that ended abnormally. Creating the new mapping below
                     // remains the authoritative recovery step.
                 }
@@ -379,7 +379,7 @@ namespace DexManager.Services
                         PhoneTransferProtocol.WriteResponse(
                             stream,
                             false,
-                            "The DX Manager transfer session has expired.");
+                            "The LocalDex transfer session has expired.");
                         return;
                     }
 

@@ -6,7 +6,7 @@ using System.IO;
 namespace DexManager.Services
 {
     /// <summary>
-    /// Final safety net for helper executables shipped with DX Manager.
+    /// Final safety net for helper executables shipped with LocalDex.
     /// Normal service shutdown still owns the primary process lifecycle; this
     /// class removes detached ADB servers and any orphaned bundled helpers after
     /// the WinForms message loop has ended.

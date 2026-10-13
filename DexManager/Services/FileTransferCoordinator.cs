@@ -75,7 +75,7 @@ namespace DexManager.Services
                 AppDomain.CurrentDomain.BaseDirectory,
                 "tools",
                 "adb-proxy",
-                "DXMAdbProxy.exe");
+                "LocalDexAdbProxy.exe");
             _pipeName = "DXManager.Transfer." +
                 Process.GetCurrentProcess().Id.ToString(
                     CultureInfo.InvariantCulture) + "." +
@@ -85,12 +85,12 @@ namespace DexManager.Services
             _acceptThread = new Thread(AcceptLoop)
             {
                 IsBackground = true,
-                Name = "DX Manager file-transfer IPC"
+                Name = "LocalDex file-transfer IPC"
             };
             _workerThread = new Thread(WorkerLoop)
             {
                 IsBackground = true,
-                Name = "DX Manager file-transfer worker"
+                Name = "LocalDex file-transfer worker"
             };
             _acceptThread.Start();
             _workerThread.Start();
@@ -111,7 +111,7 @@ namespace DexManager.Services
             {
                 var directory = NormalizeRemoteDirectory(
                     _settings.Paths.FileTransferTargetFolder);
-                if (CanCleanupStaleTransferArtifacts())
+                if (_settings.Features.ManagedFileTransferEnabled && CanCleanupStaleTransferArtifacts())
                     CleanupStaleRemoteTransferArtifacts(serial, directory);
                 try
                 {

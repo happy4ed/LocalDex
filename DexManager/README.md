@@ -1,4 +1,10 @@
-# DX Manager Source and Build Notes
+# LocalDex source notes
+
+Current build instructions: [LOCALDEX_BUILD](../docs/LOCALDEX_BUILD.md).
+Current lifecycle and compatibility: [LOCALDEX_ONEUI](../docs/LOCALDEX_ONEUI.md).
+The inherited implementation notes below include legacy overlay/Windows 7 details; the linked LocalDex documents define the current desktop path.
+
+# LocalDex Source and Build Notes
 
 [Repository overview](../README.md) ·
 [English user guide](../docs/USER_GUIDE_EN.md) ·
@@ -30,7 +36,7 @@ run the packaging script to create the user-facing folder and ZIP:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Package-Release.ps1
 ```
 
-The script rebuilds Release and writes `dist/DX Manager` and
+The script rebuilds Release and writes `dist/LocalDex` and
 `dist/DX-Manager-v2.0.1-win-x64.zip`. Use `-SkipBuild` only when the current
 Release output has already been verified. `ExecutionPolicy Bypass` applies
 only to this process and does not change the system policy.
@@ -40,13 +46,13 @@ the directory containing `.NETFramework\v4.6.2` as
 `-TargetFrameworkRootPath`, or set `DXM_TARGET_FRAMEWORK_ROOT` for the current
 shell.
 
-The application is portable, but `DXManager.exe` is not standalone. A release
+The application is portable, but `LocalDex.exe` is not standalone. A release
 package must include:
 
-- `DXManager.exe` and `DXManager.exe.config`
+- `LocalDex.exe` and `LocalDex.exe.config`
 - `tools/scrcpy` and all of its runtime files
 - `tools/adb`
-- `tools/adb-proxy/DXMAdbProxy.exe`
+- `tools/adb-proxy/LocalDexAdbProxy.exe`
 - the `licenses` directory, including `THIRD_PARTY_NOTICES.md`
 - the HTML-free portable `README.md` generated from `docs/PACKAGE_README.md`
 - `LICENSE`, the user guides, FAQs, and guide images
@@ -63,7 +69,7 @@ folder without explicit permission.
 
 ## ADB Selection
 
-DX Manager never relies on an `adb.exe` found through the system `PATH`.
+LocalDex never relies on an `adb.exe` found through the system `PATH`.
 
 1. A manually configured ADB is used when manual mode is selected.
 2. Windows 7 and 8.1 use the bundled legacy-compatible ADB.
@@ -80,16 +86,16 @@ platform-tools build number.
 
 ## Managed File Transfer
 
-The `DexManager.AdbProxy` project builds `DXMAdbProxy.exe` into
+The `DexManager.AdbProxy` project builds `LocalDexAdbProxy.exe` into
 `tools/adb-proxy`. When managed file transfer is enabled, only newly started
 DeX and single-app scrcpy processes receive this helper through their `ADB`
-environment variable. DX Manager's own ADB commands, wireless setup, wake-up,
+environment variable. LocalDex's own ADB commands, wireless setup, wake-up,
 and screen-state commands continue to use the selected real ADB directly.
 
 The helper forwards ordinary ADB commands unchanged. It intercepts managed
 file and folder drops to the target selected in Settings (default:
 `/sdcard/Download/`), authenticates each request over a per-session named pipe,
-and lets DX Manager serialize the transfer. Files are pushed under ASCII
+and lets LocalDex serialize the transfer. Files are pushed under ASCII
 temporary names and finalized on the phone from Base64-encoded Unicode names.
 Complete folder trees, including empty folders, are staged and committed under
 one collision-safe top-level name. An independent movable status window shows
@@ -103,7 +109,7 @@ windows.
 - Target framework: .NET Framework 4.6.2
 - Intended Windows range: 64-bit Windows 7 SP1 through Windows 11
 - 32-bit Windows is not supported
-- Bundled scrcpy baseline: 4.1
+- Bundled scrcpy baseline: 5.0.1
 
 The .NET Framework 4.6.2 target is intentional: it preserves compatibility
 with 64-bit Windows 7 SP1 and offline or closed-network PCs. Windows 7 SP1 does
@@ -120,11 +126,11 @@ release.
 The repository also contains `DXDisplayCleanup`, published as **DX Companion**.
 Its signed Release APK is bundled under `tools/companion` but is never installed
 automatically. From Diagnostics, the user may install, update, grant permission
-to, or uninstall it on the currently selected phone. DX Manager verifies the
+to, or uninstall it on the currently selected phone. LocalDex verifies the
 exact APK hash and APK Signature Scheme v2 certificate before installation,
 then rechecks the installed package, version, certificate, and permission.
 DX Companion removes a stale simulated display, turns off Developer options'
-stay-awake setting, and sends phone files or folders to DX Manager. Build and
+stay-awake setting, and sends phone files or folders to LocalDex. Build and
 signing details are documented in `DXDisplayCleanup/README.md` and
 `DXDisplayCleanup/SIGNING.md`.
 

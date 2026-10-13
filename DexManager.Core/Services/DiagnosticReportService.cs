@@ -36,10 +36,10 @@ namespace DexManager.Services
             IEnumerable<string> sessionEntries)
         {
             var builder = new StringBuilder();
-            builder.AppendLine("DX Manager diagnostic report");
+            builder.AppendLine("LocalDex diagnostic report");
             builder.AppendLine("Generated: " +
                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz"));
-            builder.AppendLine("DX Manager: " + Safe(appVersion));
+            builder.AppendLine("LocalDex: " + Safe(appVersion));
             builder.AppendLine("Windows: " + Environment.OSVersion);
             builder.AppendLine("64-bit OS: " +
                 Environment.Is64BitOperatingSystem);

@@ -254,19 +254,16 @@ namespace DexManager.Services
                 _launchCoordinator.RunExclusive(delegate
                 {
                     ThrowIfShutdownRequested();
-                    lease = _virtualDisplayService.EnsureVirtualDisplay(
-                        serial,
-                        runSettings.VirtualDisplay,
-                        _settings.Timing.VirtualDisplayDetectionTimeoutMs,
-                        delegate { return IsShutdownRequested; });
+                    lease = _virtualDisplayService.PrepareDesktop(serial);
                     CompleteDeferredCleanupCore(
                         serial,
                         deviceIdentity);
                     ThrowIfShutdownRequested();
-                    _scrcpyService.Start(
+                    _scrcpyService.StartDesktop(
                         runSettings.Scrcpy,
-                        lease.DisplayId,
-                        serial);
+                        runSettings.VirtualDisplay,
+                        serial,
+                        id => _virtualDisplayService.ConfigureDesktop(lease, id));
                     scrcpyStarted = true;
                 });
 
@@ -509,45 +506,12 @@ namespace DexManager.Services
                 "Log.Dex.NaturalExitCleanupCompleted"));
         }
 
-        private void CleanupStaleSession(
-            string nextSerial,
-            string nextDeviceIdentity)
+        private void CleanupStaleSession(string nextSerial, string nextDeviceIdentity)
         {
             var stale = _currentSession;
             if (stale == null) return;
-            if (string.Equals(
-                stale.Serial,
-                nextSerial,
-                StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(
-                    stale.DeviceIdentity,
-                    nextDeviceIdentity,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                // A reconnect must be evaluated by EnsureVirtualDisplay.
-                // Preserve the cleanup evidence until that comparison and
-                // any required recreation have actually succeeded.
-                DeferDisplayCleanup(stale);
-                return;
-            }
-            if (ReleaseDisplayLease(
-                stale.DisplayLease,
-                stale.DeviceIdentity))
-            {
-                ClearSession(stale);
-                return;
-            }
-
-            DeferDisplayCleanup(stale);
-            if (string.Equals(
-                stale.Serial,
-                nextSerial,
-                StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException(
-                    LocalizationService.Get(
-                        "Error.Dex.DisplayResetFailed"));
-            }
+            if (!ReleaseDisplayLease(stale.DisplayLease, stale.DeviceIdentity)) DeferDisplayCleanup(stale);
+            ClearSession(stale);
         }
 
         private void CleanupFailedStart(
@@ -613,9 +577,12 @@ namespace DexManager.Services
             var verifiedIdentity = GetVerifiedDeviceIdentity(
                 serial,
                 deviceIdentity);
-            // Keep the entry until EnsureVirtualDisplay or an explicit Reset
-            // succeeds for this verified physical device.
-            return !string.IsNullOrWhiteSpace(verifiedIdentity);
+            if (string.IsNullOrWhiteSpace(verifiedIdentity)) return false;
+            if (_scrcpyService.IsRunning) return true;
+            CleanupNaturallyEndedSession();
+            if (!_virtualDisplayService.RecoverDesktop(serial)) return false;
+            CompleteDeferredCleanupCore(serial, verifiedIdentity);
+            return true;
         }
 
         private void CompleteDeferredCleanupCore(
@@ -677,8 +644,13 @@ namespace DexManager.Services
                 expectedDeviceIdentity,
                 out verifiedIdentity);
             if (string.IsNullOrWhiteSpace(cleanupSerial))
-                return false;
+                return lease.IsScrcpyOwned ? _virtualDisplayService.Release(lease) : false;
 
+            if (lease.IsScrcpyOwned)
+            {
+                lease.Serial = cleanupSerial;
+                return _virtualDisplayService.Release(lease);
+            }
             if (string.Equals(
                 cleanupSerial,
                 lease.Serial,
@@ -687,7 +659,7 @@ namespace DexManager.Services
                 return _virtualDisplayService.Release(lease);
             }
 
-            var reset = _virtualDisplayService.Reset(cleanupSerial);
+            var reset = _virtualDisplayService.RecoverDesktop(cleanupSerial);
             if (reset) lease.OwnsOverlaySetting = false;
             return reset;
         }
@@ -704,7 +676,7 @@ namespace DexManager.Services
             if (string.IsNullOrWhiteSpace(cleanupSerial))
                 return false;
 
-            return _virtualDisplayService.Reset(cleanupSerial);
+            return _virtualDisplayService.RecoverDesktop(cleanupSerial);
         }
 
         private string FindVerifiedCleanupTransport(
@@ -869,9 +841,9 @@ namespace DexManager.Services
                 runSettings.LastSuccess.ScrcpyPath =
                     _scrcpyService.ScrcpyPath;
                 runSettings.LastSuccess.ScrcpyArguments =
-                    _scrcpyService.BuildArguments(
+                    _scrcpyService.BuildDesktopArguments(
                         runSettings.Scrcpy,
-                        displayId,
+                        runSettings.VirtualDisplay,
                         serial);
                 runSettings.LastSuccess.DisplayId = displayId;
                 runSettings.LastSuccess.SavedAtUtc =

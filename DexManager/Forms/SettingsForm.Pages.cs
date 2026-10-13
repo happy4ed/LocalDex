@@ -404,6 +404,17 @@ namespace DexManager.Forms
                 220);
             resetButton.Click += ResetDefaultsButton_Click;
             panel.Controls.Add(resetButton);
+            panel.Controls.Add(new Label
+            {
+                AutoSize = true, MaximumSize = new Size(610, 0),
+                ForeColor = _theme.TextTertiary,
+                Margin = new Padding(0, 18, 0, 10),
+                Text = LocalizationService.Get("Settings.FreeformRecoveryGuide")
+            });
+            var restoreDesktopButton = CreateActionButton(
+                LocalizationService.Get("Settings.FreeformRecovery"), 270);
+            restoreDesktopButton.Click += ResetDesktopButton_Click;
+            panel.Controls.Add(restoreDesktopButton);
             AddCard(page, LocalizationService.Get("Settings.Diagnostics"), panel);
 
             AddCard(

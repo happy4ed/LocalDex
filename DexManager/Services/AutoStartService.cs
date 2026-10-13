@@ -8,7 +8,7 @@ namespace DexManager.Services
     {
         private const string RunKeyPath =
             @"Software\Microsoft\Windows\CurrentVersion\Run";
-        private const string ValueName = "DXManager";
+        private const string ValueName = "LocalDex";
         private const string LegacyValueName = "DexManager";
         private readonly LogService _logService;
 
@@ -23,7 +23,7 @@ namespace DexManager.Services
             {
                 return key != null &&
                     (key.GetValue(ValueName) != null ||
-                     key.GetValue(LegacyValueName) != null);
+                     key.GetValue("DXManager") != null || key.GetValue(LegacyValueName) != null);
             }
         }
 
@@ -48,6 +48,7 @@ namespace DexManager.Services
                             "Error.AutoStart.RegistryUnavailable"));
                 key.SetValue(ValueName, command, RegistryValueKind.String);
                 key.DeleteValue(LegacyValueName, false);
+                key.DeleteValue("DXManager", false);
             }
 
             _logService.Info(LocalizationService.Get(
@@ -62,6 +63,7 @@ namespace DexManager.Services
                 {
                     key.DeleteValue(ValueName, false);
                     key.DeleteValue(LegacyValueName, false);
+                key.DeleteValue("DXManager", false);
                 }
             }
 

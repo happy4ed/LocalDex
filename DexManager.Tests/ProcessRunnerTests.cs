@@ -63,9 +63,6 @@ namespace DexManager.Tests
         private static string GetPingExecutablePath()
         {
             if (OperatingSystem.IsWindows()) return "ping.exe";
-            if (File.Exists("/sbin/ping")) return "/sbin/ping";
-            if (File.Exists("/bin/ping")) return "/bin/ping";
-            if (File.Exists("/usr/bin/ping")) return "/usr/bin/ping";
             return "/bin/sleep";
         }
 

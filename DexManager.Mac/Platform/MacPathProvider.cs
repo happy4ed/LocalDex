@@ -46,13 +46,13 @@ public sealed class MacPathProvider : IPathProvider
         get
         {
             var proxyDir = Path.Combine(BaseDirectory, "tools", "adb-proxy");
-            var native = Path.Combine(proxyDir, "DXMAdbProxy");
+            var native = Path.Combine(proxyDir, "LocalDexAdbProxy");
             if (File.Exists(native)) return native;
-            var dllInProxy = Path.Combine(proxyDir, "DXMAdbProxy.dll");
+            var dllInProxy = Path.Combine(proxyDir, "LocalDexAdbProxy.dll");
             if (File.Exists(dllInProxy)) return dllInProxy;
-            var dllInBase = Path.Combine(BaseDirectory, "DXMAdbProxy.dll");
+            var dllInBase = Path.Combine(BaseDirectory, "LocalDexAdbProxy.dll");
             if (File.Exists(dllInBase)) return dllInBase;
-            return Path.Combine(proxyDir, "DXMAdbProxy.exe");
+            return Path.Combine(proxyDir, "LocalDexAdbProxy.exe");
         }
     }
 

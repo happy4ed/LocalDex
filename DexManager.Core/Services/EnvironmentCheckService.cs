@@ -51,10 +51,10 @@ namespace DexManager.Services
                 AppDomain.CurrentDomain.BaseDirectory,
                 "tools",
                 "adb-proxy");
-            var proxyCandidate = Path.Combine(proxyDir, OperatingSystem.IsWindows() ? "DXMAdbProxy.exe" : "DXMAdbProxy");
-            if (!File.Exists(proxyCandidate)) proxyCandidate = Path.Combine(proxyDir, "DXMAdbProxy.dll");
-            if (!File.Exists(proxyCandidate)) proxyCandidate = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DXMAdbProxy.dll");
-            if (!File.Exists(proxyCandidate)) proxyCandidate = Path.Combine(proxyDir, "DXMAdbProxy.exe");
+            var proxyCandidate = Path.Combine(proxyDir, OperatingSystem.IsWindows() ? "LocalDexAdbProxy.exe" : "LocalDexAdbProxy");
+            if (!File.Exists(proxyCandidate)) proxyCandidate = Path.Combine(proxyDir, "LocalDexAdbProxy.dll");
+            if (!File.Exists(proxyCandidate)) proxyCandidate = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LocalDexAdbProxy.dll");
+            if (!File.Exists(proxyCandidate)) proxyCandidate = Path.Combine(proxyDir, "LocalDexAdbProxy.exe");
 
             AddFileCheck(
                 results,

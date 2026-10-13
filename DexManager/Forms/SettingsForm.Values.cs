@@ -159,6 +159,33 @@ namespace DexManager.Forms
             }
         }
 
+        private async void ResetDesktopButton_Click(object sender, EventArgs e)
+        {
+            var serial = _getSelectedDeviceSerial();
+            var button = sender as Button;
+            if (string.IsNullOrWhiteSpace(serial) || _resetDesktop == null)
+            {
+                ShowSaveStatus(LocalizationService.Get("Settings.FreeformRecoveryFailed"), Color.Firebrick, 6000);
+                return;
+            }
+            if (MessageBox.Show(this, LocalizationService.Get("Settings.FreeformRecoveryConfirm"),
+                    LocalizationService.Get("App.Name"), MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+            if (button != null) button.Enabled = false;
+            try
+            {
+                var restored = await _resetDesktop(serial);
+                if (!IsDisposed) ShowSaveStatus(LocalizationService.Get(restored
+                    ? "Settings.FreeformRecoveryDone" : "Settings.FreeformRecoveryFailed"),
+                    restored ? Color.DarkGreen : Color.Firebrick, 6000);
+            }
+            catch (Exception ex)
+            {
+                if (!IsDisposed) ShowSaveStatus(ex.Message, Color.Firebrick, 6000);
+            }
+            finally { if (!IsDisposed && button != null) button.Enabled = true; }
+        }
+
         private void ResetDefaultsButton_Click(
             object sender,
             EventArgs e)

@@ -1,5 +1,10 @@
 # DX Manager 새 작업 인수인계
 
+## LocalDex fork — 2026-10-12
+
+Current desktop behavior supersedes the inherited overlay and scrcpy 4.1 notes below. See [One UI implementation](LOCALDEX_ONEUI.md) and [build/validation](LOCALDEX_BUILD.md). App/process: `LocalDex.exe`; official bundle: scrcpy 5.0.1; per-phone freeform recovery journal and Settings reset added. Hardware validation and any GitHub publication remain pending.
+
+
 마지막 갱신: 2026-08-22
 
 이 문서는 긴 개발 대화를 보지 못한 새 Codex 작업에서도 DX Manager를 안전하게

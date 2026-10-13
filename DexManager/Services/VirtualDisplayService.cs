@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,6 +34,7 @@ namespace DexManager.Services
             @"(?<width>\d{3,5})x(?<height>\d{3,5})/(?<dpi>\d{2,4})",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        private readonly DexFreeformJournal _freeform;
         private readonly AdbService _adbService;
         private readonly LogService _logService;
 
@@ -40,6 +42,32 @@ namespace DexManager.Services
         {
             _adbService = adbService;
             _logService = logService;
+            _freeform = new DexFreeformJournal(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "freeform-recovery"),
+                (serial, command) => _adbService.ShellForSerial(serial, command, true),
+                serial => _adbService.GetDeviceIdentity(serial),
+                message => _logService.Warning(message));
+        }
+
+        public VirtualDisplayLease PrepareDesktop(string serial)
+        {
+            return new VirtualDisplayLease
+            {
+                Serial = serial,
+                IsScrcpyOwned = true,
+                FreeformIdentity = _freeform.Acquire(serial)
+            };
+        }
+
+        public void ConfigureDesktop(VirtualDisplayLease lease, int displayId)
+        {
+            lease.DisplayId = displayId;
+            _freeform.ConfigureDisplay(lease.Serial, lease.FreeformIdentity, displayId);
+        }
+
+        public bool RecoverDesktop(string serial)
+        {
+            return _freeform.Recover(serial);
         }
 
         public string GetOverlaySetting(string serial)
@@ -208,6 +236,8 @@ namespace DexManager.Services
         public bool Release(VirtualDisplayLease lease)
         {
             if (lease == null) return true;
+            if (lease.IsScrcpyOwned)
+                return _freeform.Release(lease.Serial, lease.FreeformIdentity);
             try
             {
                 // Normal DeX cleanup is intentionally unconditional. The

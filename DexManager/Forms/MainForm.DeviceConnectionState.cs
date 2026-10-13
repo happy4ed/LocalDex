@@ -35,18 +35,19 @@ namespace DexManager.Forms
         }
 
         private async Task<bool> WaitForDeviceStartDelayAsync(
-            string serial)
+            string serial, bool validateAuthorization = true)
         {
             return await WaitForDeviceStartDelayAsync(
                 serial,
                 null,
-                -1);
+                -1,
+                validateAuthorization);
         }
 
         private async Task<bool> WaitForDeviceStartDelayAsync(
             string serial,
             DeviceUiContext context,
-            int generation)
+            int generation, bool validateAuthorization = true)
         {
             if (string.IsNullOrWhiteSpace(serial)) return false;
             DateTime connectedAt;
@@ -89,6 +90,9 @@ namespace DexManager.Forms
             {
                 return false;
             }
+            // DeX validates authorization in its orchestrator immediately after
+            // this delay. Keep the transport/generation checks above for every caller.
+            if (!validateAuthorization) return true;
             var current = context == null
                 ? _deviceMonitor.CurrentState
                 : null;
@@ -184,4 +188,3 @@ namespace DexManager.Forms
 
     }
 }
-

@@ -88,7 +88,15 @@ namespace DexManager.Forms
                         ApplyThemeSelection,
                         ApplyGeneralSettingsChanges,
                         DetachSelectedPhoneTransferAsync,
-                        ConfigurePhoneTransferReceiver);
+                        ConfigurePhoneTransferReceiver,
+                        async serial =>
+                        {
+                            // Capture the context before awaiting; selection may change.
+                            var context = _selectedDeviceContext;
+                            if (context == null || !string.Equals(GetContextSerial(context), serial,
+                                    StringComparison.OrdinalIgnoreCase)) return false;
+                            return await context.Runtime.Dex.ResetDesktopAsync(serial);
+                        });
                     _settingsForm.FormClosed += delegate { _settingsForm = null; };
                 }
                 if (!_settingsForm.Visible) _settingsForm.Show();

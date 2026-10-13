@@ -69,8 +69,8 @@ namespace DexManager.Services
             int timeoutMs,
             ProcessRunner processRunner)
         {
-            var major = 4;
-            var minor = 1;
+            var major = 5;
+            var minor = 0;
             var sdlMajor = 3;
 
             try
@@ -114,7 +114,7 @@ namespace DexManager.Services
             }
             catch
             {
-                // Preserve the bundled scrcpy 4.1 behavior if probing fails.
+                // Preserve the bundled scrcpy 5.0.1 behavior if probing fails.
             }
 
             return new ScrcpyRuntimeInfo(major, minor, sdlMajor);
@@ -155,7 +155,7 @@ namespace DexManager.Services
                 "-s", "-d", "-e",
                 "--serial", "--select-usb", "--select-tcpip",
                 "--tcpip",
-                "--display-id", "--new-display",
+                "--display-id", "--new-display", "--start-app",
                 "--push-target",
                 "--no-window", "--no-video",
                 "--no-video-playback", "--no-playback",
@@ -185,6 +185,7 @@ namespace DexManager.Services
         private bool _turnScreenOffRequested;
         private string _targetSerial;
         private int _displayId;
+        private int _newDisplayId;
         private IntPtr _mainWindowHandle;
         private string _deviceDisplayName = string.Empty;
         private string _fileTransferSessionId;
@@ -356,7 +357,7 @@ namespace DexManager.Services
             ScrcpySettings settings,
             int displayId,
             string serial,
-            string pushTarget)
+            string pushTarget, VirtualDisplaySettings virtualDisplay = null)
         {
             if (settings == null) throw new ArgumentNullException("settings");
             if (string.IsNullOrWhiteSpace(serial))
@@ -369,8 +370,16 @@ namespace DexManager.Services
             {
             };
             AddSerialArgument(arguments, serial);
-            arguments.Add("--display-id");
-            arguments.Add(displayId.ToString(CultureInfo.InvariantCulture));
+            if (virtualDisplay == null)
+            {
+                arguments.Add("--display-id");
+                arguments.Add(displayId.ToString(CultureInfo.InvariantCulture));
+            }
+            else
+            {
+                arguments.Add(string.Format(CultureInfo.InvariantCulture,
+                    "--new-display={0}x{1}/{2}", virtualDisplay.Width, virtualDisplay.Height, virtualDisplay.Dpi));
+            }
 
             if (!string.IsNullOrWhiteSpace(settings.BitRate))
             {
@@ -386,7 +395,7 @@ namespace DexManager.Services
 
             arguments.Add("--window-title");
             arguments.Add(Quote(BuildWindowTitle(
-                "DX Manager - DeX Station",
+                "LocalDex - DeX Station",
                 DeviceDisplayName)));
 
             if (settings.UseHidKeyboard && OperatingSystem.IsWindows()) arguments.Add("-K");
@@ -401,7 +410,7 @@ namespace DexManager.Services
             arguments.Add("--push-target");
             arguments.Add(Quote(pushTarget));
 
-            if (!string.IsNullOrWhiteSpace(settings.StartAppPackage))
+            if (virtualDisplay == null && !string.IsNullOrWhiteSpace(settings.StartAppPackage))
             {
                 var packageName = settings.StartAppPackage.Trim();
                 if (settings.ForceStopStartApp && !packageName.StartsWith("+"))
@@ -551,6 +560,27 @@ namespace DexManager.Services
             int displayId,
             string serial)
         {
+            StartCore(settings, displayId, serial, null, null);
+        }
+
+        public void StartDesktop(ScrcpySettings settings,
+            VirtualDisplaySettings display, string serial, Action<int> configureDisplay)
+        {
+            if (display == null || display.Width <= 0 || display.Height <= 0 || display.Dpi <= 0)
+                throw new ArgumentException("Invalid virtual display dimensions.");
+            StartCore(settings, 0, serial, display, configureDisplay);
+        }
+
+        public string BuildDesktopArguments(ScrcpySettings settings,
+            VirtualDisplaySettings display, string serial)
+        {
+            return BuildArguments(settings, 0, serial,
+                _fileTransferCoordinator.GetScrcpyPushTarget(), display);
+        }
+
+        private void StartCore(ScrcpySettings settings, int displayId,
+            string serial, VirtualDisplaySettings virtualDisplay, Action<int> configureDisplay)
+        {
             var started = false;
             _launchCoordinator.RunExclusive(delegate
             {
@@ -585,13 +615,16 @@ namespace DexManager.Services
                                     "Error.Scrcpy.FileNotFound"),
                                 _scrcpyPath);
 
+                        var preparation = Stopwatch.StartNew();
                         var pushTarget = _fileTransferCoordinator
                             .PrepareScrcpyPushTarget(serial);
+                        _logService.Info(DeviceLogFormatter.ForSerial(serial,
+                            LocalizationService.Format("Log.Scrcpy.TransferPreparation", preparation.ElapsedMilliseconds)));
                         var arguments = BuildArguments(
                             settings,
                             displayId,
                             serial,
-                            pushTarget);
+                            pushTarget, virtualDisplay);
                         transferSessionId =
                             _fileTransferCoordinator.BeginSession(
                                 serial,
@@ -613,6 +646,7 @@ namespace DexManager.Services
                         _turnScreenOffRequested = settings.TurnScreenOff;
                         _targetSerial = serial;
                         _displayId = displayId;
+                        _newDisplayId = 0;
                         _mainWindowHandle = IntPtr.Zero;
                         _fileTransferSessionId = transferSessionId;
 
@@ -627,6 +661,13 @@ namespace DexManager.Services
                         process.Id);
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
+                    if (virtualDisplay != null)
+                    {
+                        var createdId = WaitForNewDisplay(process);
+                        configureDisplay(createdId);
+                        lock (_syncRoot) _displayId = createdId;
+                        StartDesktopApp(settings, serial, createdId);
+                    }
                     WaitForMainWindow(process);
                     started = true;
                 }
@@ -640,6 +681,65 @@ namespace DexManager.Services
             });
 
             if (started) RaiseRunningChanged();
+        }
+
+        private int WaitForNewDisplay(Process process)
+        {
+            // Server upload, tunnel setup and display creation share this budget.
+            // Keep ordinary ADB command timeouts unchanged; honor longer user limits.
+            var timeoutMs = Math.Max(45000, _processTimeoutMs);
+            var watch = Stopwatch.StartNew();
+            _logService.Info(LocalizationService.Format("Log.Scrcpy.DisplayWaiting", timeoutMs));
+            while (watch.ElapsedMilliseconds < timeoutMs)
+            {
+                if (Interlocked.CompareExchange(ref _shutdownRequested, 0, 0) != 0)
+                    throw new OperationCanceledException();
+                lock (_syncRoot)
+                {
+                    if (!ReferenceEquals(process, _process) || !IsProcessRunning(process))
+                        throw new InvalidOperationException("scrcpy exited before creating its display.");
+                    if (_newDisplayId > 0)
+                    {
+                        _logService.Info(DeviceLogFormatter.ForSerial(_targetSerial,
+                            LocalizationService.Format("Log.Scrcpy.DisplayReceived", _newDisplayId, watch.ElapsedMilliseconds)));
+                        return _newDisplayId;
+                    }
+                }
+                Thread.Sleep(25);
+            }
+            throw new TimeoutException(LocalizationService.Format(
+                "Error.Scrcpy.DisplayIdTimeout", watch.ElapsedMilliseconds));
+        }
+
+        private void ObserveNewDisplay(Process process, string line)
+        {
+            if (string.IsNullOrEmpty(line)) return;
+            var match = Regex.Match(line, @"New display: .*\(id=(\d+)\)");
+            int id;
+            if (!match.Success || !int.TryParse(match.Groups[1].Value, out id) || id <= 0) return;
+            lock (_syncRoot)
+                if (ReferenceEquals(process, _process)) _newDisplayId = id;
+        }
+
+        private void StartDesktopApp(ScrcpySettings settings, string serial, int displayId)
+        {
+            var package = (settings.StartAppPackage ?? "").Trim();
+            var forceStop = settings.ForceStopStartApp || package.StartsWith("+", StringComparison.Ordinal);
+            package = package.TrimStart('+');
+            if (package.Length > 0 && !Regex.IsMatch(package, @"\A[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)+\z"))
+                throw new ArgumentException("Select an exact Android package name for the desktop start app.");
+            if (forceStop && package.Length > 0)
+            {
+                var stopped = _adbService.ShellForSerial(serial, "am force-stop " + package, true);
+                if (!stopped.IsSuccess) throw new InvalidOperationException(stopped.StandardError);
+            }
+            var command = "am start --display " + displayId.ToString(CultureInfo.InvariantCulture) +
+                " -a android.intent.action.MAIN -c " +
+                (package.Length == 0 ? "android.intent.category.HOME" : "android.intent.category.LAUNCHER -p " + package);
+            var result = _adbService.ShellForSerial(serial, command, true);
+            if (!result.IsSuccess || (result.StandardOutput ?? "").IndexOf("Error:", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                (result.StandardError ?? "").IndexOf("Error", StringComparison.OrdinalIgnoreCase) >= 0)
+                throw new InvalidOperationException("Could not open the desktop launcher/app: " + result.StandardOutput + result.StandardError);
         }
 
         public void Stop()
@@ -1134,6 +1234,7 @@ namespace DexManager.Services
 
         private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
+            ObserveNewDisplay(sender as Process, e.Data);
             if (!string.IsNullOrWhiteSpace(e.Data))
                 _logService.Info(DeviceLogFormatter.ForSerial(
                     GetActiveSerialForProcess(sender as Process),
@@ -1142,6 +1243,7 @@ namespace DexManager.Services
 
         private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
+            ObserveNewDisplay(sender as Process, e.Data);
             if (string.IsNullOrWhiteSpace(e.Data)) return;
             var message = DeviceLogFormatter.ForSerial(
                 GetActiveSerialForProcess(sender as Process),

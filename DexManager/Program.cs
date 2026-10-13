@@ -108,7 +108,7 @@ namespace DexManager
                     AppDomain.CurrentDomain.BaseDirectory,
                     "tools",
                     "adb-proxy",
-                    "DXMAdbProxy.exe"));
+                    "LocalDexAdbProxy.exe"));
                 var scrcpyLaunchCoordinator =
                     new ScrcpyLaunchCoordinator();
                 var runtimeServiceFactory =

@@ -20,7 +20,7 @@ namespace DexManager.Forms
         private const int CardContentWidth = 622;
         private const int WmMouseWheel = 0x020A;
         private const string ProjectUrl =
-            "https://github.com/maze-mei/DX-Manager";
+            "https://github.com/happy4ed/LocalDex";
 
         private readonly SettingsService _settingsService;
         private readonly AppSettings _settings;
@@ -126,6 +126,7 @@ namespace DexManager.Forms
         private Label _deviceDiagnosticsStatusLabel;
         private Button _deviceDiagnosticsRefreshButton;
         private Button _diagnosticReportButton;
+        private readonly Func<string, Task<bool>> _resetDesktop;
         private DeviceVersionDiagnostic _lastDeviceDiagnostic;
         private int _deviceDiagnosticsGeneration;
 
@@ -144,7 +145,8 @@ namespace DexManager.Forms
             Action<AppTheme> applyTheme,
             Action<bool> settingsChanged,
             Func<string, Task> detachPhoneTransfer,
-            Action<string> companionInstalled)
+            Action<string> companionInstalled,
+            Func<string, Task<bool>> resetDesktop)
         {
             _settingsService = settingsService;
             _settings = settings;
@@ -170,6 +172,7 @@ namespace DexManager.Forms
             _settingsChanged = settingsChanged;
             _detachPhoneTransfer = detachPhoneTransfer;
             _companionInstalled = companionInstalled;
+            _resetDesktop = resetDesktop;
             _theme = ThemeColors.Current;
 
             Text = LocalizationService.Get("Settings.Title");

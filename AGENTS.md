@@ -43,8 +43,7 @@
   물리 identity별 런타임 및 작업 시작 시 캡처한 명시적 serial로 제한한다.
 - display ID는 실제 설정과 디스플레이 목록의 전후 차이로 찾으며 모호한 ID를
   추측하지 않는다.
-- DeX overlay는 너비, 높이와 DPI가 모두 같을 때만 재사용한다. 하나라도 다르면
-  기존 overlay를 제거한 뒤 재생성하고 새 display ID를 다시 찾는다.
+- LocalDex DeX는 scrcpy `--new-display`를 사용한다. 자기 프로세스의 로그에서 실제 ID를 확인하고 해당 화면만 freeform으로 설정한다. 기존 overlay 설정은 변경하지 않는다. freeform 복원 기록을 보존한다.
 - 정상 종료 시 관리 대상 기기의 overlay와 DX Manager가 변경한 화면 전원 및
   절전모드 해제 상태를 가능한 범위에서 복구한다. 연결이 끊겼으면 종료를
   막거나 반복 오류를 내지 말고 실패를 로그로 남긴다.

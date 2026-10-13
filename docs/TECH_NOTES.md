@@ -1,5 +1,10 @@
 # Technical Notes
 
+## LocalDex fork — 2026-10-12
+
+Current desktop behavior supersedes the inherited overlay and scrcpy 4.1 notes below. See [One UI implementation](LOCALDEX_ONEUI.md) and [build/validation](LOCALDEX_BUILD.md). App/process: `LocalDex.exe`; official bundle: scrcpy 5.0.1; per-phone freeform recovery journal and Settings reset added. Hardware validation and any GitHub publication remain pending.
+
+
 ## 주요 구조
 
 `Program.cs`가 설정을 읽고 서비스를 조립한다.

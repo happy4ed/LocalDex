@@ -323,7 +323,8 @@ namespace DexManager.Forms
                     await WaitForDeviceStartDelayAsync(
                         serial,
                         context,
-                        generation))
+                        generation,
+                        false))
                 {
                     await StartDexForContextAsync(
                         context,

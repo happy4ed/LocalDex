@@ -4,7 +4,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
-  <data name="App.Name" xml:space="preserve"><value>DX Manager</value></data>
+  <data name="App.Name" xml:space="preserve"><value>LocalDex</value></data>
   <data name="Language.Auto" xml:space="preserve"><value>Windows 언어에 맞춤</value></data>
   <data name="Language.Korean" xml:space="preserve"><value>한국어</value></data>
   <data name="Language.English" xml:space="preserve"><value>English</value></data>
@@ -109,7 +109,7 @@
   <data name="Main.SingleApplied" xml:space="preserve"><value>단일창 {0}을 새 설정으로 다시 시작했습니다.</value></data>
   <data name="Main.LoadAppsFailed" xml:space="preserve"><value>앱 목록을 불러오지 못했습니다.{0}{0}{1}</value></data>
   <data name="Main.BitrateRequired" xml:space="preserve"><value>비트레이트를 입력하세요. 예: 20M</value></data>
-  <data name="Main.TrayContinues" xml:space="preserve"><value>DX Manager가 시스템 트레이에서 계속 실행됩니다.</value></data>
+  <data name="Main.TrayContinues" xml:space="preserve"><value>LocalDex가 시스템 트레이에서 계속 실행됩니다.</value></data>
   <data name="Main.CaptureHotkeyFailed" xml:space="preserve"><value>F8 캡처 단축키를 등록하지 못했습니다.</value></data>
   <data name="Main.KeyMappingFailed" xml:space="preserve"><value>Scrcpy 키 매핑을 시작하지 못했습니다.</value></data>
   <data name="Device.Connected" xml:space="preserve"><value>연결됨 ({0})</value></data>
@@ -129,7 +129,7 @@
   <data name="Settings.SavedInline" xml:space="preserve"><value>설정을 저장했습니다. 언어, 프로그램 경로, 장치 감시 주기 또는 프로세스 제한 시간 변경은 다시 시작한 뒤 적용됩니다.</value></data>
   <data name="Settings.SaveFailedInline" xml:space="preserve"><value>저장 실패: {0}</value></data>
   <data name="Settings.SavedApplyFailedInline" xml:space="preserve"><value>설정은 저장했지만 즉시 런타임 반영에 실패했습니다: {0}</value></data>
-  <data name="Settings.Title" xml:space="preserve"><value>DX Manager · 설정 및 진단</value></data>
+  <data name="Settings.Title" xml:space="preserve"><value>LocalDex · 설정 및 진단</value></data>
   <data name="Settings.Description" xml:space="preserve"><value>해상도와 Scrcpy 실행 옵션은 메인 창에서 변경합니다. 연결, 경로와 고급 동작은 이 창에서 관리합니다.</value></data>
   <data name="Settings.General" xml:space="preserve"><value>기본</value></data>
   <data name="Settings.Connection" xml:space="preserve"><value>연결</value></data>
@@ -137,23 +137,23 @@
   <data name="Settings.Keyboard" xml:space="preserve"><value>키 입력</value></data>
   <data name="Settings.Diagnostics" xml:space="preserve"><value>진단</value></data>
   <data name="Settings.About" xml:space="preserve"><value>정보</value></data>
-  <data name="Settings.AboutVersion" xml:space="preserve"><value>DX Manager v{0}</value></data>
-  <data name="Settings.AboutSummary" xml:space="preserve"><value>Android 장치의 화면과 입력을 관리하는 독립 유틸리티입니다.</value></data>
-  <data name="Settings.AboutDeveloper" xml:space="preserve"><value>개발자: maze</value></data>
+  <data name="Settings.AboutVersion" xml:space="preserve"><value>LocalDex v{0}</value></data>
+  <data name="Settings.AboutSummary" xml:space="preserve"><value>LocalDex는 scrcpy 가상 화면과 최신 One UI용 프리폼 보정을 사용합니다. DeX 연결 해제 시 원래 설정을 복원하며, 복원이 중단되면 재연결 때 다시 처리합니다.</value></data>
+  <data name="Settings.AboutDeveloper" xml:space="preserve"><value>LocalDex 포크: happy4ed · 원본 DX Manager: maze</value></data>
   <data name="Settings.AboutCopyright" xml:space="preserve"><value>Copyright © 2026 maze</value></data>
-  <data name="Settings.AboutLicense" xml:space="preserve"><value>DX Manager 소스 코드는 MIT License로 배포됩니다.</value></data>
+  <data name="Settings.AboutLicense" xml:space="preserve"><value>LocalDex 소스 코드는 MIT License로 배포됩니다.</value></data>
   <data name="Settings.OpenProjectFailed" xml:space="preserve"><value>프로젝트 페이지를 열지 못했습니다: {0}</value></data>
-  <data name="Settings.AboutScrcpy" xml:space="preserve"><value>이 프로그램은 scrcpy 4.1을 포함하고 사용합니다. scrcpy는 Genymobile과 Romain Vimont가 Apache License 2.0으로 배포하는 오픈소스 소프트웨어입니다.</value></data>
+  <data name="Settings.AboutScrcpy" xml:space="preserve"><value>공식 scrcpy 5.0.1을 포함합니다(Genymobile / Romain Vimont, Apache 2.0). One UI 프리폼 처리 방식은 sam1am/localdex를 참고했습니다.</value></data>
   <data name="Settings.AboutComponents" xml:space="preserve"><value>동봉된 FFmpeg 라이브러리는 LGPL v2.1 이상, SDL3는 zlib, libusb는 LGPL v2.1 이상에 따라 배포됩니다. 자세한 내용은 제3자 라이선스를 확인하십시오.</value></data>
   <data name="Settings.AboutSamsung" xml:space="preserve"><value>이 프로그램은 호환되는 Samsung 장치에서 Samsung DeX 기능과 함께 동작하지만 Samsung Electronics가 제작, 후원, 보증 또는 배포하는 제품이 아닙니다. Samsung 및 Samsung DeX는 각 권리자의 상표입니다.</value></data>
   <data name="Settings.OpenNotices" xml:space="preserve"><value>제3자 라이선스 보기</value></data>
-  <data name="Licenses.Title" xml:space="preserve"><value>DX Manager - 제3자 라이선스</value></data>
-  <data name="Licenses.Guide" xml:space="preserve"><value>DX Manager에 포함된 오픈소스 소프트웨어의 고지와 라이선스 조건을 확인합니다.</value></data>
+  <data name="Licenses.Title" xml:space="preserve"><value>LocalDex - 제3자 라이선스</value></data>
+  <data name="Licenses.Guide" xml:space="preserve"><value>LocalDex에 포함된 오픈소스 소프트웨어의 고지와 라이선스 조건을 확인합니다.</value></data>
   <data name="Licenses.NoticesTab" xml:space="preserve"><value>제3자 고지</value></data>
   <data name="Licenses.ScrcpyTab" xml:space="preserve"><value>scrcpy - Apache 2.0</value></data>
   <data name="Licenses.FileMissing" xml:space="preserve"><value>동봉된 라이선스 파일을 찾을 수 없습니다: {0}</value></data>
   <data name="Licenses.ReadFailed" xml:space="preserve"><value>라이선스 파일을 읽지 못했습니다: {0} ({1})</value></data>
-  <data name="Log.Program.Starting" xml:space="preserve"><value>DX Manager를 시작합니다.</value></data>
+  <data name="Log.Program.Starting" xml:space="preserve"><value>LocalDex를 시작합니다.</value></data>
   <data name="Log.Program.ScrcpyAdbPath" xml:space="preserve"><value>Scrcpy가 사용할 ADB 경로를 지정했습니다: {0}</value></data>
   <data name="Log.Program.InitFailed" xml:space="preserve"><value>프로그램 초기화에 실패했습니다.</value></data>
   <data name="Log.Settings.CreatedDefaults" xml:space="preserve"><value>기본 설정 파일을 생성했습니다: {0}</value></data>
@@ -167,7 +167,7 @@
   <data name="Log.Settings.RecoverySaveFailed" xml:space="preserve"><value>복구한 설정을 메모리에서 사용하지만 주 설정 파일을 복구 상태로 저장하지 못했습니다.</value></data>
   <data name="Log.Settings.SchemaSaveFailed" xml:space="preserve"><value>설정을 메모리에서 마이그레이션했지만 갱신된 파일을 저장하지 못했습니다.</value></data>
   <data name="Log.Settings.Normalized" xml:space="preserve"><value>누락되었거나 올바르지 않은 설정값을 보정하고 수정된 파일을 저장했습니다.</value></data>
-  <data name="Error.Settings.NewerSchema" xml:space="preserve"><value>이 설정 파일은 스키마 {0}을(를) 사용하지만 현재 DX Manager는 스키마 {1}까지만 지원합니다. 파일은 변경하지 않았습니다. 더 새로운 DX Manager를 실행하거나 호환되는 설정 파일을 복원하세요.</value></data>
+  <data name="Error.Settings.NewerSchema" xml:space="preserve"><value>이 설정 파일은 스키마 {0}을(를) 사용하지만 현재 LocalDex는 스키마 {1}까지만 지원합니다. 파일은 변경하지 않았습니다. 더 새로운 LocalDex를 실행하거나 호환되는 설정 파일을 복원하세요.</value></data>
   <data name="Error.Process.PathEmpty" xml:space="preserve"><value>실행 파일 경로가 비어 있습니다.</value></data>
   <data name="Error.Process.FileNotFound" xml:space="preserve"><value>실행 파일을 찾을 수 없습니다.</value></data>
   <data name="Log.Process.Start" xml:space="preserve"><value>프로세스 실행: {0} {1}</value></data>
@@ -176,7 +176,7 @@
   <data name="Log.Process.TerminationFailed" xml:space="preserve"><value>시간 초과 프로세스가 반복 정리 후에도 종료되지 않았습니다.</value></data>
   <data name="Log.Process.End" xml:space="preserve"><value>프로세스 종료: ExitCode={0}, Timeout={1}, Duration={2}ms</value></data>
   <data name="Log.Process.ShutdownRequested" xml:space="preserve"><value>프로세스 종료를 요청했습니다. 새로운 ADB 및 보조 프로세스 실행을 차단합니다.</value></data>
-  <data name="Log.Process.FinalSweepTerminated" xml:space="preserve"><value>최종 프로세스 정리에서 DX Manager 번들 경로의 잔존 프로세스 {0}개를 종료했습니다.</value></data>
+  <data name="Log.Process.FinalSweepTerminated" xml:space="preserve"><value>최종 프로세스 정리에서 LocalDex 번들 경로의 잔존 프로세스 {0}개를 종료했습니다.</value></data>
   <data name="Error.Adb.PathEmpty" xml:space="preserve"><value>ADB 경로가 비어 있습니다.</value></data>
   <data name="Error.Adb.ShellCommandEmpty" xml:space="preserve"><value>ADB shell 명령이 비어 있습니다.</value></data>
   <data name="Error.Adb.SerialEmpty" xml:space="preserve"><value>ADB serial이 비어 있습니다.</value></data>
@@ -190,7 +190,7 @@
   <data name="Log.Adb.StartServerResult" xml:space="preserve"><value>ADB start-server 결과</value></data>
   <data name="Log.Adb.SelectedPath" xml:space="preserve"><value>선택된 ADB 경로: {0}</value></data>
   <data name="Log.Adb.VersionResult" xml:space="preserve"><value>ADB version 결과</value></data>
-  <data name="Log.Adb.ShutdownProcessesTerminated" xml:space="preserve"><value>DX Manager에서 선택한 ADB 경로의 프로세스 {0}개를 종료했습니다.</value></data>
+  <data name="Log.Adb.ShutdownProcessesTerminated" xml:space="preserve"><value>LocalDex에서 선택한 ADB 경로의 프로세스 {0}개를 종료했습니다.</value></data>
   <data name="Log.Adb.PairingAttempt" xml:space="preserve"><value>ADB 무선 페어링을 시도합니다: {0}</value></data>
   <data name="Log.Adb.PairResult" xml:space="preserve"><value>ADB pair 결과</value></data>
   <data name="Log.Adb.DevicesResult" xml:space="preserve"><value>ADB devices 결과</value></data>
@@ -218,7 +218,7 @@
   <data name="Log.Main.PhoneScreenWakeCommandFailed" xml:space="preserve"><value>휴대폰 화면 켜기 명령이 실패했습니다: {0}</value></data>
   <data name="Log.Main.PhoneScreenWakeFailed" xml:space="preserve"><value>휴대폰 화면을 켜지 못했습니다.</value></data>
   <data name="Log.Main.CleanupFailed" xml:space="preserve"><value>종료 중 정리 단계 '{0}'에 실패했습니다.</value></data>
-  <data name="Log.Main.CleanupDeferredForShutdown" xml:space="preserve"><value>종료 정리가 5초를 초과했습니다. 소유 프로세스와 기기 상태 정리가 끝난 뒤 DX Manager를 닫습니다.</value></data>
+  <data name="Log.Main.CleanupDeferredForShutdown" xml:space="preserve"><value>종료 정리가 5초를 초과했습니다. 소유 프로세스와 기기 상태 정리가 끝난 뒤 LocalDex를 닫습니다.</value></data>
   <data name="Log.Main.SystemShutdownDetected" xml:space="preserve"><value>Windows 세션 종료를 감지했습니다. 진행 중인 작업을 중단하고 필수 기기 정리만 빠르게 시도합니다.</value></data>
   <data name="Log.Main.SystemShutdownCleanupTimedOut" xml:space="preserve"><value>Windows 종료 기기 정리가 1.5초 안에 완료되지 않았습니다. 남은 프로세스 종료는 Windows에 맡깁니다.</value></data>
   <data name="Log.Main.SystemShutdownDeviceCleanupFailed" xml:space="preserve"><value>Windows 종료 기기 정리 명령이 실패했습니다: {0}</value></data>
@@ -241,7 +241,7 @@
   <data name="Log.Main.ModeSwitchSaveFailed" xml:space="preserve"><value>모드 전환 중 현재 실행 설정을 저장하지 못했습니다: {0}</value></data>
   <data name="Log.AutoHide.Started" xml:space="preserve"><value>자동 숨김을 시작했습니다: {0}초</value></data>
   <data name="Log.AutoHide.ScrcpyMinimized" xml:space="preserve"><value>사용자 입력이 없어 실행 중인 Scrcpy 창을 최소화했습니다.</value></data>
-  <data name="Log.AutoHide.ManagerHidden" xml:space="preserve"><value>사용자 입력이 없어 DX Manager UI를 트레이로 숨깁니다.</value></data>
+  <data name="Log.AutoHide.ManagerHidden" xml:space="preserve"><value>사용자 입력이 없어 LocalDex UI를 트레이로 숨깁니다.</value></data>
   <data name="Log.AutoHide.TickFailed" xml:space="preserve"><value>자동 숨김 감시 중 일시적인 오류가 발생했습니다. 감시는 계속됩니다.</value></data>
   <data name="Error.AutoStart.RegistryUnavailable" xml:space="preserve"><value>자동 실행 레지스트리를 열 수 없습니다.</value></data>
   <data name="Log.AutoStart.Registered" xml:space="preserve"><value>Windows 자동 실행을 등록했습니다.</value></data>
@@ -338,7 +338,7 @@
   <data name="Error.Scrcpy.FileNotFound" xml:space="preserve"><value>scrcpy.exe를 찾을 수 없습니다.</value></data>
   <data name="Error.Scrcpy.ShutdownRequested" xml:space="preserve"><value>프로그램 종료가 시작되어 Scrcpy를 실행할 수 없습니다.</value></data>
   <data name="Error.Scrcpy.StopTimeout" xml:space="preserve"><value>관리 중인 Scrcpy 프로세스 종료 시간이 초과되었습니다.</value></data>
-  <data name="Error.Scrcpy.ReservedAdditionalArgument" xml:space="preserve"><value>추가 인자 '{0}'은(는) DX Manager가 관리하므로 여기서 재정의할 수 없습니다.</value></data>
+  <data name="Error.Scrcpy.ReservedAdditionalArgument" xml:space="preserve"><value>추가 인자 '{0}'은(는) LocalDex가 관리하므로 여기서 재정의할 수 없습니다.</value></data>
   <data name="Log.ScreenOff.Cancelled" xml:space="preserve"><value>화면 OFF 재적용 조건이 사라져 실행을 취소했습니다.</value></data>
   <data name="Log.ScreenOff.Starting" xml:space="preserve"><value>휴대폰 화면 OFF 재적용 Scrcpy를 순차 실행합니다.</value></data>
   <data name="Log.ScreenOff.Confirmed" xml:space="preserve"><value>휴대폰 화면 OFF 재적용을 확인했습니다.</value></data>
@@ -372,7 +372,7 @@
   <data name="Error.Display.OverlaySettingMismatch" xml:space="preserve"><value>기존 overlay 설정이 요청한 디스플레이와 일치하지 않습니다. 기존: {0}, 요청: {1}</value></data>
   <data name="Error.Display.ResetFailed" xml:space="preserve"><value>기존 가상 디스플레이를 제거하지 못했습니다: {0}</value></data>
   <data name="Error.Display.ResetTimedOut" xml:space="preserve"><value>기존 가상 디스플레이가 제한 시간 안에 제거되지 않았습니다.</value></data>
-  <data name="Log.Display.RestoreSkipped" xml:space="preserve"><value>DX Manager 외부에서 overlay 설정이 변경되어 덮어쓰지 않습니다: {0}</value></data>
+  <data name="Log.Display.RestoreSkipped" xml:space="preserve"><value>LocalDex 외부에서 overlay 설정이 변경되어 덮어쓰지 않습니다: {0}</value></data>
   <data name="Log.Display.RestoreFailed" xml:space="preserve"><value>가상 디스플레이 설정을 정리하지 못했습니다: {0}</value></data>
   <data name="Log.Display.Restored" xml:space="preserve"><value>가상 디스플레이 설정을 정리했습니다.</value></data>
   <data name="Log.Display.RestoreException" xml:space="preserve"><value>가상 디스플레이 설정 정리 중 오류가 발생했습니다.</value></data>
@@ -410,7 +410,7 @@
   <data name="Log.Wireless.RetryDetectedAddress" xml:space="preserve"><value>기기 {0}의 저장된 주소로 연결하지 못해 USB에서 확인한 주소로 다시 시도합니다: {1}</value></data>
   <data name="Wireless.NoResult" xml:space="preserve"><value>결과 없음</value></data>
   <data name="Settings.Language" xml:space="preserve"><value>표시 언어</value></data>
-  <data name="Settings.LanguageRestart" xml:space="preserve"><value>언어 변경은 DX Manager를 다시 시작한 뒤 적용됩니다.</value></data>
+  <data name="Settings.LanguageRestart" xml:space="preserve"><value>언어 변경은 LocalDex를 다시 시작한 뒤 적용됩니다.</value></data>
   <data name="Settings.Theme" xml:space="preserve"><value>앱 테마</value></data>
   <data name="Settings.ThemeAuto" xml:space="preserve"><value>Windows 설정 사용</value></data>
   <data name="Settings.ThemeLight" xml:space="preserve"><value>라이트</value></data>
@@ -423,7 +423,7 @@
   <data name="Settings.MiniControlBarLeft" xml:space="preserve"><value>왼쪽</value></data>
   <data name="Settings.MiniControlBarHint" xml:space="preserve"><value>각 DeX·단일창을 따라다니며 Scrcpy 창이 활성화된 동안 표시됩니다.</value></data>
   <data name="Settings.ResetDefaults" xml:space="preserve"><value>모든 설정 기본값 복원</value></data>
-  <data name="Settings.ResetDefaultsGuide" xml:space="preserve"><value>DeX, 단일창, 연결, 키 입력을 포함한 모든 옵션을 초기 상태로 되돌립니다.</value></data>
+  <data name="Settings.ResetDefaultsGuide" xml:space="preserve"><value>DeX·단일창·연결·키보드 등 앱 환경설정을 초기화합니다. 휴대폰 복원 기록은 유지하며, 선택한 휴대폰의 설정 복원은 아래 DeX 초기화 버튼을 사용하세요.</value></data>
   <data name="Settings.ResetDefaultsConfirm" xml:space="preserve"><value>모든 설정을 기본값으로 되돌릴까요? 현재 저장된 사용자 설정은 삭제되며, 실행 중인 기능에는 다음 시작부터 완전히 적용됩니다.</value></data>
   <data name="Settings.ResetDefaultsDone" xml:space="preserve"><value>모든 설정을 기본값으로 복원했습니다. 실행 중인 기능은 다시 시작한 뒤 완전히 적용됩니다.</value></data>
   <data name="Settings.OpenLogs" xml:space="preserve"><value>현재 세션 로그 열기</value></data>
@@ -560,7 +560,7 @@
   <data name="Environment.WindowsVersion" xml:space="preserve"><value>Windows 버전</value></data>
   <data name="Environment.PathSystem" xml:space="preserve"><value>시스템 PATH에 ADB 폴더가 등록되어 있습니다.</value></data>
   <data name="Environment.PathProcess" xml:space="preserve"><value>현재 프로세스 PATH에만 있습니다. 시스템 등록은 선택 사항입니다.</value></data>
-  <data name="Environment.PathAbsolute" xml:space="preserve"><value>PATH에는 없지만 DX Manager는 절대 경로로 ADB를 실행할 수 있습니다.</value></data>
+  <data name="Environment.PathAbsolute" xml:space="preserve"><value>PATH에는 없지만 LocalDex는 절대 경로로 ADB를 실행할 수 있습니다.</value></data>
   <data name="Environment.Admin" xml:space="preserve"><value>관리자 권한</value></data>
   <data name="Environment.AdminYes" xml:space="preserve"><value>관리자 권한으로 실행 중입니다.</value></data>
   <data name="Environment.AdminNo" xml:space="preserve"><value>일반 권한입니다. 시스템 PATH 등록 시 관리자 실행이 필요합니다.</value></data>
@@ -577,15 +577,15 @@
   <data name="Environment.DeviceUnauthorized" xml:space="preserve"><value>휴대폰 RSA 인증창을 허용하십시오: {0}</value></data>
   <data name="Environment.DeviceOfflineMessage" xml:space="preserve"><value>장치가 offline 상태입니다. USB를 다시 연결하십시오.</value></data>
   <data name="Environment.NoDevice" xml:space="preserve"><value>장치가 없습니다. USB 케이블, 개발자 옵션, USB 디버깅, RSA 승인, 파일 전송 모드, 삼성 USB 드라이버를 확인하십시오.</value></data>
-  <data name="Settings.Saved" xml:space="preserve"><value>설정을 저장했습니다. 언어, 프로그램 경로, 장치 감시 주기 또는 프로세스 제한 시간 변경은 DX Manager를 다시 시작한 뒤 적용됩니다.</value></data>
+  <data name="Settings.Saved" xml:space="preserve"><value>설정을 저장했습니다. 언어, 프로그램 경로, 장치 감시 주기 또는 프로세스 제한 시간 변경은 LocalDex를 다시 시작한 뒤 적용됩니다.</value></data>
   <data name="Settings.SaveFailed" xml:space="preserve"><value>설정을 저장하지 못했습니다.{0}{0}{1}</value></data>
-  <data name="Log.Title" xml:space="preserve"><value>DX Manager · 세션 로그</value></data>
+  <data name="Log.Title" xml:space="preserve"><value>LocalDex · 세션 로그</value></data>
   <data name="Log.Save" xml:space="preserve"><value>로그 저장</value></data>
   <data name="Log.DialogTitle" xml:space="preserve"><value>세션 로그 저장</value></data>
   <data name="Log.Filter" xml:space="preserve"><value>로그 파일 (*.log)|*.log|텍스트 파일 (*.txt)|*.txt</value></data>
   <data name="Log.Saved" xml:space="preserve"><value>현재 실행 로그를 저장했습니다.</value></data>
   <data name="Log.SaveFailed" xml:space="preserve"><value>로그를 저장하지 못했습니다.{0}{0}{1}</value></data>
-  <data name="Environment.Title" xml:space="preserve"><value>DX Manager · 환경 점검</value></data>
+  <data name="Environment.Title" xml:space="preserve"><value>LocalDex · 환경 점검</value></data>
   <data name="Environment.Guide" xml:space="preserve"><value>Android 보안 정책상 USB 디버깅과 RSA 승인은 자동으로 켤 수 없습니다.{0}아래 점검 결과에 따라 휴대폰과 USB 드라이버 상태를 확인하십시오.</value></data>
   <data name="Environment.Status" xml:space="preserve"><value>상태</value></data>
   <data name="Environment.Item" xml:space="preserve"><value>점검 항목</value></data>
@@ -596,15 +596,15 @@
   <data name="Environment.Failed" xml:space="preserve"><value>실패</value></data>
   <data name="Environment.RunFailed" xml:space="preserve"><value>환경 점검 중 오류가 발생했습니다.{0}{0}{1}</value></data>
   <data name="Environment.Checking" xml:space="preserve"><value>환경을 점검하고 있습니다...</value></data>
-  <data name="Tray.Open" xml:space="preserve"><value>DX Manager 열기</value></data>
+  <data name="Tray.Open" xml:space="preserve"><value>LocalDex 열기</value></data>
   <data name="Tray.StartDex" xml:space="preserve"><value>DeX 시작</value></data>
   <data name="Tray.StopDex" xml:space="preserve"><value>DeX 중지</value></data>
   <data name="Tray.Settings" xml:space="preserve"><value>설정</value></data>
   <data name="Tray.Environment" xml:space="preserve"><value>환경 점검</value></data>
   <data name="Tray.Logs" xml:space="preserve"><value>세션 로그</value></data>
   <data name="Tray.Exit" xml:space="preserve"><value>프로그램 종료</value></data>
-  <data name="Program.AlreadyRunning" xml:space="preserve"><value>DX Manager가 이미 실행 중입니다.{0}시스템 트레이를 확인하십시오.</value></data>
-  <data name="Program.InitFailed" xml:space="preserve"><value>DX Manager 초기화에 실패했습니다.{0}{0}{1}</value></data>
+  <data name="Program.AlreadyRunning" xml:space="preserve"><value>LocalDex가 이미 실행 중입니다.{0}시스템 트레이를 확인하십시오.</value></data>
+  <data name="Program.InitFailed" xml:space="preserve"><value>LocalDex 초기화에 실패했습니다.{0}{0}{1}</value></data>
   <data name="Settings.GroupAppearance" xml:space="preserve"><value>화면 및 언어</value></data>
   <data name="Settings.GroupStartup" xml:space="preserve"><value>시작 및 자동 실행</value></data>
   <data name="Settings.GroupShutdown" xml:space="preserve"><value>중지 및 종료 동작</value></data>
@@ -617,14 +617,14 @@
   <data name="Log.Scrcpy.FlexDisplayUnsupported" xml:space="preserve"><value>선택한 Scrcpy 버전이 --flex-display를 지원하지 않아 해당 옵션을 제외했습니다.</value></data>
   <data name="Log.KeyMapping.RightShiftCompatibility" xml:space="preserve"><value>SDL3용 오른쪽 Shift 호환 입력을 사용합니다.</value></data>
   <data name="Common.Cancel" xml:space="preserve"><value>취소</value></data>
-  <data name="Settings.ManagedFileTransfer" xml:space="preserve"><value>DX Manager 파일 전송 사용 (한글/Unicode 호환)</value></data>
-  <data name="Settings.ManagedFileTransferHint" xml:space="preserve"><value>켜면 DX Manager 파일 전송 기능을 사용합니다. 폴더 전체와 한글을 포함한 Unicode 이름을 깨짐 없이 전송할 수 있습니다. 끄면 scrcpy의 순정 파일 드롭 기능을 사용합니다. 변경은 새로 여는 DeX, 단일창부터 적용됩니다.</value></data>
+  <data name="Settings.ManagedFileTransfer" xml:space="preserve"><value>LocalDex 파일 전송 사용 (한글/Unicode 호환)</value></data>
+  <data name="Settings.ManagedFileTransferHint" xml:space="preserve"><value>켜면 LocalDex 파일 전송 기능을 사용합니다. 폴더 전체와 한글을 포함한 Unicode 이름을 깨짐 없이 전송할 수 있습니다. 끄면 scrcpy의 순정 파일 드롭 기능을 사용합니다. 변경은 새로 여는 DeX, 단일창부터 적용됩니다.</value></data>
   <data name="Settings.FileTransferTargetFolder" xml:space="preserve"><value>드롭 파일 휴대폰 저장 폴더</value></data>
   <data name="Settings.PhoneToPcTransfer" xml:space="preserve"><value>DX Companion에서 공유한 파일 받기</value></data>
   <data name="Settings.PhoneToPcReceiveFolder" xml:space="preserve"><value>휴대폰→PC 저장 폴더</value></data>
   <data name="Settings.PhoneToPcTransferHint" xml:space="preserve"><value>검증된 DX Companion이 설치되어 있으면 공유 메뉴로 보낸 파일과 폴더를 현재 ADB 연결을 통해 PC로 직접 전송합니다. 휴대폰에는 임시 복사본을 만들지 않습니다.</value></data>
   <data name="Settings.PhoneToPcReceiveFolderRequired" xml:space="preserve"><value>휴대폰에서 받은 파일을 저장할 PC 폴더를 선택하십시오.</value></data>
-  <data name="PhoneTransfer.WindowTitle" xml:space="preserve"><value>DX Manager · 휴대폰에서 받기</value></data>
+  <data name="PhoneTransfer.WindowTitle" xml:space="preserve"><value>LocalDex · 휴대폰에서 받기</value></data>
   <data name="PhoneTransfer.Receiving" xml:space="preserve"><value>휴대폰에서 받는 중</value></data>
   <data name="PhoneTransfer.Completed" xml:space="preserve"><value>전송 완료</value></data>
   <data name="PhoneTransfer.Failed" xml:space="preserve"><value>전송 실패</value></data>
@@ -633,7 +633,7 @@
   <data name="PhoneTransfer.BytesUnknown" xml:space="preserve"><value>{0} 수신됨</value></data>
   <data name="PhoneTransfer.OpenFolder" xml:space="preserve"><value>폴더 열기</value></data>
   <data name="Settings.GroupDisplayCleanup" xml:space="preserve"><value>DX Companion</value></data>
-  <data name="Settings.DisplayCleanupGuide" xml:space="preserve"><value>내장된 DX Companion을 현재 선택한 휴대폰에 설치·업데이트·삭제합니다. DX Manager는 내장 APK와 설치된 앱을 모두 검증한 뒤 제한된 Android 설정 권한만 부여합니다. 사용자 동의 없이 자동으로 설치하지 않습니다.</value></data>
+  <data name="Settings.DisplayCleanupGuide" xml:space="preserve"><value>내장된 DX Companion을 현재 선택한 휴대폰에 설치·업데이트·삭제합니다. LocalDex는 내장 APK와 설치된 앱을 모두 검증한 뒤 제한된 Android 설정 권한만 부여합니다. 사용자 동의 없이 자동으로 설치하지 않습니다.</value></data>
   <data name="Settings.InstallCompanion" xml:space="preserve"><value>Companion 설치</value></data>
   <data name="Settings.UpdateCompanion" xml:space="preserve"><value>Companion 업데이트</value></data>
   <data name="Settings.ReinstallCompanion" xml:space="preserve"><value>Companion 재설치</value></data>
@@ -673,7 +673,7 @@
   <data name="DeviceFolder.LoadFailed" xml:space="preserve"><value>휴대폰 폴더를 읽지 못했습니다: {0}</value></data>
   <data name="DeviceFolder.NoDevice" xml:space="preserve"><value>휴대폰 폴더를 찾으려면 승인된 휴대폰을 먼저 연결하십시오.</value></data>
   <data name="Settings.FileTransferTargetFolderInvalid" xml:space="preserve"><value>/sdcard/ 또는 /storage/emulated/0/ 아래의 폴더를 입력하십시오. 상위 폴더 구문, 제어 문자 및 Android의 UTF-8 255바이트 제한을 넘는 이름은 사용할 수 없습니다.</value></data>
-  <data name="FileTransfer.WindowTitle" xml:space="preserve"><value>DX Manager · 파일 전송</value></data>
+  <data name="FileTransfer.WindowTitle" xml:space="preserve"><value>LocalDex · 파일 전송</value></data>
   <data name="FileTransfer.Preparing" xml:space="preserve"><value>파일 전송 준비 중</value></data>
   <data name="FileTransfer.Counts" xml:space="preserve"><value>완료: {0} · 실패: {1} · 대기: {2}</value></data>
   <data name="FileTransfer.Size" xml:space="preserve"><value>{0} {1}</value></data>
@@ -688,8 +688,8 @@
   <data name="FileTransfer.Canceled" xml:space="preserve"><value>전송 취소됨</value></data>
   <data name="FileTransfer.Failed" xml:space="preserve"><value>전송 실패</value></data>
   <data name="FileTransfer.CanceledByUser" xml:space="preserve"><value>파일 전송이 취소되었습니다.</value></data>
-  <data name="FileTransfer.ShuttingDown" xml:space="preserve"><value>DX Manager가 종료 중입니다.</value></data>
-  <data name="FileTransfer.ProtocolMismatch" xml:space="preserve"><value>파일 전송 도우미 버전이 DX Manager와 일치하지 않습니다.</value></data>
+  <data name="FileTransfer.ShuttingDown" xml:space="preserve"><value>LocalDex가 종료 중입니다.</value></data>
+  <data name="FileTransfer.ProtocolMismatch" xml:space="preserve"><value>파일 전송 도우미 버전이 LocalDex와 일치하지 않습니다.</value></data>
   <data name="FileTransfer.AuthenticationFailed" xml:space="preserve"><value>파일 전송 요청을 인증하지 못했습니다.</value></data>
   <data name="FileTransfer.SourceUnavailable" xml:space="preserve"><value>원본 파일 또는 폴더를 더 이상 찾을 수 없습니다.</value></data>
   <data name="FileTransfer.TargetRejected" xml:space="preserve"><value>요청한 휴대폰 폴더는 지원하지 않습니다.</value></data>
@@ -704,7 +704,7 @@
   <data name="FileTransfer.ReparsePointUnsupported" xml:space="preserve"><value>바로 가기, 정션 또는 심볼릭 링크 폴더는 전송할 수 없습니다.</value></data>
   <data name="FileTransfer.FolderCreateFailed" xml:space="preserve"><value>휴대폰에 전송 대상 폴더를 준비하지 못했습니다.</value></data>
   <data name="FileTransfer.FolderFinalizeFailed" xml:space="preserve"><value>완성된 폴더를 최종 이름으로 저장하지 못했습니다.</value></data>
-  <data name="Log.FileTransfer.ProxyMissing" xml:space="preserve"><value>DX Manager 파일 전송 도우미가 없어 scrcpy 순정 전송을 사용합니다: {0}</value></data>
+  <data name="Log.FileTransfer.ProxyMissing" xml:space="preserve"><value>LocalDex 파일 전송 도우미가 없어 scrcpy 순정 전송을 사용합니다: {0}</value></data>
   <data name="Log.FileTransfer.PipeAcceptFailed" xml:space="preserve"><value>파일 전송 IPC 연결에 실패했습니다: {0}</value></data>
   <data name="Log.FileTransfer.PipeServerFailed" xml:space="preserve"><value>파일 전송 IPC 서버에 오류가 발생했습니다.</value></data>
   <data name="Log.FileTransfer.RequestRejected" xml:space="preserve"><value>파일 전송 요청을 거부했습니다: {0}</value></data>
@@ -725,8 +725,17 @@
   <data name="MiniBar.Fullscreen" xml:space="preserve"><value>전체 화면 전환 (Alt+F)</value></data>
   <data name="MiniBar.ResetSize" xml:space="preserve"><value>Scrcpy 창 크기 복구 (Alt+G)</value></data>
   <data name="MiniBar.Capture" xml:space="preserve"><value>이 Scrcpy 창 캡처 (단축키: {0})</value></data>
-  <data name="MiniBar.OpenManager" xml:space="preserve"><value>DX Manager 열기</value></data>
+  <data name="MiniBar.OpenManager" xml:space="preserve"><value>LocalDex 열기</value></data>
   <data name="MiniBar.Collapse" xml:space="preserve"><value>컨트롤바 접기</value></data>
   <data name="MiniBar.Expand" xml:space="preserve"><value>컨트롤바 펼치기</value></data>
   <data name="Log.MiniBar.CommandFailed" xml:space="preserve"><value>미니 컨트롤바 명령을 보내지 못했습니다.</value></data>
+  <data name="Settings.FreeformRecovery" xml:space="preserve"><value>DeX 초기화 · 휴대폰 설정 복원</value></data>
+  <data name="Settings.FreeformRecoveryGuide" xml:space="preserve"><value>프리폼은 LocalDex의 DeX 연결 중에만 활성화하고 해제 시 휴대폰의 원래 설정으로 복원합니다. USB·무선 연결이 끊기면 복원 기록을 보관하고 같은 휴대폰이 다시 연결될 때 재시도합니다. 초기화는 선택한 DeX를 종료하고 설정 복원을 재시도하며, 휴대폰 데이터를 삭제하지 않습니다.</value></data>
+  <data name="Settings.FreeformRecoveryConfirm" xml:space="preserve"><value>선택한 휴대폰의 DeX를 종료하고 저장된 원래 프리폼 설정으로 복원할까요? 다른 휴대폰과 앱 환경설정은 유지됩니다.</value></data>
+  <data name="Settings.FreeformRecoveryDone" xml:space="preserve"><value>DeX를 종료했습니다. 이 휴대폰의 설정 복원이 완료되었습니다.</value></data>
+  <data name="Settings.FreeformRecoveryFailed" xml:space="preserve"><value>같은 휴대폰을 연결하고 ADB를 승인한 뒤 다시 시도하세요. 복원 기록은 보관됩니다. 자세한 원인은 로그에서 확인하세요.</value></data>
+  <data name="Log.Scrcpy.TransferPreparation" xml:space="preserve"><value>파일 전송 폴더 준비 완료: {0}ms</value></data>
+  <data name="Log.Scrcpy.DisplayWaiting" xml:space="preserve"><value>scrcpy 새 화면 ID 대기 시작: 최대 {0}ms, 수신 즉시 진행합니다.</value></data>
+  <data name="Log.Scrcpy.DisplayReceived" xml:space="preserve"><value>scrcpy 화면 ID={0} 수신: {1}ms</value></data>
+  <data name="Error.Scrcpy.DisplayIdTimeout" xml:space="preserve"><value>{0}ms 동안 scrcpy의 새 화면 ID를 받지 못했습니다. 앞선 scrcpy/ADB 로그에서 시작 지연 또는 오류를 확인하세요.</value></data>
 </root>

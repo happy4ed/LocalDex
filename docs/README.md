@@ -1,5 +1,10 @@
 # DexManager 개발 문서
 
+## LocalDex fork — 2026-10-12
+
+Current desktop behavior supersedes the inherited overlay and scrcpy 4.1 notes below. See [One UI implementation](LOCALDEX_ONEUI.md) and [build/validation](LOCALDEX_BUILD.md). App/process: `LocalDex.exe`; official bundle: scrcpy 5.0.1; per-phone freeform recovery journal and Settings reset added. Hardware validation and any GitHub publication remain pending.
+
+
 마지막 전체 정리: 2026-08-22
 
 새 작업에서는 `HANDOFF.md`, `PROJECT_BRIEF.md`, `SESSION.md`, `TODO.md`,

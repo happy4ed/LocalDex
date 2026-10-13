@@ -25,7 +25,7 @@ internal static class Program
             }
             if (firstArg is "-v" or "--version")
             {
-                Console.WriteLine($"DX Manager for macOS - Version {Version}");
+                Console.WriteLine($"LocalDex for macOS - Version {Version}");
                 return 0;
             }
         }
@@ -120,12 +120,12 @@ internal static class Program
     {
         AnsiConsole.Header($"DX MANAGER for macOS (.NET 8) - v{Version}");
         Console.WriteLine("Usage:");
-        Console.WriteLine("  DXManager.Mac              # Start Interactive Dashboard");
-        Console.WriteLine("  DXManager.Mac --dex         # Launch DeX immediately (Ctrl+C to stop)");
-        Console.WriteLine("  DXManager.Mac --stop-dex    # Stop active DeX session");
-        Console.WriteLine("  DXManager.Mac --diag        # Run system diagnostics");
-        Console.WriteLine("  DXManager.Mac --version     # Display version info");
-        Console.WriteLine("  DXManager.Mac --help        # Show this help message");
+        Console.WriteLine("  LocalDex.Mac              # Start Interactive Dashboard");
+        Console.WriteLine("  LocalDex.Mac --dex         # Launch DeX immediately (Ctrl+C to stop)");
+        Console.WriteLine("  LocalDex.Mac --stop-dex    # Stop active DeX session");
+        Console.WriteLine("  LocalDex.Mac --diag        # Run system diagnostics");
+        Console.WriteLine("  LocalDex.Mac --version     # Display version info");
+        Console.WriteLine("  LocalDex.Mac --help        # Show this help message");
         Console.WriteLine();
         Console.WriteLine("Source developers may use: dotnet run --project DexManager.Mac -- [option]");
         Console.WriteLine();

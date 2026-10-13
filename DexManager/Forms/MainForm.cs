@@ -326,6 +326,7 @@ namespace DexManager.Forms
             _resolutionBox.TabIndex = 0;
             _resolutionBox.Items.Add(new ResolutionPreset("1600 x 900", 1600, 900));
             _resolutionBox.Items.Add(new ResolutionPreset("1920 x 1080", 1920, 1080));
+            _resolutionBox.Items.Add(new ResolutionPreset("2560 x 1440 (QHD)", 2560, 1440));
             _resolutionBox.Items.Add(new ResolutionPreset("3840 x 2160 (4K)", 3840, 2160));
             _resolutionBox.Items.Add(new ResolutionPreset(
                 LocalizationService.Get("Main.Custom"), 0, 0));

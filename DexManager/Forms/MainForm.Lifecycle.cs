@@ -25,7 +25,7 @@ namespace DexManager.Forms
 
             // If another application cancels Windows shutdown after the
             // query, this process has already frozen every producer that
-            // could start ADB. Exit DX Manager instead of leaving a partially
+            // could start ADB. Exit LocalDex instead of leaving a partially
             // shut-down instance in the notification area.
             if (message.Msg == WmEndSession &&
                 message.WParam == IntPtr.Zero &&
@@ -325,11 +325,9 @@ namespace DexManager.Forms
                 var dex = context.Runtime.Scrcpy.GetSessionSnapshot();
                 string original = null;
                 var serial = GetWindowsShutdownSerial(context, dex);
-                // Normal DX Manager exit removes overlay state regardless of
-                // who created it. Keep the same recovery guarantee here for
-                // every currently reachable phone, including a display left
-                // behind after its scrcpy window already closed.
-                var removeOverlay = !string.IsNullOrWhiteSpace(serial);
+                // scrcpy owns our virtual display. Never remove unrelated developer overlays.
+                // Freeform write-ahead records are recovered on the next authorized connection.
+                var removeOverlay = false;
                 var restoreStayAwake =
                     _settings.Features.DisableStayAwakeOnStop &&
                     TryGetStayAwakeOriginalForContext(

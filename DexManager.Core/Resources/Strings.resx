@@ -4,7 +4,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
-  <data name="App.Name" xml:space="preserve"><value>DX Manager</value></data>
+  <data name="App.Name" xml:space="preserve"><value>LocalDex</value></data>
   <data name="Language.Auto" xml:space="preserve"><value>Use Windows language</value></data>
   <data name="Language.Korean" xml:space="preserve"><value>한국어</value></data>
   <data name="Language.English" xml:space="preserve"><value>English</value></data>
@@ -109,7 +109,7 @@
   <data name="Main.SingleApplied" xml:space="preserve"><value>Window {0} was restarted with the new settings.</value></data>
   <data name="Main.LoadAppsFailed" xml:space="preserve"><value>Could not load the app list.{0}{0}{1}</value></data>
   <data name="Main.BitrateRequired" xml:space="preserve"><value>Enter a bitrate, for example 20M.</value></data>
-  <data name="Main.TrayContinues" xml:space="preserve"><value>DX Manager continues running in the system tray.</value></data>
+  <data name="Main.TrayContinues" xml:space="preserve"><value>LocalDex continues running in the system tray.</value></data>
   <data name="Main.CaptureHotkeyFailed" xml:space="preserve"><value>Could not register the F8 capture hotkey.</value></data>
   <data name="Main.KeyMappingFailed" xml:space="preserve"><value>Could not start Scrcpy key mapping.</value></data>
   <data name="Device.Connected" xml:space="preserve"><value>Connected ({0})</value></data>
@@ -129,7 +129,7 @@
   <data name="Settings.SavedInline" xml:space="preserve"><value>Settings saved. Restart to apply language, program path, device monitor, or process timeout changes.</value></data>
   <data name="Settings.SaveFailedInline" xml:space="preserve"><value>Save failed: {0}</value></data>
   <data name="Settings.SavedApplyFailedInline" xml:space="preserve"><value>Settings were saved, but an immediate runtime update failed: {0}</value></data>
-  <data name="Settings.Title" xml:space="preserve"><value>DX Manager · Settings &amp; diagnostics</value></data>
+  <data name="Settings.Title" xml:space="preserve"><value>LocalDex · Settings &amp; diagnostics</value></data>
   <data name="Settings.Description" xml:space="preserve"><value>Change display and Scrcpy launch options in the main window. Manage connections, paths and advanced behavior here.</value></data>
   <data name="Settings.General" xml:space="preserve"><value>General</value></data>
   <data name="Settings.Connection" xml:space="preserve"><value>Connection</value></data>
@@ -137,23 +137,23 @@
   <data name="Settings.Keyboard" xml:space="preserve"><value>Keyboard</value></data>
   <data name="Settings.Diagnostics" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="Settings.About" xml:space="preserve"><value>About</value></data>
-  <data name="Settings.AboutVersion" xml:space="preserve"><value>DX Manager v{0}</value></data>
-  <data name="Settings.AboutSummary" xml:space="preserve"><value>An independently developed utility for managing Android device displays and input.</value></data>
-  <data name="Settings.AboutDeveloper" xml:space="preserve"><value>Developer: maze</value></data>
+  <data name="Settings.AboutVersion" xml:space="preserve"><value>LocalDex v{0}</value></data>
+  <data name="Settings.AboutSummary" xml:space="preserve"><value>LocalDex uses scrcpy virtual displays with session-scoped freeform for recent One UI. Original phone settings are restored on disconnect; interrupted recovery resumes on reconnection.</value></data>
+  <data name="Settings.AboutDeveloper" xml:space="preserve"><value>LocalDex fork: happy4ed · Original DX Manager: maze</value></data>
   <data name="Settings.AboutCopyright" xml:space="preserve"><value>Copyright © 2026 maze</value></data>
-  <data name="Settings.AboutLicense" xml:space="preserve"><value>DX Manager source code is licensed under the MIT License.</value></data>
+  <data name="Settings.AboutLicense" xml:space="preserve"><value>LocalDex source code is licensed under the MIT License.</value></data>
   <data name="Settings.OpenProjectFailed" xml:space="preserve"><value>Could not open the project page: {0}</value></data>
-  <data name="Settings.AboutScrcpy" xml:space="preserve"><value>This program includes and uses scrcpy 4.1, open-source software distributed by Genymobile and Romain Vimont under the Apache License 2.0.</value></data>
+  <data name="Settings.AboutScrcpy" xml:space="preserve"><value>Includes official scrcpy 5.0.1 (Genymobile / Romain Vimont, Apache 2.0). One UI freeform approach informed by sam1am/localdex.</value></data>
   <data name="Settings.AboutComponents" xml:space="preserve"><value>Bundled FFmpeg libraries are distributed under LGPL v2.1 or later, SDL3 under the zlib license, and libusb under LGPL v2.1 or later. See the third-party notices for details.</value></data>
   <data name="Settings.AboutSamsung" xml:space="preserve"><value>This program works with Samsung DeX features on compatible Samsung devices, but is not produced, sponsored, endorsed, or distributed by Samsung Electronics. Samsung and Samsung DeX are trademarks of their respective owner.</value></data>
   <data name="Settings.OpenNotices" xml:space="preserve"><value>View third-party notices</value></data>
-  <data name="Licenses.Title" xml:space="preserve"><value>DX Manager - Third-party licenses</value></data>
-  <data name="Licenses.Guide" xml:space="preserve"><value>Review notices and license terms for open-source software included with DX Manager.</value></data>
+  <data name="Licenses.Title" xml:space="preserve"><value>LocalDex - Third-party licenses</value></data>
+  <data name="Licenses.Guide" xml:space="preserve"><value>Review notices and license terms for open-source software included with LocalDex.</value></data>
   <data name="Licenses.NoticesTab" xml:space="preserve"><value>Third-party notices</value></data>
   <data name="Licenses.ScrcpyTab" xml:space="preserve"><value>scrcpy - Apache 2.0</value></data>
   <data name="Licenses.FileMissing" xml:space="preserve"><value>The bundled license file could not be found: {0}</value></data>
   <data name="Licenses.ReadFailed" xml:space="preserve"><value>Could not read the license file: {0} ({1})</value></data>
-  <data name="Log.Program.Starting" xml:space="preserve"><value>Starting DX Manager.</value></data>
+  <data name="Log.Program.Starting" xml:space="preserve"><value>Starting LocalDex.</value></data>
   <data name="Log.Program.ScrcpyAdbPath" xml:space="preserve"><value>Configured the ADB path for scrcpy: {0}</value></data>
   <data name="Log.Program.InitFailed" xml:space="preserve"><value>Program initialization failed.</value></data>
   <data name="Log.Settings.CreatedDefaults" xml:space="preserve"><value>Created the default settings file: {0}</value></data>
@@ -167,7 +167,7 @@
   <data name="Log.Settings.RecoverySaveFailed" xml:space="preserve"><value>Recovered settings are active in memory, but the primary settings file could not be repaired.</value></data>
   <data name="Log.Settings.SchemaSaveFailed" xml:space="preserve"><value>The settings were loaded and migrated in memory, but the migrated file could not be saved.</value></data>
   <data name="Log.Settings.Normalized" xml:space="preserve"><value>Normalized invalid or missing settings values and saved the corrected file.</value></data>
-  <data name="Error.Settings.NewerSchema" xml:space="preserve"><value>This settings file uses schema {0}, but this DX Manager supports up to schema {1}. The file was not changed. Run the newer DX Manager version or restore a compatible settings file.</value></data>
+  <data name="Error.Settings.NewerSchema" xml:space="preserve"><value>This settings file uses schema {0}, but this LocalDex supports up to schema {1}. The file was not changed. Run the newer LocalDex version or restore a compatible settings file.</value></data>
   <data name="Error.Process.PathEmpty" xml:space="preserve"><value>The executable path is empty.</value></data>
   <data name="Error.Process.FileNotFound" xml:space="preserve"><value>The executable could not be found.</value></data>
   <data name="Log.Process.Start" xml:space="preserve"><value>Starting process: {0} {1}</value></data>
@@ -176,7 +176,7 @@
   <data name="Log.Process.TerminationFailed" xml:space="preserve"><value>The timed-out process still did not exit after repeated cleanup attempts.</value></data>
   <data name="Log.Process.End" xml:space="preserve"><value>Process exited: ExitCode={0}, Timeout={1}, Duration={2}ms</value></data>
   <data name="Log.Process.ShutdownRequested" xml:space="preserve"><value>Process shutdown requested. New ADB and helper process launches are now blocked.</value></data>
-  <data name="Log.Process.FinalSweepTerminated" xml:space="preserve"><value>Final process cleanup terminated {0} remaining process(es) from DX Manager bundled paths.</value></data>
+  <data name="Log.Process.FinalSweepTerminated" xml:space="preserve"><value>Final process cleanup terminated {0} remaining process(es) from LocalDex bundled paths.</value></data>
   <data name="Error.Adb.PathEmpty" xml:space="preserve"><value>The ADB path is empty.</value></data>
   <data name="Error.Adb.ShellCommandEmpty" xml:space="preserve"><value>The ADB shell command is empty.</value></data>
   <data name="Error.Adb.SerialEmpty" xml:space="preserve"><value>The ADB serial is empty.</value></data>
@@ -190,7 +190,7 @@
   <data name="Log.Adb.StartServerResult" xml:space="preserve"><value>ADB start-server result</value></data>
   <data name="Log.Adb.SelectedPath" xml:space="preserve"><value>Selected ADB path: {0}</value></data>
   <data name="Log.Adb.VersionResult" xml:space="preserve"><value>ADB version result</value></data>
-  <data name="Log.Adb.ShutdownProcessesTerminated" xml:space="preserve"><value>Terminated {0} ADB process(es) launched from the selected DX Manager ADB path.</value></data>
+  <data name="Log.Adb.ShutdownProcessesTerminated" xml:space="preserve"><value>Terminated {0} ADB process(es) launched from the selected LocalDex ADB path.</value></data>
   <data name="Log.Adb.PairingAttempt" xml:space="preserve"><value>Attempting wireless ADB pairing: {0}</value></data>
   <data name="Log.Adb.PairResult" xml:space="preserve"><value>ADB pair result</value></data>
   <data name="Log.Adb.DevicesResult" xml:space="preserve"><value>ADB devices result</value></data>
@@ -218,7 +218,7 @@
   <data name="Log.Main.PhoneScreenWakeCommandFailed" xml:space="preserve"><value>The command to turn on the phone screen failed: {0}</value></data>
   <data name="Log.Main.PhoneScreenWakeFailed" xml:space="preserve"><value>Could not turn on the phone screen.</value></data>
   <data name="Log.Main.CleanupFailed" xml:space="preserve"><value>The cleanup step '{0}' failed while exiting.</value></data>
-  <data name="Log.Main.CleanupDeferredForShutdown" xml:space="preserve"><value>Shutdown cleanup exceeded five seconds. DX Manager will close after owned processes and device state are cleaned up.</value></data>
+  <data name="Log.Main.CleanupDeferredForShutdown" xml:space="preserve"><value>Shutdown cleanup exceeded five seconds. LocalDex will close after owned processes and device state are cleaned up.</value></data>
   <data name="Log.Main.SystemShutdownDetected" xml:space="preserve"><value>Windows session shutdown detected. Stopping active work and attempting only essential device cleanup.</value></data>
   <data name="Log.Main.SystemShutdownCleanupTimedOut" xml:space="preserve"><value>Windows shutdown device cleanup did not finish within 1.5 seconds. Windows will terminate the remaining processes.</value></data>
   <data name="Log.Main.SystemShutdownDeviceCleanupFailed" xml:space="preserve"><value>Windows shutdown device cleanup command failed: {0}</value></data>
@@ -241,11 +241,11 @@
   <data name="Log.Main.ModeSwitchSaveFailed" xml:space="preserve"><value>Could not save the current run settings while switching modes: {0}</value></data>
   <data name="Log.AutoHide.Started" xml:space="preserve"><value>Started auto-hide: {0} second(s)</value></data>
   <data name="Log.AutoHide.ScrcpyMinimized" xml:space="preserve"><value>Minimized the running scrcpy windows because there was no user input.</value></data>
-  <data name="Log.AutoHide.ManagerHidden" xml:space="preserve"><value>Hiding the DX Manager UI to the system tray because there was no user input.</value></data>
+  <data name="Log.AutoHide.ManagerHidden" xml:space="preserve"><value>Hiding the LocalDex UI to the system tray because there was no user input.</value></data>
   <data name="Log.AutoHide.TickFailed" xml:space="preserve"><value>Auto-hide monitoring encountered a transient error. Monitoring will continue.</value></data>
   <data name="Error.AutoStart.RegistryUnavailable" xml:space="preserve"><value>Could not open the startup registry key.</value></data>
-  <data name="Log.AutoStart.Registered" xml:space="preserve"><value>Registered DX Manager for Windows startup.</value></data>
-  <data name="Log.AutoStart.Unregistered" xml:space="preserve"><value>Removed DX Manager from Windows startup.</value></data>
+  <data name="Log.AutoStart.Registered" xml:space="preserve"><value>Registered LocalDex for Windows startup.</value></data>
+  <data name="Log.AutoStart.Unregistered" xml:space="preserve"><value>Removed LocalDex from Windows startup.</value></data>
   <data name="Capture.CancelReason.Timeout" xml:space="preserve"><value>timeout</value></data>
   <data name="Log.Capture.Waiting" xml:space="preserve"><value>Capture pending: press F8 again or drag the mouse.</value></data>
   <data name="Log.Capture.ScrcpyWindowMissing" xml:space="preserve"><value>Capture mode could not start because no scrcpy window was found.</value></data>
@@ -338,7 +338,7 @@
   <data name="Error.Scrcpy.FileNotFound" xml:space="preserve"><value>scrcpy.exe could not be found.</value></data>
   <data name="Error.Scrcpy.ShutdownRequested" xml:space="preserve"><value>Scrcpy cannot be started because application shutdown has begun.</value></data>
   <data name="Error.Scrcpy.StopTimeout" xml:space="preserve"><value>Timed out while stopping the managed Scrcpy process.</value></data>
-  <data name="Error.Scrcpy.ReservedAdditionalArgument" xml:space="preserve"><value>The additional argument '{0}' is managed by DX Manager and cannot be overridden here.</value></data>
+  <data name="Error.Scrcpy.ReservedAdditionalArgument" xml:space="preserve"><value>The additional argument '{0}' is managed by LocalDex and cannot be overridden here.</value></data>
   <data name="Log.ScreenOff.Cancelled" xml:space="preserve"><value>Cancelled screen-off reapplication because its conditions no longer apply.</value></data>
   <data name="Log.ScreenOff.Starting" xml:space="preserve"><value>Starting the screen-off helper scrcpy sequentially.</value></data>
   <data name="Log.ScreenOff.Confirmed" xml:space="preserve"><value>Confirmed that screen-off was reapplied to the phone.</value></data>
@@ -372,7 +372,7 @@
   <data name="Error.Display.OverlaySettingMismatch" xml:space="preserve"><value>The existing overlay setting does not match the requested display. Existing: {0}, requested: {1}</value></data>
   <data name="Error.Display.ResetFailed" xml:space="preserve"><value>Could not remove the existing virtual display: {0}</value></data>
   <data name="Error.Display.ResetTimedOut" xml:space="preserve"><value>The existing virtual display was not removed within the time limit.</value></data>
-  <data name="Log.Display.RestoreSkipped" xml:space="preserve"><value>The overlay setting changed outside DX Manager, so it will not be overwritten: {0}</value></data>
+  <data name="Log.Display.RestoreSkipped" xml:space="preserve"><value>The overlay setting changed outside LocalDex, so it will not be overwritten: {0}</value></data>
   <data name="Log.Display.RestoreFailed" xml:space="preserve"><value>Could not clean up the virtual display setting: {0}</value></data>
   <data name="Log.Display.Restored" xml:space="preserve"><value>Cleaned up the virtual display setting.</value></data>
   <data name="Log.Display.RestoreException" xml:space="preserve"><value>An error occurred while cleaning up the virtual display setting.</value></data>
@@ -410,7 +410,7 @@
   <data name="Log.Wireless.RetryDetectedAddress" xml:space="preserve"><value>The saved address for device {0} did not connect. Retrying the address detected over USB: {1}</value></data>
   <data name="Wireless.NoResult" xml:space="preserve"><value>No result</value></data>
   <data name="Settings.Language" xml:space="preserve"><value>Display language</value></data>
-  <data name="Settings.LanguageRestart" xml:space="preserve"><value>Language changes are applied after restarting DX Manager.</value></data>
+  <data name="Settings.LanguageRestart" xml:space="preserve"><value>Language changes are applied after restarting LocalDex.</value></data>
   <data name="Settings.Theme" xml:space="preserve"><value>App theme</value></data>
   <data name="Settings.ThemeAuto" xml:space="preserve"><value>Use Windows setting</value></data>
   <data name="Settings.ThemeLight" xml:space="preserve"><value>Light</value></data>
@@ -423,9 +423,9 @@
   <data name="Settings.MiniControlBarLeft" xml:space="preserve"><value>Left</value></data>
   <data name="Settings.MiniControlBarHint" xml:space="preserve"><value>The bar follows each DeX or single-app window and appears while a Scrcpy window is active.</value></data>
   <data name="Settings.ResetDefaults" xml:space="preserve"><value>Restore all defaults</value></data>
-  <data name="Settings.ResetDefaultsGuide" xml:space="preserve"><value>Reset every option, including DeX, single-window, connection, and keyboard settings.</value></data>
+  <data name="Settings.ResetDefaultsGuide" xml:space="preserve"><value>Reset saved app preferences, including DeX, app windows, connection and keyboard settings. Phone recovery records are preserved; use the DeX reset button below to restore the selected phone.</value></data>
   <data name="Settings.ResetDefaultsConfirm" xml:space="preserve"><value>Restore every setting to its default value? Saved custom settings will be removed, and active services will fully use the defaults after restart.</value></data>
-  <data name="Settings.ResetDefaultsDone" xml:space="preserve"><value>All settings were restored to defaults. Restart DX Manager to fully apply them to active services.</value></data>
+  <data name="Settings.ResetDefaultsDone" xml:space="preserve"><value>All settings were restored to defaults. Restart LocalDex to fully apply them to active services.</value></data>
   <data name="Settings.OpenLogs" xml:space="preserve"><value>Open session log</value></data>
   <data name="Settings.OpenEnvironment" xml:space="preserve"><value>Run environment check</value></data>
   <data name="Settings.DiagnosticsGuide" xml:space="preserve"><value>Open logs or check ADB, Scrcpy and device connectivity.</value></data>
@@ -560,7 +560,7 @@
   <data name="Environment.WindowsVersion" xml:space="preserve"><value>Windows version</value></data>
   <data name="Environment.PathSystem" xml:space="preserve"><value>The ADB folder is registered in the system PATH.</value></data>
   <data name="Environment.PathProcess" xml:space="preserve"><value>ADB is only in the current process PATH. System registration is optional.</value></data>
-  <data name="Environment.PathAbsolute" xml:space="preserve"><value>ADB is not in PATH, but DX Manager uses its absolute path.</value></data>
+  <data name="Environment.PathAbsolute" xml:space="preserve"><value>ADB is not in PATH, but LocalDex uses its absolute path.</value></data>
   <data name="Environment.Admin" xml:space="preserve"><value>Administrator</value></data>
   <data name="Environment.AdminYes" xml:space="preserve"><value>Running as administrator.</value></data>
   <data name="Environment.AdminNo" xml:space="preserve"><value>Running with standard privileges. Administrator access is required to modify system PATH.</value></data>
@@ -577,15 +577,15 @@
   <data name="Environment.DeviceUnauthorized" xml:space="preserve"><value>Approve the RSA prompt on the phone: {0}</value></data>
   <data name="Environment.DeviceOfflineMessage" xml:space="preserve"><value>The device is offline. Reconnect USB.</value></data>
   <data name="Environment.NoDevice" xml:space="preserve"><value>No device found. Check the USB cable, Developer options, USB debugging, RSA approval, file transfer mode and Samsung USB driver.</value></data>
-  <data name="Settings.Saved" xml:space="preserve"><value>Settings were saved. Restart DX Manager to apply language, program path, device monitor, or process timeout changes.</value></data>
+  <data name="Settings.Saved" xml:space="preserve"><value>Settings were saved. Restart LocalDex to apply language, program path, device monitor, or process timeout changes.</value></data>
   <data name="Settings.SaveFailed" xml:space="preserve"><value>Could not save settings.{0}{0}{1}</value></data>
-  <data name="Log.Title" xml:space="preserve"><value>DX Manager · Session log</value></data>
+  <data name="Log.Title" xml:space="preserve"><value>LocalDex · Session log</value></data>
   <data name="Log.Save" xml:space="preserve"><value>Save log</value></data>
   <data name="Log.DialogTitle" xml:space="preserve"><value>Save session log</value></data>
   <data name="Log.Filter" xml:space="preserve"><value>Log files (*.log)|*.log|Text files (*.txt)|*.txt</value></data>
   <data name="Log.Saved" xml:space="preserve"><value>The current session log was saved.</value></data>
   <data name="Log.SaveFailed" xml:space="preserve"><value>Could not save the log.{0}{0}{1}</value></data>
-  <data name="Environment.Title" xml:space="preserve"><value>DX Manager · Environment check</value></data>
+  <data name="Environment.Title" xml:space="preserve"><value>LocalDex · Environment check</value></data>
   <data name="Environment.Guide" xml:space="preserve"><value>Android security does not allow USB debugging or RSA approval to be enabled automatically.{0}Check the phone and USB driver based on the results below.</value></data>
   <data name="Environment.Status" xml:space="preserve"><value>Status</value></data>
   <data name="Environment.Item" xml:space="preserve"><value>Check</value></data>
@@ -596,15 +596,15 @@
   <data name="Environment.Failed" xml:space="preserve"><value>Failed</value></data>
   <data name="Environment.RunFailed" xml:space="preserve"><value>Environment check failed.{0}{0}{1}</value></data>
   <data name="Environment.Checking" xml:space="preserve"><value>Checking the environment...</value></data>
-  <data name="Tray.Open" xml:space="preserve"><value>Open DX Manager</value></data>
+  <data name="Tray.Open" xml:space="preserve"><value>Open LocalDex</value></data>
   <data name="Tray.StartDex" xml:space="preserve"><value>Start DeX</value></data>
   <data name="Tray.StopDex" xml:space="preserve"><value>Stop DeX</value></data>
   <data name="Tray.Settings" xml:space="preserve"><value>Settings</value></data>
   <data name="Tray.Environment" xml:space="preserve"><value>Environment check</value></data>
   <data name="Tray.Logs" xml:space="preserve"><value>Session log</value></data>
   <data name="Tray.Exit" xml:space="preserve"><value>Exit</value></data>
-  <data name="Program.AlreadyRunning" xml:space="preserve"><value>DX Manager is already running.{0}Check the system tray.</value></data>
-  <data name="Program.InitFailed" xml:space="preserve"><value>DX Manager could not start.{0}{0}{1}</value></data>
+  <data name="Program.AlreadyRunning" xml:space="preserve"><value>LocalDex is already running.{0}Check the system tray.</value></data>
+  <data name="Program.InitFailed" xml:space="preserve"><value>LocalDex could not start.{0}{0}{1}</value></data>
   <data name="Settings.GroupAppearance" xml:space="preserve"><value>Appearance</value></data>
   <data name="Settings.GroupStartup" xml:space="preserve"><value>Startup and automation</value></data>
   <data name="Settings.GroupShutdown" xml:space="preserve"><value>Stop and exit behavior</value></data>
@@ -617,14 +617,14 @@
   <data name="Log.Scrcpy.FlexDisplayUnsupported" xml:space="preserve"><value>The selected scrcpy version does not support --flex-display; the option was skipped.</value></data>
   <data name="Log.KeyMapping.RightShiftCompatibility" xml:space="preserve"><value>Enabled the SDL3 right Shift compatibility mapping.</value></data>
   <data name="Common.Cancel" xml:space="preserve"><value>Cancel</value></data>
-  <data name="Settings.ManagedFileTransfer" xml:space="preserve"><value>Use DX Manager file transfer (Unicode-compatible)</value></data>
-  <data name="Settings.ManagedFileTransferHint" xml:space="preserve"><value>When enabled, DX Manager handles file transfer and preserves complete folders and Unicode names. Turn it off to use scrcpy's original file-drop behavior. Changes apply to newly opened DeX and single-app windows.</value></data>
+  <data name="Settings.ManagedFileTransfer" xml:space="preserve"><value>Use LocalDex file transfer (Unicode-compatible)</value></data>
+  <data name="Settings.ManagedFileTransferHint" xml:space="preserve"><value>When enabled, LocalDex handles file transfer and preserves complete folders and Unicode names. Turn it off to use scrcpy's original file-drop behavior. Changes apply to newly opened DeX and single-app windows.</value></data>
   <data name="Settings.FileTransferTargetFolder" xml:space="preserve"><value>Dropped files destination on phone</value></data>
   <data name="Settings.PhoneToPcTransfer" xml:space="preserve"><value>Receive shared files from DX Companion</value></data>
   <data name="Settings.PhoneToPcReceiveFolder" xml:space="preserve"><value>Phone-to-PC destination folder</value></data>
-  <data name="Settings.PhoneToPcTransferHint" xml:space="preserve"><value>When the verified DX Companion is installed, files and folders shared to DX Manager are streamed directly to this PC through the current ADB connection. No temporary copy is created on the phone.</value></data>
+  <data name="Settings.PhoneToPcTransferHint" xml:space="preserve"><value>When the verified DX Companion is installed, files and folders shared to LocalDex are streamed directly to this PC through the current ADB connection. No temporary copy is created on the phone.</value></data>
   <data name="Settings.PhoneToPcReceiveFolderRequired" xml:space="preserve"><value>Select a PC folder for files received from the phone.</value></data>
-  <data name="PhoneTransfer.WindowTitle" xml:space="preserve"><value>DX Manager · Receiving from phone</value></data>
+  <data name="PhoneTransfer.WindowTitle" xml:space="preserve"><value>LocalDex · Receiving from phone</value></data>
   <data name="PhoneTransfer.Receiving" xml:space="preserve"><value>Receiving from the phone</value></data>
   <data name="PhoneTransfer.Completed" xml:space="preserve"><value>Transfer complete</value></data>
   <data name="PhoneTransfer.Failed" xml:space="preserve"><value>Transfer failed</value></data>
@@ -633,7 +633,7 @@
   <data name="PhoneTransfer.BytesUnknown" xml:space="preserve"><value>{0} received</value></data>
   <data name="PhoneTransfer.OpenFolder" xml:space="preserve"><value>Open folder</value></data>
   <data name="Settings.GroupDisplayCleanup" xml:space="preserve"><value>DX Companion</value></data>
-  <data name="Settings.DisplayCleanupGuide" xml:space="preserve"><value>Install, update, or remove the bundled DX Companion on the currently selected phone. DX Manager verifies the bundled APK and the installed app before granting its restricted Android settings permission. Nothing is installed automatically.</value></data>
+  <data name="Settings.DisplayCleanupGuide" xml:space="preserve"><value>Install, update, or remove the bundled DX Companion on the currently selected phone. LocalDex verifies the bundled APK and the installed app before granting its restricted Android settings permission. Nothing is installed automatically.</value></data>
   <data name="Settings.InstallCompanion" xml:space="preserve"><value>Install Companion</value></data>
   <data name="Settings.UpdateCompanion" xml:space="preserve"><value>Update Companion</value></data>
   <data name="Settings.ReinstallCompanion" xml:space="preserve"><value>Reinstall Companion</value></data>
@@ -673,7 +673,7 @@
   <data name="DeviceFolder.LoadFailed" xml:space="preserve"><value>Could not read phone folders: {0}</value></data>
   <data name="DeviceFolder.NoDevice" xml:space="preserve"><value>Connect and authorize a phone before browsing its folders.</value></data>
   <data name="Settings.FileTransferTargetFolderInvalid" xml:space="preserve"><value>Enter a folder below /sdcard/ or /storage/emulated/0/. The path cannot contain parent-directory segments, control characters, or names longer than Android's 255-byte UTF-8 limit.</value></data>
-  <data name="FileTransfer.WindowTitle" xml:space="preserve"><value>DX Manager · File transfer</value></data>
+  <data name="FileTransfer.WindowTitle" xml:space="preserve"><value>LocalDex · File transfer</value></data>
   <data name="FileTransfer.Preparing" xml:space="preserve"><value>Preparing file transfer</value></data>
   <data name="FileTransfer.Counts" xml:space="preserve"><value>Completed: {0} · Failed: {1} · Waiting: {2}</value></data>
   <data name="FileTransfer.Size" xml:space="preserve"><value>{0} {1}</value></data>
@@ -688,8 +688,8 @@
   <data name="FileTransfer.Canceled" xml:space="preserve"><value>Transfer canceled</value></data>
   <data name="FileTransfer.Failed" xml:space="preserve"><value>Transfer failed</value></data>
   <data name="FileTransfer.CanceledByUser" xml:space="preserve"><value>The file transfer was canceled.</value></data>
-  <data name="FileTransfer.ShuttingDown" xml:space="preserve"><value>DX Manager is shutting down.</value></data>
-  <data name="FileTransfer.ProtocolMismatch" xml:space="preserve"><value>The file transfer helper version does not match DX Manager.</value></data>
+  <data name="FileTransfer.ShuttingDown" xml:space="preserve"><value>LocalDex is shutting down.</value></data>
+  <data name="FileTransfer.ProtocolMismatch" xml:space="preserve"><value>The file transfer helper version does not match LocalDex.</value></data>
   <data name="FileTransfer.AuthenticationFailed" xml:space="preserve"><value>The file transfer request could not be authenticated.</value></data>
   <data name="FileTransfer.SourceUnavailable" xml:space="preserve"><value>The source file or folder is no longer available.</value></data>
   <data name="FileTransfer.TargetRejected" xml:space="preserve"><value>The requested phone folder is not supported.</value></data>
@@ -704,7 +704,7 @@
   <data name="FileTransfer.ReparsePointUnsupported" xml:space="preserve"><value>A shortcut, junction, or symbolic-link folder cannot be transferred.</value></data>
   <data name="FileTransfer.FolderCreateFailed" xml:space="preserve"><value>The destination folder could not be prepared on the phone.</value></data>
   <data name="FileTransfer.FolderFinalizeFailed" xml:space="preserve"><value>The completed folder could not be saved under its final name.</value></data>
-  <data name="Log.FileTransfer.ProxyMissing" xml:space="preserve"><value>The DX Manager file-transfer helper is missing. scrcpy's original file transfer will be used: {0}</value></data>
+  <data name="Log.FileTransfer.ProxyMissing" xml:space="preserve"><value>The LocalDex file-transfer helper is missing. scrcpy's original file transfer will be used: {0}</value></data>
   <data name="Log.FileTransfer.PipeAcceptFailed" xml:space="preserve"><value>File-transfer IPC connection failed: {0}</value></data>
   <data name="Log.FileTransfer.PipeServerFailed" xml:space="preserve"><value>The file-transfer IPC server failed.</value></data>
   <data name="Log.FileTransfer.RequestRejected" xml:space="preserve"><value>A file-transfer request was rejected: {0}</value></data>
@@ -725,8 +725,17 @@
   <data name="MiniBar.Fullscreen" xml:space="preserve"><value>Toggle fullscreen (Alt+F)</value></data>
   <data name="MiniBar.ResetSize" xml:space="preserve"><value>Reset the Scrcpy window size (Alt+G)</value></data>
   <data name="MiniBar.Capture" xml:space="preserve"><value>Capture this Scrcpy window (hotkey: {0})</value></data>
-  <data name="MiniBar.OpenManager" xml:space="preserve"><value>Open DX Manager</value></data>
+  <data name="MiniBar.OpenManager" xml:space="preserve"><value>Open LocalDex</value></data>
   <data name="MiniBar.Collapse" xml:space="preserve"><value>Collapse the control bar</value></data>
   <data name="MiniBar.Expand" xml:space="preserve"><value>Expand the control bar</value></data>
   <data name="Log.MiniBar.CommandFailed" xml:space="preserve"><value>The mini control bar command could not be sent.</value></data>
+  <data name="Settings.FreeformRecovery" xml:space="preserve"><value>Reset DeX / restore phone settings</value></data>
+  <data name="Settings.FreeformRecoveryGuide" xml:space="preserve"><value>Freeform is enabled only for a LocalDex desktop session. Disconnecting restores the original phone setting. If USB/Wi-Fi is lost, recovery is saved and retried when the same phone reconnects. Reset stops the selected desktop and retries recovery; it does not factory-reset the phone.</value></data>
+  <data name="Settings.FreeformRecoveryConfirm" xml:space="preserve"><value>Stop the selected phone’s DeX session and restore its saved freeform setting? Other phones and saved app preferences are unchanged.</value></data>
+  <data name="Settings.FreeformRecoveryDone" xml:space="preserve"><value>DeX stopped. No freeform recovery remains for this phone.</value></data>
+  <data name="Settings.FreeformRecoveryFailed" xml:space="preserve"><value>Connect and authorize the same phone, then retry. Pending recovery records are retained. See the log for details.</value></data>
+  <data name="Log.Scrcpy.TransferPreparation" xml:space="preserve"><value>File transfer folder preparation completed: {0}ms</value></data>
+  <data name="Log.Scrcpy.DisplayWaiting" xml:space="preserve"><value>Waiting for the new scrcpy display ID (up to {0}ms; continues immediately when ready).</value></data>
+  <data name="Log.Scrcpy.DisplayReceived" xml:space="preserve"><value>Received scrcpy display ID={0}: {1}ms</value></data>
+  <data name="Error.Scrcpy.DisplayIdTimeout" xml:space="preserve"><value>No new display ID was received from scrcpy within {0}ms. Check the preceding scrcpy/ADB log for startup delays or errors.</value></data>
 </root>

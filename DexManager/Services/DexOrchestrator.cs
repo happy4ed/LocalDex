@@ -91,6 +91,18 @@ namespace DexManager.Services
             });
         }
 
+        public Task<bool> ResetDesktopAsync(string serial)
+        {
+            return Task.Run(delegate
+            {
+                lock (_operationGate)
+                {
+                    StopCore();
+                    return RetryDeferredCleanupCore(serial);
+                }
+            });
+        }
+
         public Task<bool> RetryDeferredCleanupAsync(string serial)
         {
             return Task.Run(delegate
@@ -153,13 +165,9 @@ namespace DexManager.Services
                     LocalizationService.Get(
                         "Error.Dex.NoAuthorizedDevice"));
             }
-            if (!RetryDeferredCleanupCore(serial))
-            {
-                throw new InvalidOperationException(
-                    LocalizationService.Get(
-                        "Error.Dex.DisplayResetFailed"));
-            }
             CleanupStaleSession(serial);
+            // Acquire restores any journal for the verified physical phone before
+            // saving its original value. A separate Recover repeats that identity query.
             var runSettings = GetDeviceRunSettings();
 
             VirtualDisplayLease lease = null;
@@ -169,16 +177,14 @@ namespace DexManager.Services
                 _launchCoordinator.RunExclusive(delegate
                 {
                     ThrowIfShutdownRequested();
-                    lease = _virtualDisplayService.EnsureVirtualDisplay(
-                        serial,
-                        runSettings.VirtualDisplay,
-                        _settings.Timing.VirtualDisplayDetectionTimeoutMs,
-                        delegate { return IsShutdownRequested; });
+                    lease = _virtualDisplayService.PrepareDesktop(serial);
+                    _pendingDisplayCleanup.Remove(serial);
                     ThrowIfShutdownRequested();
-                    _scrcpyService.Start(
+                    _scrcpyService.StartDesktop(
                         runSettings.Scrcpy,
-                        lease.DisplayId,
-                        serial);
+                        runSettings.VirtualDisplay,
+                        serial,
+                        id => _virtualDisplayService.ConfigureDesktop(lease, id));
                     scrcpyStarted = true;
                 });
 
@@ -397,33 +403,8 @@ namespace DexManager.Services
         {
             var stale = _currentSession;
             if (stale == null) return;
-            if (string.Equals(
-                stale.Serial,
-                nextSerial,
-                StringComparison.OrdinalIgnoreCase))
-            {
-                // A reconnect must be evaluated by EnsureVirtualDisplay.
-                // Releasing the stale lease here would always delete a
-                // perfectly reusable overlay before the comparison.
-                ClearSession(stale);
-                return;
-            }
-            if (ReleaseDisplayLease(stale.DisplayLease))
-            {
-                ClearSession(stale);
-                return;
-            }
-
-            DeferDisplayCleanup(stale);
-            if (string.Equals(
-                stale.Serial,
-                nextSerial,
-                StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException(
-                    LocalizationService.Get(
-                        "Error.Dex.DisplayResetFailed"));
-            }
+            if (!ReleaseDisplayLease(stale.DisplayLease)) DeferDisplayCleanup(stale);
+            ClearSession(stale);
         }
 
         private void CleanupFailedStart(
@@ -475,21 +456,18 @@ namespace DexManager.Services
         private bool RetryDeferredCleanupCore(string serial)
         {
             if (string.IsNullOrWhiteSpace(serial)) return true;
-            if (!_pendingDisplayCleanup.ContainsKey(serial))
-                return true;
-            // The device is available again. Do not delete the old overlay
-            // merely because the previous connection ended unexpectedly;
-            // the next start will compare its actual resolution and DPI.
+            if (_scrcpyService.IsRunning) return true;
+            CleanupNaturallyEndedSession();
+            // Recover by physical identity even after an app restart or a USB/Wi-Fi switch.
+            if (!_virtualDisplayService.RecoverDesktop(serial)) return false;
             _pendingDisplayCleanup.Remove(serial);
-            _logService.Info(LocalizationService.Format(
-                "Log.Dex.DeferredCleanupSuperseded",
-                serial));
             return true;
         }
 
         private bool ReleaseDisplayLease(VirtualDisplayLease lease)
         {
             if (lease == null) return true;
+            if (lease.IsScrcpyOwned) return _virtualDisplayService.Release(lease);
             if (string.IsNullOrWhiteSpace(lease.Serial) ||
                 !_adbService.IsAuthorizedDeviceConnected(lease.Serial))
             {
@@ -506,7 +484,7 @@ namespace DexManager.Services
                 return;
             }
 
-            _virtualDisplayService.Reset(serial);
+            _virtualDisplayService.RecoverDesktop(serial);
         }
 
         private void DeferDisplayCleanup(ManagedDisplaySession session)
@@ -557,9 +535,9 @@ namespace DexManager.Services
                 runSettings.LastSuccess.ScrcpyPath =
                     _scrcpyService.ScrcpyPath;
                 runSettings.LastSuccess.ScrcpyArguments =
-                    _scrcpyService.BuildArguments(
+                    _scrcpyService.BuildDesktopArguments(
                         runSettings.Scrcpy,
-                        displayId,
+                        runSettings.VirtualDisplay,
                         serial);
                 runSettings.LastSuccess.DisplayId = displayId;
                 runSettings.LastSuccess.SavedAtUtc =

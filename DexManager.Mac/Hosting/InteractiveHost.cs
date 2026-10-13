@@ -325,7 +325,7 @@ public sealed class InteractiveHost : IDisposable
             Console.WriteLine($"  {AnsiConsole.BrightCyan}[5]{AnsiConsole.Reset} Wireless ADB Management       {AnsiConsole.BrightCyan}[6]{AnsiConsole.Reset} File Transfer Coordinator");
             Console.WriteLine($"  {AnsiConsole.BrightCyan}[7]{AnsiConsole.Reset} Diagnostics & Environment     {AnsiConsole.BrightCyan}[8]{AnsiConsole.Reset} DX Companion Guardian");
             Console.WriteLine($"  {AnsiConsole.BrightMagenta}[9]{AnsiConsole.Reset} Settings & Configuration      {AnsiConsole.BrightYellow}[S]{AnsiConsole.Reset} Select Active Device");
-            Console.WriteLine($"  {AnsiConsole.BrightBlack}[L]{AnsiConsole.Reset} View Recent Logs              {AnsiConsole.BrightRed}[Q]{AnsiConsole.Reset} Exit DX Manager");
+            Console.WriteLine($"  {AnsiConsole.BrightBlack}[L]{AnsiConsole.Reset} View Recent Logs              {AnsiConsole.BrightRed}[Q]{AnsiConsole.Reset} Exit LocalDex");
         }
 
         private PhysicalDeviceInfo GetSelectedDevice()
@@ -972,7 +972,7 @@ public sealed class InteractiveHost : IDisposable
                 string.Empty;
             var errors = new List<Exception>();
 
-            AnsiConsole.Info("Shutting down DX Manager and cleaning up active sessions...");
+            AnsiConsole.Info("Shutting down LocalDex and cleaning up active sessions...");
             try
             {
                 _deviceMonitor?.Stop();
@@ -1052,11 +1052,11 @@ public sealed class InteractiveHost : IDisposable
 
             if (errors.Count == 0)
             {
-                AnsiConsole.Success("DX Manager stopped cleanly. Goodbye!");
+                AnsiConsole.Success("LocalDex stopped cleanly. Goodbye!");
             }
             else
             {
-                AnsiConsole.Warning("DX Manager stopped, but one or more cleanup steps could not be confirmed.");
+                AnsiConsole.Warning("LocalDex stopped, but one or more cleanup steps could not be confirmed.");
             }
         }
 

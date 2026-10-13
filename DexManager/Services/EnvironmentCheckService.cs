@@ -55,7 +55,7 @@ namespace DexManager.Services
                     AppDomain.CurrentDomain.BaseDirectory,
                     "tools",
                     "adb-proxy",
-                    "DXMAdbProxy.exe"));
+                    "LocalDexAdbProxy.exe"));
             AddAdbVersionCheck(results);
 
             results.Add(new EnvironmentCheckItem

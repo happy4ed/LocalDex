@@ -32,3 +32,11 @@ dist/
 **/config/settings.json
 **/config/settings.json.*
 **/*.dSYM/
+
+
+# LocalDex write-ahead phone-setting recovery records
+**/config/freeform-recovery/
+
+# Downloaded and checksum-verified by scripts/Update-Scrcpy.ps1
+DexManager/tools/scrcpy/*
+!DexManager/tools/scrcpy/README.md

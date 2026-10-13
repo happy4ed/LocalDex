@@ -10,14 +10,14 @@ $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $solutionPath = Join-Path $repoRoot "DexManager.sln"
 $releaseRoot = Join-Path $repoRoot "DexManager\bin\Release"
 $distRoot = Join-Path $repoRoot "dist"
-$packageRoot = Join-Path $distRoot "DX Manager"
+$packageRoot = Join-Path $distRoot "LocalDex"
 $companionApkSource = Join-Path $repoRoot `
     "DXDisplayCleanup\app\build\outputs\apk\release\app-release.apk"
 $companionApkSha256 = `
     "7CD40017789E22440DCA0291AB0C45ADB564A19D8A623E669F373395536B880F"
 
 function Assert-ChildPath([string]$Parent, [string]$Child) {
-    $parentPath = [IO.Path]::GetFullPath($Parent).TrimEnd('\') + '\'
+    $parentPath = [IO.Path]::GetFullPath($Parent).TrimEnd([char[]]@('\', '/')) + [IO.Path]::DirectorySeparatorChar
     $childPath = [IO.Path]::GetFullPath($Child)
     if (!$childPath.StartsWith(
         $parentPath,
@@ -30,7 +30,14 @@ function Find-MSBuild {
     $fromPath = Get-Command msbuild.exe -ErrorAction SilentlyContinue
     if ($fromPath) { return $fromPath.Source }
 
+    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    if (Test-Path $vswhere) {
+        $found = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
+        if ($found) { return $found }
+    }
     $candidates = @(
+        "${env:ProgramFiles}\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe",
@@ -43,8 +50,8 @@ function Find-MSBuild {
     throw "MSBuild was not found. Build Release in Visual Studio, then run this script with -SkipBuild."
 }
 
-if (Get-Process DXManager -ErrorAction SilentlyContinue) {
-    throw "DX Manager is running. Exit it before creating a release package."
+if (Get-Process LocalDex -ErrorAction SilentlyContinue) {
+    throw "LocalDex is running. Exit it before creating a release package."
 }
 
 $releaseAdbPath = Join-Path $releaseRoot "tools\scrcpy\adb.exe"
@@ -80,22 +87,9 @@ if ($releaseAdbProcesses -and (Test-Path -LiteralPath $releaseAdbPath)) {
     }
 }
 
-foreach ($runtimeDirectory in @(
-    (Join-Path $repoRoot "DexManager\bin\Debug\logs"),
-    (Join-Path $repoRoot "DexManager\bin\Debug\screenshot"),
-    (Join-Path $repoRoot "DexManager\bin\Debug\screenshots"),
-    (Join-Path $repoRoot "DexManager\bin\Release\logs"),
-    (Join-Path $repoRoot "DexManager\bin\Release\screenshot"),
-    (Join-Path $repoRoot "DexManager\bin\Release\screenshots")
-)) {
-    Assert-ChildPath $repoRoot $runtimeDirectory
-    if (Test-Path -LiteralPath $runtimeDirectory) {
-        Get-ChildItem -LiteralPath $runtimeDirectory -File -Recurse |
-            Remove-Item -Force
-    }
-}
-
 if (!$SkipBuild) {
+    & (Join-Path $PSScriptRoot "Update-Scrcpy.ps1")
+    & (Join-Path $PSScriptRoot "Prepare-Companion.ps1")
     $msbuild = Find-MSBuild
     $arguments = @(
         $solutionPath,
@@ -126,9 +120,19 @@ if (!$SkipBuild) {
     }
 }
 
+# The ADB helper is a separate .NET 8 process, published with its own runtime.
+# No additional .NET 8 installation is required on the target Windows PC.
+if (!$SkipBuild) {
+    & dotnet publish (Join-Path $repoRoot "DexManager.AdbProxy/DexManager.AdbProxy.csproj") `
+        -c Release -r win-x64 --self-contained true `
+        -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+        -o (Join-Path $releaseRoot "tools/adb-proxy")
+    if ($LASTEXITCODE -ne 0) { throw "LocalDex ADB helper publish failed." }
+}
+
 $requiredOutput = @(
-    "DXManager.exe",
-    "DXManager.exe.config",
+    "LocalDex.exe",
+    "LocalDex.exe.config",
     "ko",
     "licenses",
     "tools"
@@ -140,8 +144,8 @@ foreach ($item in $requiredOutput) {
     }
 }
 $requiredFiles = @(
-    "ko\DXManager.resources.dll",
-    "tools\adb-proxy\DXMAdbProxy.exe",
+    "ko\LocalDex.resources.dll",
+    "tools\adb-proxy\LocalDexAdbProxy.exe",
     "tools\adb\legacy\adb.exe",
     "tools\adb\legacy\AdbWinApi.dll",
     "tools\adb\legacy\AdbWinUsbApi.dll",
@@ -152,14 +156,16 @@ $requiredFiles = @(
     "tools\scrcpy\AdbWinApi.dll",
     "tools\scrcpy\AdbWinUsbApi.dll",
     "tools\scrcpy\SDL3.dll",
-    "tools\scrcpy\avcodec-62.dll",
-    "tools\scrcpy\avformat-62.dll",
-    "tools\scrcpy\avutil-60.dll",
-    "tools\scrcpy\swresample-6.dll",
+    "tools\scrcpy\avcodec-63.dll",
+    "tools\scrcpy\avformat-63.dll",
+    "tools\scrcpy\avutil-61.dll",
+    "tools\scrcpy\swresample-7.dll",
     "tools\scrcpy\libusb-1.0.dll",
     "licenses\DX-Manager-MIT-LICENSE.txt",
     "licenses\THIRD_PARTY_NOTICES.md",
     "licenses\scrcpy-LICENSE.txt",
+    "licenses\dotnet-LICENSE.txt",
+    "licenses\dotnet-THIRD-PARTY-NOTICES.txt",
     "licenses\LGPL-2.1-LICENSE.txt",
     "licenses\MinGW-w64-winpthreads-LICENSE.txt",
     "licenses\SDL3-LICENSE.txt",
@@ -201,7 +207,7 @@ if ($Version -notmatch '^[0-9A-Za-z][0-9A-Za-z._-]*$') {
     throw "The version contains unsupported filename characters: $Version"
 }
 
-$zipPath = Join-Path $distRoot "DX-Manager-v$Version-win-x64.zip"
+$zipPath = Join-Path $distRoot "LocalDex-v$Version-win-x64.zip"
 Assert-ChildPath $distRoot $packageRoot
 Assert-ChildPath $distRoot $zipPath
 
@@ -243,7 +249,9 @@ foreach ($document in @(
     "USER_GUIDE_EN.md",
     "USER_GUIDE_KO.md",
     "FAQ_EN.md",
-    "FAQ_KO.md"
+    "FAQ_KO.md",
+    "LOCALDEX_ONEUI.md",
+    "LOCALDEX_BUILD.md"
 )) {
     Copy-Item -LiteralPath (Join-Path $repoRoot "docs\$document") -Destination $packageDocs
 }

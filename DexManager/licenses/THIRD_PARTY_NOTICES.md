@@ -1,13 +1,13 @@
-# DX Manager v2.0.1 - Third-Party Notices
+# LocalDex v2.1.0-localdex.1 - Third-Party Notices
 
-DX Manager is an independently developed utility. The third-party binaries
+LocalDex is an independently developed utility. The third-party binaries
 listed below are distributed without modification and remain under their
-respective licenses. DX Manager's MIT License does not replace or alter those
+respective licenses. LocalDex's MIT License does not replace or alter those
 licenses.
 
 ## scrcpy
 
-DX Manager includes and uses scrcpy 4.1 to display and control Android
+LocalDex includes and uses scrcpy 5.0.1 to display and control Android
 devices.
 
 Copyright (C) 2018 Genymobile  
@@ -18,11 +18,11 @@ license text is provided in `scrcpy-LICENSE.txt` in this directory.
 
 Official project: https://github.com/Genymobile/scrcpy
 
-Bundled version: 4.1
+Bundled version: 5.0.1
 
 ## Android Debug Bridge (ADB)
 
-DX Manager includes Android Debug Bridge binaries from the Android Open
+LocalDex includes Android Debug Bridge binaries from the Android Open
 Source Project. The scrcpy runtime contains platform-tools
 37.0.0-14910828, and the Windows 7/8.1 fallback contains platform-tools
 34.0.1-9979309.
@@ -34,21 +34,20 @@ Official source: https://android.googlesource.com/platform/packages/modules/adb/
 
 ## SDL
 
-The Windows scrcpy client includes SDL 3.4.12, distributed under the zlib
+The Windows scrcpy client includes SDL3, distributed under the zlib
 license.
 
 Copyright (C) 1997-2026 Sam Lantinga
 
 Official project and license:
-https://github.com/libsdl-org/SDL/blob/release-3.4.12/LICENSE.txt
+https://github.com/libsdl-org/SDL/blob/main/LICENSE.txt
 
 The complete notice is provided in `SDL3-LICENSE.txt` in this directory.
 
 ## FFmpeg libraries
 
 The Windows scrcpy client dynamically loads FFmpeg libraries including
-libavcodec 62.28.102, libavformat 62.12.102, libavutil 60.26.102, and
-libswresample. The bundled build reports `LGPL version 2.1 or later` and does
+libavcodec 63, libavformat 63, libavutil 61, and libswresample 7, from the official scrcpy 5.0.1 Windows distribution. The bundled build reports `LGPL version 2.1 or later` and does
 not report GPL components.
 
 Official project: https://ffmpeg.org/
@@ -80,8 +79,8 @@ Official project and source: https://www.mingw-w64.org/source/
 
 ## Samsung DeX trademark notice
 
-DX Manager works with features provided by Samsung DeX on compatible
-Samsung devices. DX Manager is not affiliated with, sponsored by, endorsed
+LocalDex works with features provided by Samsung DeX on compatible
+Samsung devices. LocalDex is not affiliated with, sponsored by, endorsed
 by, or distributed by Samsung Electronics.
 
 Samsung and Samsung DeX are trademarks of Samsung Electronics Co., Ltd.
@@ -89,8 +88,14 @@ All trademarks are the property of their respective owners.
 
 ## Source availability
 
-DX Manager does not modify scrcpy, ADB, SDL, FFmpeg, libusb, or MinGW-w64.
+LocalDex does not modify scrcpy, ADB, SDL, FFmpeg, libusb, or MinGW-w64.
 Corresponding source code and build information are available from the
 official project links above. Recipients may replace the dynamically loaded
 compatible libraries in the portable distribution, subject to the relevant
 license terms.
+
+## .NET runtime and original application
+
+The LocalDex ADB helper includes Microsoft .NET 8.0.28 under the MIT license. See `dotnet-LICENSE.txt` and `dotnet-THIRD-PARTY-NOTICES.txt`. Source: https://github.com/dotnet/runtime/tree/v8.0.28
+
+LocalDex is a fork of DX Manager, Copyright © 2026 maze, MIT. Its original copyright and license are preserved in `DX-Manager-MIT-LICENSE.txt` and the root `LICENSE`. The signed DX Companion APK is unchanged. The One UI command sequence was independently implemented with reference to https://github.com/sam1am/localdex; no source from that project is bundled.

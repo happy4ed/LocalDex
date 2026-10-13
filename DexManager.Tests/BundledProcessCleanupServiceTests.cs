@@ -80,8 +80,8 @@ namespace DexManager.Tests
 
             if (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
             {
-                File.WriteAllText(ownedScript, "#!/bin/sh\nsleep 60\n");
-                File.WriteAllText(unrelatedScript, "#!/bin/sh\nsleep 60\n");
+                File.Copy("/bin/sleep", ownedScript);
+                File.Copy("/bin/sleep", unrelatedScript);
                 File.SetUnixFileMode(ownedScript, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
                 File.SetUnixFileMode(unrelatedScript, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
             }
@@ -94,6 +94,7 @@ namespace DexManager.Tests
                 ownedProcess = Process.Start(new ProcessStartInfo
                 {
                     FileName = ownedScript,
+                    Arguments = "30",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });
@@ -101,6 +102,7 @@ namespace DexManager.Tests
                 unrelatedProcess = Process.Start(new ProcessStartInfo
                 {
                     FileName = unrelatedScript,
+                    Arguments = "30",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });

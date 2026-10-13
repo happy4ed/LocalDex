@@ -5,13 +5,13 @@ set -euo pipefail
 script_directory="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repository_root="$(cd "$script_directory/.." && pwd)"
 
-version="2.0.1"
+version="2.1.0-localdex.1"
 rid=""
 output_directory="$repository_root/dist"
 scrcpy_archive=""
 skip_tests=0
 
-scrcpy_version="4.1"
+scrcpy_version="5.0.1"
 dotnet_runtime_version="8.0.30"
 dotnet_license_url="https://raw.githubusercontent.com/dotnet/runtime/v8.0.30/LICENSE.TXT"
 dotnet_license_sha256="cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310"
@@ -20,13 +20,13 @@ dotnet_notices_sha256="97c1a7b3da6a4c6ad516448719f45114b41a4d4c5aa300a944476e2e4
 
 usage() {
     cat <<'EOF'
-Create one prebuilt, self-contained DX Manager portable ZIP for macOS.
+Create one prebuilt, self-contained LocalDex portable ZIP for macOS.
 
 Usage:
   scripts/Package-Mac-Release.sh --rid osx-arm64|osx-x64 [options]
 
 Options:
-  --version VERSION          Package version (default: 2.0.1)
+  --version VERSION          Package version (default: 2.1.0-localdex.1)
   --output-dir DIRECTORY    Generated ZIP directory (default: ./dist)
   --scrcpy-archive FILE     Use an already downloaded official scrcpy archive
   --skip-tests              Skip the test suites (intended only after CI tests)
@@ -34,7 +34,7 @@ Options:
 
 Examples:
   scripts/Package-Mac-Release.sh --rid osx-arm64
-  scripts/Package-Mac-Release.sh --rid osx-x64 --version 2.0.1
+  scripts/Package-Mac-Release.sh --rid osx-x64 --version 2.1.0-localdex.1
 EOF
 }
 
@@ -138,13 +138,13 @@ case "$rid" in
         package_arch="arm64"
         binary_arch="arm64"
         scrcpy_asset_arch="aarch64"
-        scrcpy_sha256="20fd47c9014dd5e0fa77091f3cb7adbda8445a360c4584aeaa0150b5b3988ff3"
+        scrcpy_sha256="33611e51977a8289e2e124b220f727895181ef2eb9060e0987a4dc2db9cf0d6b"
         ;;
     osx-x64)
         package_arch="x64"
         binary_arch="x86_64"
         scrcpy_asset_arch="x86_64"
-        scrcpy_sha256="ee2a7223bc8dbdc4f482db1134bcf441178dafb833492b71ca4c22090c58ce72"
+        scrcpy_sha256="31a5467a9e907f162b093267cbbab1276b15c6e709c2ea8159566a8d165beb50"
         ;;
     *)
         fail "unsupported RID '$rid'; use osx-arm64 or osx-x64"
@@ -239,8 +239,8 @@ dotnet publish "$repository_root/DexManager.AdbProxy/DexManager.AdbProxy.csproj"
     -p:DebugSymbols=false \
     -p:DebugType=None
 
-[[ -f "$main_publish/DXManager.Mac" ]] || fail "DXManager.Mac publish output is missing"
-[[ -f "$proxy_publish/DXMAdbProxy" ]] || fail "DXMAdbProxy publish output is missing"
+[[ -f "$main_publish/LocalDex.Mac" ]] || fail "LocalDex.Mac publish output is missing"
+[[ -f "$proxy_publish/LocalDexAdbProxy" ]] || fail "LocalDexAdbProxy publish output is missing"
 
 scrcpy_archive_name="scrcpy-macos-$scrcpy_asset_arch-v$scrcpy_version.tar.gz"
 scrcpy_download="$work_root/$scrcpy_archive_name"
@@ -264,15 +264,15 @@ for required in scrcpy scrcpy-server adb LICENSE; do
 done
 
 package_parent="$work_root/package"
-package_root="$package_parent/DX Manager"
+package_root="$package_parent/LocalDex"
 mkdir -p "$package_root/tools/scrcpy" "$package_root/tools/adb-proxy" \
     "$package_root/config" "$package_root/licenses" "$package_root/docs"
 
-cp "$main_publish/DXManager.Mac" "$package_root/DXManager.Mac"
-cp "$proxy_publish/DXMAdbProxy" "$package_root/tools/adb-proxy/DXMAdbProxy"
+cp "$main_publish/LocalDex.Mac" "$package_root/LocalDex.Mac"
+cp "$proxy_publish/LocalDexAdbProxy" "$package_root/tools/adb-proxy/LocalDexAdbProxy"
 cp -R "$scrcpy_root/." "$package_root/tools/scrcpy/"
-cp "$repository_root/build/macos/Start DX Manager.command" \
-    "$package_root/Start DX Manager.command"
+cp "$repository_root/build/macos/Start LocalDex.command" \
+    "$package_root/Start LocalDex.command"
 cp "$repository_root/build/macos/PORTABLE_PACKAGE.txt" \
     "$package_root/PORTABLE_PACKAGE.txt"
 sed "s/<version>/$version/g" \
@@ -300,19 +300,19 @@ cp "$dotnet_notices" "$package_root/licenses/dotnet-THIRD-PARTY-NOTICES.txt"
 
 find "$package_root" -type d -exec chmod 755 {} +
 find "$package_root" -type f -exec chmod 644 {} +
-chmod 755 "$package_root/DXManager.Mac" \
-    "$package_root/Start DX Manager.command" \
-    "$package_root/tools/adb-proxy/DXMAdbProxy" \
+chmod 755 "$package_root/LocalDex.Mac" \
+    "$package_root/Start LocalDex.command" \
+    "$package_root/tools/adb-proxy/LocalDexAdbProxy" \
     "$package_root/tools/scrcpy/scrcpy" \
     "$package_root/tools/scrcpy/adb"
 
 for required in \
-    "DXManager.Mac" \
-    "Start DX Manager.command" \
+    "LocalDex.Mac" \
+    "Start LocalDex.command" \
     "PORTABLE_PACKAGE.txt" \
     "README.md" \
     "LICENSE" \
-    "tools/adb-proxy/DXMAdbProxy" \
+    "tools/adb-proxy/LocalDexAdbProxy" \
     "tools/scrcpy/scrcpy" \
     "tools/scrcpy/scrcpy-server" \
     "tools/scrcpy/adb" \
@@ -337,19 +337,19 @@ unexpected="$(find "$package_root" \
 symlink="$(find "$package_root" -type l -print -quit)"
 [[ -z "$symlink" ]] || fail "symbolic links are not allowed in the portable package: $symlink"
 
-assert_architecture "$package_root/DXManager.Mac" "$binary_arch" "DX Manager"
-assert_architecture "$package_root/tools/adb-proxy/DXMAdbProxy" "$binary_arch" "ADB proxy"
+assert_architecture "$package_root/LocalDex.Mac" "$binary_arch" "LocalDex"
+assert_architecture "$package_root/tools/adb-proxy/LocalDexAdbProxy" "$binary_arch" "ADB proxy"
 assert_architecture "$package_root/tools/scrcpy/scrcpy" "$binary_arch" "scrcpy"
 assert_architecture "$package_root/tools/scrcpy/adb" "$binary_arch" "ADB"
 
-assert_portable_dependencies "$package_root/DXManager.Mac"
-assert_portable_dependencies "$package_root/tools/adb-proxy/DXMAdbProxy"
+assert_portable_dependencies "$package_root/LocalDex.Mac"
+assert_portable_dependencies "$package_root/tools/adb-proxy/LocalDexAdbProxy"
 assert_portable_dependencies "$package_root/tools/scrcpy/scrcpy"
 assert_portable_dependencies "$package_root/tools/scrcpy/adb"
 
 for signed_binary in \
-    "$package_root/DXManager.Mac" \
-    "$package_root/tools/adb-proxy/DXMAdbProxy"; do
+    "$package_root/LocalDex.Mac" \
+    "$package_root/tools/adb-proxy/LocalDexAdbProxy"; do
     codesign --force --sign - --timestamp=none "$signed_binary"
     codesign --verify --strict "$signed_binary"
 done
@@ -373,12 +373,12 @@ if [[ "$host_arch" == "$binary_arch" ]]; then
     clean_path="/usr/bin:/bin:/usr/sbin:/sbin"
 
     version_output="$(HOME="$smoke_home" PATH="$clean_path" \
-        "$package_root/DXManager.Mac" --version)"
+        "$package_root/LocalDex.Mac" --version)"
     [[ "$version_output" == *"$version"* ]] ||
-        fail "DX Manager version output does not contain $version: $version_output"
-    HOME="$smoke_home" PATH="$clean_path" "$package_root/DXManager.Mac" --help >/dev/null
+        fail "LocalDex version output does not contain $version: $version_output"
+    HOME="$smoke_home" PATH="$clean_path" "$package_root/LocalDex.Mac" --help >/dev/null
     proxy_output="$(HOME="$smoke_home" PATH="$clean_path" \
-        "$package_root/tools/adb-proxy/DXMAdbProxy" --self-test)"
+        "$package_root/tools/adb-proxy/LocalDexAdbProxy" --self-test)"
     [[ "$proxy_output" == *"$version"* ]] ||
         fail "ADB proxy self-test output does not contain $version: $proxy_output"
     scrcpy_output="$(HOME="$smoke_home" PATH="$clean_path" \
@@ -392,14 +392,14 @@ else
     echo "The matching GitHub Actions runner performs these tests before artifact upload."
 fi
 
-zip_path="$output_directory/DX-Manager-v$version-macos-$package_arch.zip"
+zip_path="$output_directory/LocalDex-v$version-macos-$package_arch.zip"
 checksum_path="$zip_path.sha256"
 staged_zip="$output_staging/$(basename "$zip_path")"
 staged_checksum="$output_staging/$(basename "$checksum_path")"
 find "$package_root" -exec touch -h -t "$normalized_timestamp" {} +
 (
     cd "$package_parent"
-    find "DX Manager" -print | LC_ALL=C sort | \
+    find "LocalDex" -print | LC_ALL=C sort | \
         zip -X -q "$staged_zip" -@
 )
 
@@ -412,10 +412,10 @@ extract_root="$work_root/reextract"
 mkdir -p "$extract_root"
 ditto -x -k --norsrc --noextattr --noqtn --noacl \
     "$staged_zip" "$extract_root"
-reextracted="$extract_root/DX Manager"
-[[ -x "$reextracted/DXManager.Mac" ]] || fail "ZIP did not preserve the DX Manager executable bit"
-[[ -x "$reextracted/Start DX Manager.command" ]] || fail "ZIP did not preserve the launcher executable bit"
-[[ -x "$reextracted/tools/adb-proxy/DXMAdbProxy" ]] || fail "ZIP did not preserve the proxy executable bit"
+reextracted="$extract_root/LocalDex"
+[[ -x "$reextracted/LocalDex.Mac" ]] || fail "ZIP did not preserve the LocalDex executable bit"
+[[ -x "$reextracted/Start LocalDex.command" ]] || fail "ZIP did not preserve the launcher executable bit"
+[[ -x "$reextracted/tools/adb-proxy/LocalDexAdbProxy" ]] || fail "ZIP did not preserve the proxy executable bit"
 [[ -x "$reextracted/tools/scrcpy/scrcpy" ]] || fail "ZIP did not preserve the scrcpy executable bit"
 [[ -x "$reextracted/tools/scrcpy/adb" ]] || fail "ZIP did not preserve the ADB executable bit"
 
@@ -426,15 +426,15 @@ if [[ "$host_arch" == "$binary_arch" ]]; then
     launcher_version="$(HOME="$extracted_smoke_home" \
         TMPDIR="$extracted_smoke_tmp" \
         PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
-        "$reextracted/Start DX Manager.command" --version 2>&1)"
+        "$reextracted/Start LocalDex.command" --version 2>&1)"
     [[ "$launcher_version" == *"$version"* ]] ||
         fail "re-extracted launcher version check failed: $launcher_version"
     tui_output="$({ sleep 2; printf 'Q\n'; } | \
         HOME="$extracted_smoke_home" \
         TMPDIR="$extracted_smoke_tmp" \
         PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
-        "$reextracted/Start DX Manager.command" 2>&1)"
-    [[ "$tui_output" == *"DX Manager stopped cleanly"* ]] ||
+        "$reextracted/Start LocalDex.command" 2>&1)"
+    [[ "$tui_output" == *"LocalDex stopped cleanly"* ]] ||
         fail "re-extracted TUI did not complete Q cleanup: $tui_output"
 fi
 

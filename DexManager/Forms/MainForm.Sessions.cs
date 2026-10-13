@@ -135,7 +135,7 @@ namespace DexManager.Forms
                         LocalizationService.Get(
                             "Error.Dex.NoAuthorizedDevice"));
                 }
-                if (!await WaitForDeviceStartDelayAsync(serial)) return;
+                if (!await WaitForDeviceStartDelayAsync(serial, false)) return;
                 var scrcpySettings =
                     GetSelectedDeviceRunSettings().Scrcpy;
                 if (scrcpySettings.TurnScreenOff)

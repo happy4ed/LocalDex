@@ -820,7 +820,7 @@ namespace DexManager.Services
                 : settings.StartAppName.Trim();
             if (string.IsNullOrWhiteSpace(appName))
                 appName = "Single Window " + slot;
-            return "DX Manager - " + appName;
+            return "LocalDex - " + appName;
         }
 
         private void EnsureProcessStopped(Process process)

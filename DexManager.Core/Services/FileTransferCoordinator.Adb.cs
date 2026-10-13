@@ -132,7 +132,7 @@ namespace DexManager.Services
             }))
             {
                 IsBackground = true,
-                Name = "DX Manager ADB output reader"
+                Name = "LocalDex ADB output reader"
             };
             thread.Start();
             return thread;
@@ -234,7 +234,7 @@ namespace DexManager.Services
             })
             {
                 IsBackground = true,
-                Name = "DX Manager ADB input writer"
+                Name = "LocalDex ADB input writer"
             };
             thread.Start();
             return thread;

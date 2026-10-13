@@ -19,7 +19,7 @@ internal static class Program
                     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                     .InformationalVersion ?? "unknown";
                 Console.WriteLine(
-                    $"DX Manager ADB proxy {version} self-test passed.");
+                    $"LocalDex ADB proxy {version} self-test passed.");
                 return 0;
             }
 
@@ -28,14 +28,14 @@ internal static class Program
             if (string.IsNullOrWhiteSpace(realAdbPath) ||
                 !File.Exists(realAdbPath))
             {
-                return Fail("DX Manager: the real ADB executable is unavailable.");
+                return Fail("LocalDex: the real ADB executable is unavailable.");
             }
 
             var currentProcessPath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
             if (!string.IsNullOrWhiteSpace(currentProcessPath) &&
                 PathsReferToSameFile(realAdbPath, currentProcessPath))
             {
-                return Fail("DX Manager: recursive ADB proxy configuration was rejected.");
+                return Fail("LocalDex: recursive ADB proxy configuration was rejected.");
             }
 
             if (IsManagedTransferEnabled() &&
@@ -48,7 +48,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            return Fail("DX Manager ADB proxy failed: " + ex.Message);
+            return Fail("LocalDex ADB proxy failed: " + ex.Message);
         }
     }
 
@@ -159,7 +159,7 @@ internal static class Program
             string.IsNullOrWhiteSpace(token) ||
             string.IsNullOrWhiteSpace(sessionId))
         {
-            return Fail("DX Manager file transfer is not available for this session.");
+            return Fail("LocalDex file transfer is not available for this session.");
         }
 
         try
@@ -185,12 +185,12 @@ internal static class Program
             if (response == null ||
                 response.Version != FileTransferEnvironment.ProtocolVersion)
             {
-                return Fail("DX Manager file transfer protocol mismatch.");
+                return Fail("LocalDex file transfer protocol mismatch.");
             }
             if (!response.Success)
             {
                 return Fail(string.IsNullOrWhiteSpace(response.Message)
-                    ? "DX Manager file transfer failed."
+                    ? "LocalDex file transfer failed."
                     : response.Message,
                     response.ExitCode == 0 ? 1 : response.ExitCode);
             }
@@ -198,11 +198,11 @@ internal static class Program
         }
         catch (TimeoutException)
         {
-            return Fail("DX Manager file transfer service did not respond.");
+            return Fail("LocalDex file transfer service did not respond.");
         }
         catch (IOException ex)
         {
-            return Fail("DX Manager file transfer connection failed: " + ex.Message);
+            return Fail("LocalDex file transfer connection failed: " + ex.Message);
         }
     }
 
@@ -282,7 +282,7 @@ internal static class Program
         })
         {
             IsBackground = true,
-            Name = "DX Manager ADB stream relay"
+            Name = "LocalDex ADB stream relay"
         };
         thread.Start();
         return thread;
