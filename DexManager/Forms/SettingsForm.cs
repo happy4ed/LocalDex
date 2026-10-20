@@ -126,6 +126,12 @@ namespace DexManager.Forms
         private ThemedSelectControl _handoffEdgeBox;
         private ThemedHotkeyControl _handoffHotkeyBox;
         private ThemedNumberControl _handoffSpeedBox;
+        private ThemedHotkeyControl _handoffEnterHotkeyBox;
+        private ThemedHotkeyControl _handoffNextHotkeyBox;
+        private ThemedHotkeyControl _handoffDeviceHotkeyBox;
+        private string _handoffHotkeyIdentity = string.Empty;
+        private readonly Dictionary<string, string> _pendingDeviceHotkeys =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private string _loadedWirelessDeviceIdentity = string.Empty;
         private int _activePageIndex;
         private Label _deviceDiagnosticsStatusLabel;

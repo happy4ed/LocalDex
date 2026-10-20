@@ -29,8 +29,18 @@ namespace DexManager.Services
         private readonly AppSettings _settings;
         private readonly Func<string> _scrcpyPath;
         private readonly Func<string> _adbPath;
-        private readonly Func<string> _targetSerial;
-        private readonly Func<bool> _targetBusy;
+        // USB serial of a phone identity (empty when not connected by USB).
+        private readonly Func<string, string> _usbSerialFor;
+        // Connected phone identities in presentation order.
+        private readonly Func<System.Collections.Generic.IList<string>> _orderedIdentities;
+        private readonly System.Collections.Generic.List<HotkeyBinding> _bindings =
+            new System.Collections.Generic.List<HotkeyBinding>();
+        private readonly System.Collections.Generic.HashSet<Keys> _swallowedKeys =
+            new System.Collections.Generic.HashSet<Keys>();
+        // Phone picked by a device / next-phone shortcut, for this run only.
+        private string _overrideIdentity = string.Empty;
+        private string _targetIdentity = string.Empty;
+        private long _enterPendingUntilMs = -1;
         private readonly InputHandoffController _controller;
         private readonly SynchronizationContext _ui;
         private readonly System.Windows.Forms.Timer _timer;
@@ -48,8 +58,6 @@ namespace DexManager.Services
         private int _outsideTicks;
         private int _enterPosted;
         private int _returnPosted;
-        private HotkeyService.KeyShortcut _returnShortcut;
-        private bool _returnKeyHeld;
         private bool _disposed;
 
         public InputHandoffService(
@@ -57,15 +65,15 @@ namespace DexManager.Services
             AppSettings settings,
             Func<string> scrcpyPath,
             Func<string> adbPath,
-            Func<string> targetSerial,
-            Func<bool> targetBusy)
+            Func<string, string> usbSerialFor,
+            Func<System.Collections.Generic.IList<string>> orderedIdentities)
         {
             _logService = logService;
             _settings = settings;
             _scrcpyPath = scrcpyPath;
             _adbPath = adbPath;
-            _targetSerial = targetSerial;
-            _targetBusy = targetBusy;
+            _usbSerialFor = usbSerialFor;
+            _orderedIdentities = orderedIdentities;
             _ui = SynchronizationContext.Current ??
                 new WindowsFormsSynchronizationContext();
             _controller = new InputHandoffController(this);
@@ -91,11 +99,7 @@ namespace DexManager.Services
             if (_disposed) return;
             var config = _settings.InputHandoff ??
                 InputHandoffSettings.CreateDefault();
-            _returnShortcut = HotkeyService.KeyShortcut.Parse(
-                config.ReturnHotkey,
-                HotkeyService.KeyShortcut.Parse(
-                    InputHandoffSettings.DefaultReturnHotkey,
-                    null));
+            BuildBindings(config);
             _controller.SetPhoneSpeed(config.PhonePointerSpeedPercent / 100.0);
             _controller.Configure(config.Enabled, config.Edge, GetBounds());
             if (config.Enabled) InstallHooks();
@@ -108,20 +112,151 @@ namespace DexManager.Services
         {
             if (_disposed) return;
             _controller.UpdateBounds(GetBounds());
-            string serial;
-            bool busy;
+            var serial = string.Empty;
             try
             {
-                serial = _targetSerial();
-                busy = _targetBusy();
+                if (_overrideIdentity.Length > 0 &&
+                    !IsUsbConnected(_overrideIdentity))
+                {
+                    // The picked phone left: back to the saved default.
+                    _overrideIdentity = string.Empty;
+                    _logService.Info(LocalizationService.Get(
+                        "Log.Handoff.OverrideCleared"));
+                }
+                _targetIdentity = InputHandoffTargets.Resolve(
+                    _overrideIdentity,
+                    _settings.PreferredDeviceIdentity,
+                    IsUsbConnected);
+                serial = _targetIdentity.Length == 0
+                    ? string.Empty
+                    : _usbSerialFor(_targetIdentity) ?? string.Empty;
             }
             catch (Exception ex)
             {
                 _logService.Warning(ex.Message);
-                serial = string.Empty;
-                busy = false;
             }
-            _controller.UpdateTarget(serial, busy, _clock.ElapsedMilliseconds);
+            _controller.UpdateTarget(serial, _clock.ElapsedMilliseconds);
+            TryPendingEnter();
+        }
+
+        private bool IsUsbConnected(string identity)
+        {
+            return !string.IsNullOrWhiteSpace(identity) &&
+                !string.IsNullOrWhiteSpace(_usbSerialFor(identity));
+        }
+
+        private sealed class HotkeyBinding
+        {
+            public HotkeyService.KeyShortcut Shortcut;
+            public bool OnlyOnPhone;
+            public Action Action;
+        }
+
+        private void BuildBindings(InputHandoffSettings config)
+        {
+            _bindings.Clear();
+            AddBinding(config.ReturnHotkey, true, delegate
+            {
+                _controller.ReturnToPc("Log.Handoff.ReturnedByHotkey");
+            });
+            AddBinding(config.EnterHotkey, false, delegate
+            {
+                RequestEnter();
+            });
+            AddBinding(config.NextDeviceHotkey, false, delegate
+            {
+                var ordered = _orderedIdentities() ??
+                    new System.Collections.Generic.List<string>();
+                SwitchTarget(InputHandoffTargets.Next(
+                    ordered,
+                    IsUsbConnected,
+                    _targetIdentity));
+            });
+            if (config.DeviceHotkeys == null) return;
+            foreach (var item in config.DeviceHotkeys)
+            {
+                if (item == null) continue;
+                var identity = item.DeviceIdentity;
+                AddBinding(item.Hotkey, false, delegate
+                {
+                    SwitchTarget(identity);
+                });
+            }
+        }
+
+        private void AddBinding(string text, bool onlyOnPhone, Action action)
+        {
+            HotkeyService.KeyShortcut shortcut;
+            if (string.IsNullOrWhiteSpace(text) ||
+                !HotkeyService.KeyShortcut.TryParse(text, out shortcut))
+            {
+                return;
+            }
+            _bindings.Add(new HotkeyBinding
+            {
+                Shortcut = shortcut,
+                OnlyOnPhone = onlyOnPhone,
+                Action = action
+            });
+        }
+
+        // Device shortcut: target that phone for this run and go to it.
+        // The saved default phone in Settings is not changed.
+        private void SwitchTarget(string identity)
+        {
+            if (string.IsNullOrWhiteSpace(identity) ||
+                !IsUsbConnected(identity))
+            {
+                _logService.Info(LocalizationService.Get(
+                    "Log.Handoff.TargetMissing"));
+                return;
+            }
+            if (!string.Equals(
+                    identity,
+                    _targetIdentity,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                // Back on the PC first, then restart for the new phone.
+                _controller.ReturnToPc(null);
+                _overrideIdentity = string.Equals(
+                    identity,
+                    _settings.PreferredDeviceIdentity,
+                    StringComparison.OrdinalIgnoreCase)
+                    ? string.Empty
+                    : identity.Trim();
+                _logService.Info(LocalizationService.Get(
+                    "Log.Handoff.TargetSwitched"));
+            }
+            RequestEnter();
+            Refresh();
+        }
+
+        // "Go to phone": now if the session is ready, otherwise as soon as
+        // it is (within a few seconds).
+        private void RequestEnter()
+        {
+            if (_controller.State == InputHandoffState.OnPhone) return;
+            _enterPendingUntilMs = _clock.ElapsedMilliseconds + 8000;
+            TryPendingEnter();
+        }
+
+        private void TryPendingEnter()
+        {
+            if (_enterPendingUntilMs < 0) return;
+            if (_clock.ElapsedMilliseconds > _enterPendingUntilMs)
+            {
+                _enterPendingUntilMs = -1;
+                return;
+            }
+            if (_controller.State != InputHandoffState.Ready ||
+                _sessionWindow == IntPtr.Zero)
+            {
+                return;
+            }
+            _enterPendingUntilMs = -1;
+            Native.POINT cursor;
+            if (Native.GetCursorPos(out cursor))
+                _controller.EnterPhone(cursor.X, cursor.Y, false);
         }
 
         // Releases the pointer first, then stops the session.
@@ -369,35 +504,71 @@ namespace DexManager.Services
 
         private IntPtr KeyboardHookCallback(int code, IntPtr wParam, IntPtr lParam)
         {
-            if (code >= 0 && _returnShortcut != null &&
-                _controller.State == InputHandoffState.OnPhone)
+            if (code >= 0 && _bindings.Count > 0)
             {
                 var data = (Native.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(
                     lParam,
                     typeof(Native.KBDLLHOOKSTRUCT));
                 var message = wParam.ToInt32();
                 var key = (Keys)data.vkCode;
-                if ((data.flags & Native.LlkhfInjected) == 0 &&
-                    key == _returnShortcut.Key)
+                var down = message == Native.WmKeyDown ||
+                    message == Native.WmSysKeyDown;
+                if ((data.flags & Native.LlkhfInjected) == 0)
                 {
-                    var down = message == Native.WmKeyDown ||
-                        message == Native.WmSysKeyDown;
-                    if (down && _returnShortcut.Matches(
-                            key,
-                            HotkeyService.ModifierState.Read()))
-                    {
-                        _returnKeyHeld = true;
-                        PostReturn(false);
+                    if (!down && _swallowedKeys.Remove(key))
                         return new IntPtr(1);
-                    }
-                    if (!down && _returnKeyHeld)
+                    if (down)
                     {
-                        _returnKeyHeld = false;
-                        return new IntPtr(1);
+                        var onPhone =
+                            _controller.State == InputHandoffState.OnPhone;
+                        ModifierStateHolder state = null;
+                        foreach (var binding in _bindings)
+                        {
+                            if (binding.Shortcut.Key != key ||
+                                (binding.OnlyOnPhone && !onPhone))
+                            {
+                                continue;
+                            }
+                            if (state == null)
+                                state = new ModifierStateHolder(HotkeyService.ModifierState.Read());
+                            if (!binding.Shortcut.Matches(key, state.Value))
+                                continue;
+                            // Swallow it (never reaches the phone or the PC
+                            // app) and run the action after the hook returns.
+                            _swallowedKeys.Add(key);
+                            PostAction(binding.Action);
+                            return new IntPtr(1);
+                        }
                     }
                 }
             }
             return Native.CallNextHookEx(_keyboardHook, code, wParam, lParam);
+        }
+
+        private sealed class ModifierStateHolder
+        {
+            public ModifierStateHolder(HotkeyService.ModifierState value)
+            {
+                Value = value;
+            }
+
+            public HotkeyService.ModifierState Value { get; private set; }
+        }
+
+        private void PostAction(Action action)
+        {
+            _ui.Post(delegate
+            {
+                if (_disposed) return;
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    _logService.Warning(ex.Message);
+                }
+            }, null);
         }
 
         private void PostReturn(bool byEdge)

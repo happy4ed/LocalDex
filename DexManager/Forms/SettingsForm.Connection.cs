@@ -269,6 +269,40 @@ namespace DexManager.Forms
                 _loadingWirelessDevice = false;
             }
             LoadSelectedWirelessProfile();
+            SyncHandoffDeviceHotkey(false);
+        }
+
+        // The "this phone" handoff shortcut belongs to the phone selected as
+        // target phone above.  Edits are kept per phone until Save.
+        private void SyncHandoffDeviceHotkey(bool stashOnly)
+        {
+            if (_handoffDeviceHotkeyBox == null) return;
+            var option = GetSelectedWirelessDeviceOption();
+            var identity = option == null
+                ? string.Empty
+                : option.DeviceIdentity ?? string.Empty;
+            if (_handoffHotkeyIdentity.Length > 0)
+            {
+                _pendingDeviceHotkeys[_handoffHotkeyIdentity] =
+                    _handoffDeviceHotkeyBox.Text.Trim();
+            }
+            if (stashOnly || string.Equals(
+                    identity,
+                    _handoffHotkeyIdentity,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+            _handoffHotkeyIdentity = identity;
+            string text;
+            if (identity.Length == 0)
+                text = string.Empty;
+            else if (!_pendingDeviceHotkeys.TryGetValue(identity, out text))
+                text = _settings.InputHandoff == null
+                    ? string.Empty
+                    : _settings.InputHandoff.GetDeviceHotkey(identity);
+            _handoffDeviceHotkeyBox.Text = text;
+            _handoffDeviceHotkeyBox.Enabled = identity.Length > 0;
         }
 
         private int FindWirelessDeviceIndex(string identity)
@@ -318,6 +352,7 @@ namespace DexManager.Forms
             _preferredDeviceChangedByUser = true;
             SaveLoadedWirelessProfileToMemory();
             LoadSelectedWirelessProfile();
+            SyncHandoffDeviceHotkey(false);
         }
 
         private void LoadSelectedWirelessProfile()

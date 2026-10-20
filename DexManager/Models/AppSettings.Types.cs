@@ -106,7 +106,11 @@ namespace DexManager.Models
     [DataContract]
     public sealed class InputHandoffSettings
     {
+        // An empty shortcut means "none"; a missing one (older settings)
+        // gets the default.
         public const string DefaultReturnHotkey = "Ctrl+Alt+Home";
+        public const string DefaultEnterHotkey = "Ctrl+Alt+PageDown";
+        public const string DefaultNextDeviceHotkey = "Ctrl+Alt+PageUp";
         public const int DefaultPhonePointerSpeedPercent = 100;
 
         [DataMember(Order = 1)] public bool Enabled { get; set; }
@@ -115,6 +119,49 @@ namespace DexManager.Models
         // Speed factor of the virtual phone pointer used to detect the
         // return edge; lower it when the phone pointer speed is set slow.
         [DataMember(Order = 4)] public int PhonePointerSpeedPercent { get; set; }
+        // Go to the current target phone without pushing the screen edge.
+        [DataMember(Order = 5)] public string EnterHotkey { get; set; }
+        // Switch the target to the next connected phone and go to it.
+        [DataMember(Order = 6)] public string NextDeviceHotkey { get; set; }
+        // One shortcut per phone: target that phone and go to it.
+        [DataMember(Order = 7)]
+        public List<InputHandoffDeviceHotkey> DeviceHotkeys { get; set; }
+
+        public string GetDeviceHotkey(string identity)
+        {
+            if (DeviceHotkeys == null || string.IsNullOrWhiteSpace(identity))
+                return string.Empty;
+            foreach (var item in DeviceHotkeys)
+            {
+                if (item != null && string.Equals(
+                        item.DeviceIdentity,
+                        identity,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return item.Hotkey ?? string.Empty;
+                }
+            }
+            return string.Empty;
+        }
+
+        public void SetDeviceHotkey(string identity, string hotkey)
+        {
+            if (string.IsNullOrWhiteSpace(identity)) return;
+            if (DeviceHotkeys == null)
+                DeviceHotkeys = new List<InputHandoffDeviceHotkey>();
+            DeviceHotkeys.RemoveAll(item => item == null || string.Equals(
+                item.DeviceIdentity,
+                identity,
+                StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(hotkey))
+            {
+                DeviceHotkeys.Add(new InputHandoffDeviceHotkey
+                {
+                    DeviceIdentity = identity.Trim(),
+                    Hotkey = hotkey.Trim()
+                });
+            }
+        }
 
         public static InputHandoffSettings CreateDefault()
         {
@@ -123,7 +170,10 @@ namespace DexManager.Models
                 Enabled = false,
                 Edge = InputHandoffEdge.Right,
                 ReturnHotkey = DefaultReturnHotkey,
-                PhonePointerSpeedPercent = DefaultPhonePointerSpeedPercent
+                PhonePointerSpeedPercent = DefaultPhonePointerSpeedPercent,
+                EnterHotkey = DefaultEnterHotkey,
+                NextDeviceHotkey = DefaultNextDeviceHotkey,
+                DeviceHotkeys = new List<InputHandoffDeviceHotkey>()
             };
         }
 
@@ -131,11 +181,30 @@ namespace DexManager.Models
         {
             if (!Enum.IsDefined(typeof(InputHandoffEdge), Edge))
                 Edge = InputHandoffEdge.Right;
-            if (string.IsNullOrWhiteSpace(ReturnHotkey))
-                ReturnHotkey = DefaultReturnHotkey;
+            ReturnHotkey = ReturnHotkey == null
+                ? DefaultReturnHotkey
+                : ReturnHotkey.Trim();
+            EnterHotkey = EnterHotkey == null
+                ? DefaultEnterHotkey
+                : EnterHotkey.Trim();
+            NextDeviceHotkey = NextDeviceHotkey == null
+                ? DefaultNextDeviceHotkey
+                : NextDeviceHotkey.Trim();
+            if (DeviceHotkeys == null)
+                DeviceHotkeys = new List<InputHandoffDeviceHotkey>();
+            DeviceHotkeys.RemoveAll(item => item == null ||
+                string.IsNullOrWhiteSpace(item.DeviceIdentity) ||
+                string.IsNullOrWhiteSpace(item.Hotkey));
             if (PhonePointerSpeedPercent < 25 || PhonePointerSpeedPercent > 400)
                 PhonePointerSpeedPercent = DefaultPhonePointerSpeedPercent;
         }
+    }
+
+    [DataContract]
+    public sealed class InputHandoffDeviceHotkey
+    {
+        [DataMember(Order = 1)] public string DeviceIdentity { get; set; }
+        [DataMember(Order = 2)] public string Hotkey { get; set; }
     }
 
     [DataContract]

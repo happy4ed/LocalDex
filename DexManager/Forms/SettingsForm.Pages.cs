@@ -304,6 +304,15 @@ namespace DexManager.Forms
             _handoffHotkeyBox = AddHotkey(
                 handoff,
                 LocalizationService.Get("Settings.HandoffReturnHotkey"));
+            _handoffEnterHotkeyBox = AddHotkey(
+                handoff,
+                LocalizationService.Get("Settings.HandoffEnterHotkey"));
+            _handoffNextHotkeyBox = AddHotkey(
+                handoff,
+                LocalizationService.Get("Settings.HandoffNextDeviceHotkey"));
+            _handoffDeviceHotkeyBox = AddHotkey(
+                handoff,
+                LocalizationService.Get("Settings.HandoffDeviceHotkey"));
             _handoffSpeedBox = AddNumber(
                 handoff,
                 LocalizationService.Get("Settings.HandoffPhoneSpeed"),

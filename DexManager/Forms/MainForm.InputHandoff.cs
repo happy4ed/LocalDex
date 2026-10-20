@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DexManager.Models;
 using DexManager.Services;
 
@@ -21,8 +22,8 @@ namespace DexManager.Forms
                             _settings.Paths.ScrcpyPath);
                     },
                     delegate { return _adbService.AdbPath; },
-                    GetInputHandoffTargetSerial,
-                    IsInputHandoffTargetBusy);
+                    GetInputHandoffUsbSerial,
+                    GetInputHandoffIdentities);
                 _inputHandoff.ApplySettings();
             }
             catch (Exception ex)
@@ -53,11 +54,10 @@ namespace DexManager.Forms
             TryCleanup("input handoff", handoff.Dispose);
         }
 
-        // Authorized USB serial of the saved default phone, or empty.  The
-        // handoff is a USB feature: a wireless-only connection waits.
-        private string GetInputHandoffTargetSerial()
+        // Authorized USB serial of a phone, or empty.  The handoff is a USB
+        // feature: a wireless-only connection waits.
+        private string GetInputHandoffUsbSerial(string identity)
         {
-            var identity = _settings.PreferredDeviceIdentity;
             if (string.IsNullOrWhiteSpace(identity)) return string.Empty;
             var snapshot = _physicalDeviceRegistry.Current;
             if (snapshot == null || snapshot.Devices == null)
@@ -81,29 +81,12 @@ namespace DexManager.Forms
             return string.Empty;
         }
 
-        // Rule: while the default phone runs DeX or a single-app window,
-        // the handoff pauses (its session is stopped).  Those windows
-        // already forward the PC keyboard and mouse, and a second UHID
-        // mouse would make the target display ambiguous.
-        private bool IsInputHandoffTargetBusy()
+        // Phones in the same order as the device tabs (for "next phone").
+        // DeX or single-app windows on the target phone do not pause the
+        // handoff: they are separate windows.
+        private IList<string> GetInputHandoffIdentities()
         {
-            var identity = _settings.PreferredDeviceIdentity;
-            if (string.IsNullOrWhiteSpace(identity)) return false;
-            DeviceUiContext context;
-            lock (_deviceContextsSync)
-            {
-                if (!_deviceContexts.TryGetValue(identity, out context))
-                    return false;
-            }
-            if (context == null || context.Runtime == null) return false;
-            if (context.Runtime.Dex != null && context.Runtime.Dex.IsRunning)
-                return true;
-            if (context.Runtime.SingleWindows == null) return false;
-            for (var slot = 1; slot <= 3; slot++)
-            {
-                if (context.Runtime.SingleWindows.IsRunning(slot)) return true;
-            }
-            return false;
+            return _devicePresentationOrder.GetIdentities();
         }
     }
 }

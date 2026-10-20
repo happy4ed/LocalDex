@@ -119,6 +119,10 @@ namespace DexManager.Forms
                 _handoffEdgeBox.Items.Count - 1,
                 (int)handoff.Edge));
             _handoffHotkeyBox.Text = handoff.ReturnHotkey;
+            _handoffEnterHotkeyBox.Text = handoff.EnterHotkey;
+            _handoffNextHotkeyBox.Text = handoff.NextDeviceHotkey;
+            _pendingDeviceHotkeys.Clear();
+            _handoffHotkeyIdentity = string.Empty;
             _handoffSpeedBox.Value = Clamp(
                 handoff.PhonePointerSpeedPercent,
                 _handoffSpeedBox);
@@ -467,26 +471,59 @@ namespace DexManager.Forms
             handoff.Enabled = _handoffEnabledBox.Checked;
             var edge = _handoffEdgeBox.SelectedItem as HandoffEdgeOption;
             handoff.Edge = edge == null ? InputHandoffEdge.Right : edge.Edge;
+            // Empty = no shortcut (cleared with Delete or Backspace).
             handoff.ReturnHotkey = _handoffHotkeyBox.Text.Trim();
+            handoff.EnterHotkey = _handoffEnterHotkeyBox.Text.Trim();
+            handoff.NextDeviceHotkey = _handoffNextHotkeyBox.Text.Trim();
             handoff.PhonePointerSpeedPercent = (int)_handoffSpeedBox.Value;
-            if (!HotkeyService.IsValidShortcut(handoff.ReturnHotkey))
+            SyncHandoffDeviceHotkey(true);
+            foreach (var pending in _pendingDeviceHotkeys)
+                handoff.SetDeviceHotkey(pending.Key, pending.Value);
+
+            var shortcuts = new List<string>
             {
-                throw new InvalidOperationException(
-                    LocalizationService.Get("Settings.InvalidHotkey"));
+                handoff.ReturnHotkey,
+                handoff.EnterHotkey,
+                handoff.NextDeviceHotkey
+            };
+            foreach (var item in handoff.DeviceHotkeys)
+                shortcuts.Add(item.Hotkey);
+            shortcuts.RemoveAll(string.IsNullOrWhiteSpace);
+            foreach (var shortcut in shortcuts)
+            {
+                if (!HotkeyService.IsValidShortcut(shortcut))
+                {
+                    throw new InvalidOperationException(
+                        LocalizationService.Get("Settings.InvalidHotkey"));
+                }
             }
-            // The return shortcut is matched by the handoff's own low-level
-            // hook, so compare in low-level mode.
-            if (HotkeyService.ShortcutsConflict(
-                    handoff.ReturnHotkey,
-                    settings.KeyMappings.CaptureHotkey,
-                    true) ||
-                HotkeyService.ShortcutsConflict(
-                    handoff.ReturnHotkey,
-                    settings.KeyMappings.ExitHotkey,
-                    true))
+            // Handoff shortcuts are matched by the handoff's own low-level
+            // hook, so compare in low-level mode: with each other and with
+            // the capture and exit shortcuts.
+            for (var first = 0; first < shortcuts.Count; first++)
             {
-                throw new InvalidOperationException(
-                    LocalizationService.Get("Settings.HandoffHotkeyConflict"));
+                var conflict = HotkeyService.ShortcutsConflict(
+                        shortcuts[first],
+                        settings.KeyMappings.CaptureHotkey,
+                        true) ||
+                    HotkeyService.ShortcutsConflict(
+                        shortcuts[first],
+                        settings.KeyMappings.ExitHotkey,
+                        true);
+                for (var second = first + 1;
+                    !conflict && second < shortcuts.Count;
+                    second++)
+                {
+                    conflict = HotkeyService.ShortcutsConflict(
+                        shortcuts[first],
+                        shortcuts[second],
+                        true);
+                }
+                if (conflict)
+                {
+                    throw new InvalidOperationException(
+                        LocalizationService.Get("Settings.HandoffHotkeyConflict"));
+                }
             }
             settings.InputHandoff = handoff;
         }

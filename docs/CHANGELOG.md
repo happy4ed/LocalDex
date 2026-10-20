@@ -1,5 +1,12 @@
 # Changelog
 
+## Handoff shortcuts — 2.1.0-localdex.6 (2026-10-20)
+
+All handoff shortcuts are configurable in Settings → Connection, and each can be set to none (Delete/Backspace): return (default Ctrl+Alt+Home), go to phone without pushing the edge (default Ctrl+Alt+PageDown), next phone (default Ctrl+Alt+PageUp) and one shortcut per phone. Phone and next-phone shortcuts change the target for this run only and go to it; the saved default phone does not change. Conflicts with each other or with the capture/exit shortcuts are rejected on save. DeX and single-app windows on the same phone no longer pause the handoff.
+
+넘기기 단축키를 모두 설정 → 연결에서 바꿀 수 있고 각각 「없음」(Delete·Backspace)으로 둘 수 있습니다: 돌아오기(기본 Ctrl+Alt+Home), 화면 끝으로 밀지 않고 휴대폰으로 가기(기본 Ctrl+Alt+PageDown), 다음 휴대폰(기본 Ctrl+Alt+PageUp), 휴대폰별 단축키. 휴대폰별·다음 휴대폰 단축키는 이번 실행 동안만 대상을 바꾸고 바로 넘어가며 저장된 기본 휴대폰은 바뀌지 않습니다. 서로 겹치거나 캡처·종료 단축키와 겹치면 저장할 때 막습니다. 같은 휴대폰의 DeX·단일 앱 창이 켜져 있어도 넘기기를 쉬지 않습니다.
+
+
 ## Keyboard and mouse handoff — 2.1.0-localdex.5 (2026-10-20)
 
 Settings → Connection → "PC keyboard and mouse to phone" hands the PC keyboard and mouse to the default phone over USB debugging, without mirroring (scrcpy control-only session: no video, no audio, UHID keyboard and mouse). Rest the pointer on the chosen screen edge and keep pushing to move to the phone; push against the phone edge facing the PC, or press the return shortcut (default Ctrl+Alt+Home), to come back at the same height. The pointer returns to the PC immediately if the session ends, the cable is unplugged or the target changes. Paused while the same phone runs DeX or a single-app window. Clipboard is shared; files are not.

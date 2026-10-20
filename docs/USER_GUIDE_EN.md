@@ -298,10 +298,13 @@ Place the phone next to the PC and control it with the PC keyboard and mouse. On
 
 - Enable: Settings → Connection → "PC keyboard and mouse to phone", choose the phone position (left, right, top or bottom) and save. The target is the "target phone" (default phone) on the same page and must be connected by USB. While it is connected, the control session is started in advance and its small window is hidden.
 - Move to the phone: rest the PC pointer on the chosen screen edge briefly (about 0.2 s) and keep pushing. Dragging with a button held never hands over. The keyboard follows.
-- Return: move the pointer to the phone edge facing the PC and keep pushing, or press the return shortcut (default `Ctrl+Alt+Home`, configurable). The PC pointer reappears on the edge it left, at the same height (or width ratio for top/bottom).
+- Go by shortcut: the go-to-phone shortcut (default `Ctrl+Alt+PageDown`) moves to the phone without pushing the screen edge.
+- Return: move the pointer to the phone edge facing the PC and keep pushing, or press the return shortcut (default `Ctrl+Alt+Home`). After an edge return the PC pointer reappears on the edge it left at the same height (or width ratio for top/bottom); after going and returning by shortcut it comes back to where it was.
+- Change target: the next-phone shortcut (default `Ctrl+Alt+PageUp`) or a per-phone shortcut (one for each phone chosen as target phone) targets that phone and moves to it. This lasts for the current run only; the saved default phone does not change. If that phone disconnects, the default phone is used again.
+- All shortcuts are configurable; Delete or Backspace in a shortcut box sets "none". Shortcuts that conflict with each other or with the capture/exit shortcuts are rejected on save.
 - Returning by edge uses a virtual phone pointer computed from the mouse movement LocalDex hands over. It may need a little extra push but never returns early. If the phone pointer speed is set slower than normal, lower "Phone pointer speed factor (%)".
 - Safety: if the control session ends, the cable is unplugged or the target phone changes, the pointer returns to the PC immediately. Leaving with scrcpy's Alt (release capture) or Alt+Tab also returns to the PC.
-- Paused while the same phone runs DeX or a single-app window, which already forward the PC keyboard and mouse.
+- DeX and single-app windows on the same phone do not pause the handoff (separate windows). Android decides which phone display receives the handed-over input; this is still being confirmed on devices.
 - Clipboard: copy and paste are shared between the PC and the phone.
 - Korean/other input: the UHID keyboard follows the phone's physical keyboard settings (language switching and layout).
 - On managed PCs, follow your organisation's policies.

@@ -325,6 +325,58 @@ namespace DexManager.Services
         }
     }
 
+    // Which phone the handoff targets.  A phone picked with a device or
+    // "next phone" shortcut overrides the saved default for this run only;
+    // the saved default phone (Settings) is never changed by shortcuts.
+    public static class InputHandoffTargets
+    {
+        public static string Resolve(
+            string overrideIdentity,
+            string preferredIdentity,
+            Func<string, bool> isConnected)
+        {
+            if (isConnected == null) return string.Empty;
+            if (!string.IsNullOrWhiteSpace(overrideIdentity) &&
+                isConnected(overrideIdentity))
+            {
+                return overrideIdentity.Trim();
+            }
+            return !string.IsNullOrWhiteSpace(preferredIdentity) &&
+                isConnected(preferredIdentity)
+                ? preferredIdentity.Trim()
+                : string.Empty;
+        }
+
+        // Next connected phone after current in presentation order, wrapping
+        // around; the first connected phone when current is not listed.
+        public static string Next(
+            System.Collections.Generic.IList<string> ordered,
+            Func<string, bool> isConnected,
+            string current)
+        {
+            if (ordered == null || isConnected == null) return string.Empty;
+            var start = -1;
+            for (var index = 0; index < ordered.Count; index++)
+            {
+                if (string.Equals(
+                        ordered[index],
+                        current,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    start = index;
+                    break;
+                }
+            }
+            for (var step = 1; step <= ordered.Count; step++)
+            {
+                var candidate = ordered[(start + step + ordered.Count) % ordered.Count];
+                if (!string.IsNullOrWhiteSpace(candidate) && isConnected(candidate))
+                    return candidate;
+            }
+            return string.Empty;
+        }
+    }
+
     public static class PhoneScreenSize
     {
         // Parses "adb shell wm size"; an override size wins over the
@@ -392,6 +444,8 @@ namespace DexManager.Services
         private HandoffRect _bounds = new HandoffRect(0, 0, 1920, 1080);
         private string _sessionSerial = string.Empty;
         private double _exitRatio = 0.5;
+        private bool _hasExactReturn;
+        private HandoffPoint _exactReturn;
         private long _restartNotBeforeMs;
         private int _failures;
         private bool _gaveUpLogged;
@@ -447,10 +501,10 @@ namespace DexManager.Services
         }
 
         // Called periodically and on every device change.  targetSerial is
-        // the authorized serial of the saved default phone (empty when it is
-        // not connected); blocked is true while that phone runs DeX or a
-        // single-app window.
-        public void UpdateTarget(string targetSerial, bool blocked, long nowMs)
+        // the authorized USB serial of the current target phone (empty when
+        // it is not connected).  DeX or single-app windows on the same phone
+        // do not pause the handoff: they are separate windows.
+        public void UpdateTarget(string targetSerial, long nowMs)
         {
             if (!_enabled)
             {
@@ -460,20 +514,15 @@ namespace DexManager.Services
             var serial = string.IsNullOrWhiteSpace(targetSerial)
                 ? string.Empty
                 : targetSerial.Trim();
-            if (serial.Length == 0 || blocked)
+            if (serial.Length == 0)
             {
-                if (serial.Length == 0)
-                {
-                    // Reconnecting the phone allows new attempts.
-                    _failures = 0;
-                    _gaveUpLogged = false;
-                }
+                // Reconnecting the phone allows new attempts.
+                _failures = 0;
+                _gaveUpLogged = false;
                 if (State != InputHandoffState.Waiting ||
                     _sessionSerial.Length > 0)
                 {
-                    StopAll(serial.Length == 0
-                        ? "Log.Handoff.TargetMissing"
-                        : "Log.Handoff.BlockedBySession");
+                    StopAll("Log.Handoff.TargetMissing");
                 }
                 State = InputHandoffState.Waiting;
                 return;
@@ -536,12 +585,22 @@ namespace DexManager.Services
 
         public bool EnterPhone(int x, int y)
         {
+            return EnterPhone(x, y, true);
+        }
+
+        // fromEdge = false for the "go to phone" and device shortcuts: the
+        // pointer then comes back to exactly where it was (except after a
+        // return by edge push, which uses the edge).
+        public bool EnterPhone(int x, int y, bool fromEdge)
+        {
             if (State != InputHandoffState.Ready) return false;
             _exitRatio = InputHandoffEdgeDetector.RatioAlongEdge(
                 _bounds,
                 _edge,
                 x,
                 y);
+            _hasExactReturn = !fromEdge;
+            _exactReturn = new HandoffPoint(x, y);
             State = InputHandoffState.OnPhone;
             _phone.Begin();
             bool entered;
@@ -576,6 +635,7 @@ namespace DexManager.Services
 
         public bool ReturnByEdge()
         {
+            _hasExactReturn = false;
             if (!ReturnToPc("Log.Handoff.ReturnedByEdge")) return false;
             _phone.RememberAtReturnEdge();
             return true;
@@ -586,11 +646,14 @@ namespace DexManager.Services
         {
             if (State != InputHandoffState.OnPhone) return false;
             _phone.Forget();
-            _host.ReleaseToPc(InputHandoffEdgeDetector.ReturnPoint(
-                _bounds,
-                _edge,
-                _exitRatio,
-                ReturnInset));
+            _host.ReleaseToPc(_hasExactReturn
+                ? _exactReturn
+                : InputHandoffEdgeDetector.ReturnPoint(
+                    _bounds,
+                    _edge,
+                    _exitRatio,
+                    ReturnInset));
+            _hasExactReturn = false;
             _detector.Reset(true);
             State = _sessionSerial.Length > 0
                 ? InputHandoffState.Ready

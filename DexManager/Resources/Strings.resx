@@ -749,8 +749,8 @@
   <data name="Settings.HandoffEdgeBottom" xml:space="preserve"><value>Bottom</value></data>
   <data name="Settings.HandoffReturnHotkey" xml:space="preserve"><value>Return-to-PC shortcut</value></data>
   <data name="Settings.HandoffPhoneSpeed" xml:space="preserve"><value>Phone pointer speed factor (%)</value></data>
-  <data name="Settings.HandoffHint" xml:space="preserve"><value>Target: the default phone chosen above, connected by USB. Rest the PC pointer on that screen edge and keep pushing to move to the phone; push the pointer against the phone edge facing the PC, or press the shortcut, to come back. Paused while the same phone runs DeX or a single-app window. Text input follows the phone physical keyboard settings. On managed PCs, follow your organisation’s policies.</value></data>
-  <data name="Settings.HandoffHotkeyConflict" xml:space="preserve"><value>The return shortcut must differ from the capture and exit shortcuts.</value></data>
+  <data name="Settings.HandoffHint" xml:space="preserve"><value>Target: the default phone chosen above, connected by USB. Rest the PC pointer on that screen edge and keep pushing, or press the go-to-phone shortcut, to move to the phone; push the pointer against the phone edge facing the PC, or press the return shortcut, to come back. A phone shortcut or the next-phone shortcut changes the target for this run only and moves to it; the saved default phone does not change. Delete or Backspace in a shortcut box sets "none". DeX and single-app windows on the same phone keep working; they are separate windows. Text input follows the phone physical keyboard settings. On managed PCs, follow your organisation’s policies.</value></data>
+  <data name="Settings.HandoffHotkeyConflict" xml:space="preserve"><value>Handoff shortcuts must differ from each other and from the capture and exit shortcuts.</value></data>
   <data name="Log.Handoff.Ready" xml:space="preserve"><value>Keyboard and mouse handoff ready (control-only session).</value></data>
   <data name="Log.Handoff.Entered" xml:space="preserve"><value>Keyboard and mouse handed to the phone.</value></data>
   <data name="Log.Handoff.ReturnedByHotkey" xml:space="preserve"><value>Returned to the PC by shortcut.</value></data>
@@ -759,7 +759,6 @@
   <data name="Log.Handoff.SessionEnded" xml:space="preserve"><value>The control session ended; the pointer is back on the PC.</value></data>
   <data name="Log.Handoff.TargetMissing" xml:space="preserve"><value>Keyboard and mouse handoff paused: the default phone is not connected by USB.</value></data>
   <data name="Log.Handoff.TargetChanged" xml:space="preserve"><value>The default phone connection changed; restarting the control session.</value></data>
-  <data name="Log.Handoff.BlockedBySession" xml:space="preserve"><value>Keyboard and mouse handoff paused while the phone runs DeX or a single-app window.</value></data>
   <data name="Log.Handoff.EnterFailed" xml:space="preserve"><value>Could not hand over to the phone; the pointer stays on the PC.</value></data>
   <data name="Log.Handoff.GaveUp" xml:space="preserve"><value>The control session failed repeatedly; retrying after the phone reconnects.</value></data>
   <data name="Log.Handoff.StartFailed" xml:space="preserve"><value>Could not start the control session: {0}</value></data>
@@ -767,4 +766,9 @@
   <data name="Log.Handoff.PhoneSizeUnknown" xml:space="preserve"><value>Could not read the phone screen size; return with the shortcut.</value></data>
   <data name="Log.Handoff.HookFailed" xml:space="preserve"><value>Could not install the input hook for keyboard and mouse handoff.</value></data>
   <data name="Log.Handoff.RawInputFailed" xml:space="preserve"><value>Could not register mouse raw input; return with the shortcut.</value></data>
+  <data name="Settings.HandoffEnterHotkey" xml:space="preserve"><value>Go-to-phone shortcut</value></data>
+  <data name="Settings.HandoffNextDeviceHotkey" xml:space="preserve"><value>Next-phone shortcut</value></data>
+  <data name="Settings.HandoffDeviceHotkey" xml:space="preserve"><value>Shortcut for this phone (target phone above)</value></data>
+  <data name="Log.Handoff.TargetSwitched" xml:space="preserve"><value>Handoff target changed by shortcut (this run only; the saved default phone is unchanged).</value></data>
+  <data name="Log.Handoff.OverrideCleared" xml:space="preserve"><value>The phone picked by shortcut is no longer connected by USB; back to the saved default phone.</value></data>
 </root>

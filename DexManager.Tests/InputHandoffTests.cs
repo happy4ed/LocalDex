@@ -191,11 +191,11 @@ namespace DexManager.Tests
             var controller = new InputHandoffController(host);
             Assert.Equal(InputHandoffState.Off, controller.State);
             controller.Configure(true, InputHandoffEdge.Right, Screen);
-            controller.UpdateTarget(string.Empty, false, 0);
+            controller.UpdateTarget(string.Empty, 0);
             Assert.Equal(InputHandoffState.Waiting, controller.State);
             Assert.Empty(host.Started);
 
-            controller.UpdateTarget("usb-b", false, 10);
+            controller.UpdateTarget("usb-b", 10);
             Assert.Equal(InputHandoffState.Ready, controller.State);
             Assert.Equal(new[] { "usb-b" }, host.Started);
 
@@ -240,9 +240,9 @@ namespace DexManager.Tests
             Assert.Equal(new[] { "release", "stop" }, host.Calls.GetRange(host.Calls.Count - 2, 2));
             Assert.Equal(InputHandoffState.Waiting, controller.State);
             // Restarted only after the delay.
-            controller.UpdateTarget("usb-b", false, 20000 + 100);
+            controller.UpdateTarget("usb-b", 20000 + 100);
             Assert.Single(host.Started);
-            controller.UpdateTarget("usb-b", false, 20000 + InputHandoffController.RestartDelayMs);
+            controller.UpdateTarget("usb-b", 20000 + InputHandoffController.RestartDelayMs);
             Assert.Equal(2, host.Started.Count);
             Assert.Equal(InputHandoffState.Ready, controller.State);
         }
@@ -254,35 +254,106 @@ namespace DexManager.Tests
             var controller = ReadyController(host);
             PushToEdge(controller, 100);
             controller.EnterPhone(1919, 100);
-            controller.UpdateTarget(string.Empty, false, 30000);
+            controller.UpdateTarget(string.Empty, 30000);
             Assert.Equal("release", host.Calls[host.Calls.Count - 2]);
             Assert.Equal("stop", host.Calls[host.Calls.Count - 1]);
             Assert.Equal(InputHandoffState.Waiting, controller.State);
 
-            controller.UpdateTarget("usb-b", false, 30010);
+            controller.UpdateTarget("usb-b", 30010);
             PushToEdge(controller, 100);
             controller.EnterPhone(1919, 100);
             host.Calls.Clear();
-            controller.UpdateTarget("usb-c", false, 40000);
+            controller.UpdateTarget("usb-c", 40000);
             Assert.Equal(new[] { "release", "stop", "start:usb-c" }, host.Calls);
             Assert.Equal(InputHandoffState.Ready, controller.State);
         }
 
         [Fact]
-        public void DexOnTheSamePhonePausesTheHandoff()
+        public void ShortcutEntryReturnsToTheExactPointButEdgeReturnUsesTheEdge()
         {
             var host = new FakeHost();
             var controller = ReadyController(host);
-            PushToEdge(controller, 100);
-            controller.EnterPhone(1919, 100);
-            controller.UpdateTarget("usb-b", true, 50000);
-            Assert.Equal(InputHandoffState.Waiting, controller.State);
-            Assert.Equal("release", host.Calls[host.Calls.Count - 2]);
-            Assert.Equal(1, host.Stopped);
-            controller.UpdateTarget("usb-b", true, 60000);
-            Assert.Single(host.Started);
-            controller.UpdateTarget("usb-b", false, 60010);
-            Assert.Equal(InputHandoffState.Ready, controller.State);
+            Assert.True(controller.EnterPhone(700, 400, false));
+            Assert.Equal(InputHandoffState.OnPhone, controller.State);
+            controller.ReturnToPc("Log.Handoff.ReturnedByHotkey");
+            Assert.Equal(700, host.Released[0].X);
+            Assert.Equal(400, host.Released[0].Y);
+
+            controller.SetPhoneExtent(1000, 1000);
+            Assert.True(controller.EnterPhone(700, 540, false));
+            Assert.True(controller.ReturnByEdge());
+            Assert.Equal(1919 - InputHandoffController.ReturnInset, host.Released[1].X);
+            Assert.Equal(540, host.Released[1].Y);
+        }
+
+        [Fact]
+        public void ShortcutTargetOverridesOnlyWhileConnected()
+        {
+            var connected = new HashSet<string> { "phone-a", "phone-b" };
+            Assert.Equal("phone-b", InputHandoffTargets.Resolve(
+                "phone-b", "phone-a", connected.Contains));
+            Assert.Equal("phone-a", InputHandoffTargets.Resolve(
+                string.Empty, "phone-a", connected.Contains));
+            connected.Remove("phone-b");
+            Assert.Equal("phone-a", InputHandoffTargets.Resolve(
+                "phone-b", "phone-a", connected.Contains));
+            connected.Remove("phone-a");
+            Assert.Equal(string.Empty, InputHandoffTargets.Resolve(
+                "phone-b", "phone-a", connected.Contains));
+        }
+
+        [Fact]
+        public void NextPhoneCyclesThroughConnectedPhones()
+        {
+            var ordered = new List<string> { "phone-a", "phone-b", "phone-c" };
+            var connected = new HashSet<string>(ordered);
+            Assert.Equal("phone-b", InputHandoffTargets.Next(ordered, connected.Contains, "phone-a"));
+            Assert.Equal("phone-a", InputHandoffTargets.Next(ordered, connected.Contains, "phone-c"));
+            Assert.Equal("phone-a", InputHandoffTargets.Next(ordered, connected.Contains, string.Empty));
+            connected.Remove("phone-b");
+            Assert.Equal("phone-c", InputHandoffTargets.Next(ordered, connected.Contains, "phone-a"));
+            connected.Clear();
+            connected.Add("phone-c");
+            Assert.Equal("phone-c", InputHandoffTargets.Next(ordered, connected.Contains, "phone-c"));
+            connected.Clear();
+            Assert.Equal(string.Empty, InputHandoffTargets.Next(ordered, connected.Contains, "phone-c"));
+        }
+
+        [Fact]
+        public void HandoffShortcutsKeepNoneAndPerPhoneValues()
+        {
+            var root = Path.Combine(Path.GetTempPath(), "localdex-hotkeys-" + System.Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+            try
+            {
+                var service = new SettingsService(new LogService(), root);
+                var settings = AppSettings.CreateDefault();
+                settings.EnsureDefaults();
+                Assert.Equal(InputHandoffSettings.DefaultEnterHotkey, settings.InputHandoff.EnterHotkey);
+                Assert.Equal(InputHandoffSettings.DefaultNextDeviceHotkey, settings.InputHandoff.NextDeviceHotkey);
+                service.UpdateAndSave(settings, s =>
+                {
+                    s.InputHandoff.ReturnHotkey = string.Empty;
+                    s.InputHandoff.SetDeviceHotkey("phone-b", "Ctrl+Alt+F2");
+                    s.InputHandoff.SetDeviceHotkey("phone-c", "Ctrl+Alt+F3");
+                    s.InputHandoff.SetDeviceHotkey("phone-c", string.Empty);
+                });
+                var reloaded = service.Load();
+                Assert.Equal(string.Empty, reloaded.InputHandoff.ReturnHotkey);
+                Assert.Equal("Ctrl+Alt+F2", reloaded.InputHandoff.GetDeviceHotkey("PHONE-B"));
+                Assert.Equal(string.Empty, reloaded.InputHandoff.GetDeviceHotkey("phone-c"));
+                Assert.Single(reloaded.InputHandoff.DeviceHotkeys);
+
+                // Settings written by localdex.5 have no enter/next fields.
+                var old = new InputHandoffSettings { ReturnHotkey = "Ctrl+Alt+Home" };
+                old.Normalize();
+                Assert.Equal(InputHandoffSettings.DefaultEnterHotkey, old.EnterHotkey);
+                Assert.Empty(old.DeviceHotkeys);
+            }
+            finally
+            {
+                try { Directory.Delete(root, true); } catch { }
+            }
         }
 
         [Fact]
@@ -303,7 +374,7 @@ namespace DexManager.Tests
             var controller = new InputHandoffController(host);
             controller.Configure(true, InputHandoffEdge.Right, Screen);
             for (var i = 0; i < 10; i++)
-                controller.UpdateTarget("usb-b", false, i * InputHandoffController.RestartDelayMs);
+                controller.UpdateTarget("usb-b", i * InputHandoffController.RestartDelayMs);
             Assert.Equal(InputHandoffController.MaxQuickFailures, host.Started.Count);
             Assert.Equal(InputHandoffState.Waiting, controller.State);
         }
@@ -367,7 +438,7 @@ namespace DexManager.Tests
         {
             var controller = new InputHandoffController(host);
             controller.Configure(true, InputHandoffEdge.Right, Screen);
-            controller.UpdateTarget("usb-b", false, 0);
+            controller.UpdateTarget("usb-b", 0);
             Assert.Equal(InputHandoffState.Ready, controller.State);
             return controller;
         }
