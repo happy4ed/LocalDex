@@ -148,6 +148,8 @@ namespace DexManager.Forms
                 PhoneTransferReceiver_ProgressChanged;
             _phoneScreenWakeTimer.Tick -= PhoneScreenWakeTimer_Tick;
 
+            // Give the pointer back and end the control session first.
+            ShutdownInputHandoff();
             RequestAllRuntimeShutdown(_systemShutdownInProgress);
             if (_systemShutdownInProgress)
             {

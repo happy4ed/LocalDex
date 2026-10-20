@@ -21,5 +21,6 @@
 
   <ItemGroup>
     <Compile Include="../Shared/DexFreeformJournal.cs" Link="Shared/DexFreeformJournal.cs" />
+    <Compile Include="../Shared/InputHandoff.cs" Link="Shared/InputHandoff.cs" />
   </ItemGroup>
 </Project>

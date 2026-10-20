@@ -619,6 +619,7 @@ namespace DexManager.Services
                 source.DeviceWirelessConnectionProfiles;
             target.PreferredDeviceIdentity =
                 source.PreferredDeviceIdentity;
+            target.InputHandoff = source.InputHandoff;
         }
     }
 }

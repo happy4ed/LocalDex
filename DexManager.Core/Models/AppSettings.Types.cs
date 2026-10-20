@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -98,6 +99,43 @@ namespace DexManager.Models
         [DataMember(Order = 2)] public string WirelessHost { get; set; }
         [DataMember(Order = 3)] public int WirelessPort { get; set; }
         [DataMember(Order = 4)] public bool AutoReconnect { get; set; }
+    }
+
+    // PC keyboard and mouse handoff to the saved default phone over USB
+    // debugging (control-only scrcpy session).
+    [DataContract]
+    public sealed class InputHandoffSettings
+    {
+        public const string DefaultReturnHotkey = "Ctrl+Alt+Home";
+        public const int DefaultPhonePointerSpeedPercent = 100;
+
+        [DataMember(Order = 1)] public bool Enabled { get; set; }
+        [DataMember(Order = 2)] public InputHandoffEdge Edge { get; set; }
+        [DataMember(Order = 3)] public string ReturnHotkey { get; set; }
+        // Speed factor of the virtual phone pointer used to detect the
+        // return edge; lower it when the phone pointer speed is set slow.
+        [DataMember(Order = 4)] public int PhonePointerSpeedPercent { get; set; }
+
+        public static InputHandoffSettings CreateDefault()
+        {
+            return new InputHandoffSettings
+            {
+                Enabled = false,
+                Edge = InputHandoffEdge.Right,
+                ReturnHotkey = DefaultReturnHotkey,
+                PhonePointerSpeedPercent = DefaultPhonePointerSpeedPercent
+            };
+        }
+
+        public void Normalize()
+        {
+            if (!Enum.IsDefined(typeof(InputHandoffEdge), Edge))
+                Edge = InputHandoffEdge.Right;
+            if (string.IsNullOrWhiteSpace(ReturnHotkey))
+                ReturnHotkey = DefaultReturnHotkey;
+            if (PhonePointerSpeedPercent < 25 || PhonePointerSpeedPercent > 400)
+                PhonePointerSpeedPercent = DefaultPhonePointerSpeedPercent;
+        }
     }
 
     [DataContract]

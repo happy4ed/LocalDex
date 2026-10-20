@@ -2,7 +2,7 @@
 
 ## Windows downloads / Windows 다운로드
 
-[Latest release](https://github.com/happy4ed/LocalDex/releases/latest): choose the setup EXE for per-user installation, the full ZIP for portable use, or the update ZIP for an existing LocalDex folder. The installer preserves user settings on upgrade and uninstall. See [release notes](docs/RELEASE_NOTES_localdex.4.md).
+[Latest release](https://github.com/happy4ed/LocalDex/releases/latest): choose the setup EXE for per-user installation, the full ZIP for portable use, or the update ZIP for an existing LocalDex folder. The installer preserves user settings on upgrade and uninstall. See [release notes](docs/RELEASE_NOTES_localdex.5.md).
 
 [최신 릴리스](https://github.com/happy4ed/LocalDex/releases/latest)에서 설치 EXE, 전체 포터블 ZIP, 기존 사용자용 업데이트 ZIP을 받을 수 있습니다. 설치판은 사용자 폴더에 설치하며 업데이트·제거 시 설정을 보존합니다. 기존 포터블 설정을 유지하려면 업데이트 ZIP을 사용하세요.
 

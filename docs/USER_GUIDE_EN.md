@@ -292,6 +292,20 @@ not stored in settings or written to the log.
 - If the first connection fails on 5GHz, check the router configuration or
   initialize the connection on 2.4GHz before retrying.
 
+## 7a. PC Keyboard and Mouse Handoff (USB)
+
+Place the phone next to the PC and control it with the PC keyboard and mouse. Only input is sent; the screen is not mirrored (scrcpy control-only session: no video, no audio, UHID keyboard and mouse). USB debugging is required. Files are not transferred.
+
+- Enable: Settings → Connection → "PC keyboard and mouse to phone", choose the phone position (left, right, top or bottom) and save. The target is the "target phone" (default phone) on the same page and must be connected by USB. While it is connected, the control session is started in advance and its small window is hidden.
+- Move to the phone: rest the PC pointer on the chosen screen edge briefly (about 0.2 s) and keep pushing. Dragging with a button held never hands over. The keyboard follows.
+- Return: move the pointer to the phone edge facing the PC and keep pushing, or press the return shortcut (default `Ctrl+Alt+Home`, configurable). The PC pointer reappears on the edge it left, at the same height (or width ratio for top/bottom).
+- Returning by edge uses a virtual phone pointer computed from the mouse movement LocalDex hands over. It may need a little extra push but never returns early. If the phone pointer speed is set slower than normal, lower "Phone pointer speed factor (%)".
+- Safety: if the control session ends, the cable is unplugged or the target phone changes, the pointer returns to the PC immediately. Leaving with scrcpy's Alt (release capture) or Alt+Tab also returns to the PC.
+- Paused while the same phone runs DeX or a single-app window, which already forward the PC keyboard and mouse.
+- Clipboard: copy and paste are shared between the PC and the phone.
+- Korean/other input: the UHID keyboard follows the phone's physical keyboard settings (language switching and layout).
+- On managed PCs, follow your organisation's policies.
+
 ## 8. Capture
 
 The capture hotkey only works while a scrcpy window is active.

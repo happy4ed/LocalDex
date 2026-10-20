@@ -121,6 +121,7 @@ namespace DexManager.Forms
 
             RebuildDeviceTabs();
             RefreshSelectedDeviceState();
+            RefreshInputHandoff();
             if (_settingsForm != null && !_settingsForm.IsDisposed)
                 _settingsForm.RefreshSelectedDeviceContext();
         }

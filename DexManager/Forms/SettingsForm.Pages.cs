@@ -289,6 +289,38 @@ namespace DexManager.Forms
             pairButtons.Controls.Add(_pairButton);
             AddRow(pairing, string.Empty, pairButtons);
             AddCard(page, LocalizationService.Get("Settings.GroupPairing"), pairing);
+
+            var handoff = CreateTable();
+            _handoffEnabledBox = AddCheck(
+                handoff,
+                LocalizationService.Get("Settings.HandoffEnabled"));
+            _handoffEdgeBox = CreateSelect();
+            foreach (InputHandoffEdge edge in Enum.GetValues(typeof(InputHandoffEdge)))
+                _handoffEdgeBox.Items.Add(new HandoffEdgeOption(edge));
+            AddRow(
+                handoff,
+                LocalizationService.Get("Settings.HandoffEdge"),
+                _handoffEdgeBox);
+            _handoffHotkeyBox = AddHotkey(
+                handoff,
+                LocalizationService.Get("Settings.HandoffReturnHotkey"));
+            _handoffSpeedBox = AddNumber(
+                handoff,
+                LocalizationService.Get("Settings.HandoffPhoneSpeed"),
+                25,
+                400);
+            AddRow(
+                handoff,
+                string.Empty,
+                new Label
+                {
+                    AutoSize = true,
+                    MaximumSize = new Size(410, 0),
+                    ForeColor = _theme.TextSecondary,
+                    BackColor = _theme.CardBackground,
+                    Text = LocalizationService.Get("Settings.HandoffHint")
+                });
+            AddCard(page, LocalizationService.Get("Settings.GroupHandoff"), handoff);
             return page;
         }
 

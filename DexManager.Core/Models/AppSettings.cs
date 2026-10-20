@@ -42,6 +42,8 @@ namespace DexManager.Models
         // fallback selections never overwrite it.
         [DataMember(Order = 17)]
         public string PreferredDeviceIdentity { get; set; }
+        [DataMember(Order = 18)]
+        public InputHandoffSettings InputHandoff { get; set; }
 
         public static AppSettings CreateDefault()
         {
@@ -173,6 +175,9 @@ namespace DexManager.Models
             if (DeviceWirelessConnectionProfiles == null)
                 DeviceWirelessConnectionProfiles =
                     new List<DeviceWirelessConnectionProfile>();
+            if (InputHandoff == null)
+                InputHandoff = InputHandoffSettings.CreateDefault();
+            InputHandoff.Normalize();
             PreferredDeviceIdentity = string.IsNullOrWhiteSpace(
                 PreferredDeviceIdentity)
                 ? string.Empty

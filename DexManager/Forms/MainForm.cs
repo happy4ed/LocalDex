@@ -507,6 +507,7 @@ namespace DexManager.Forms
             Controls.Add(_modeHintLabel);
             _phoneScreenWakeTimer = new Timer { Interval = 600 };
             _phoneScreenWakeTimer.Tick += PhoneScreenWakeTimer_Tick;
+            InitializeInputHandoff();
             AddModeSidebar();
             ApplyDesignLayout();
             ApplyTheme();

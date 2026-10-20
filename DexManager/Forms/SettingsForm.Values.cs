@@ -112,6 +112,16 @@ namespace DexManager.Forms
             _rightWindowsBox.Checked = _settings.KeyMappings.HandleRightWindowsKey;
             _convertEnterBox.Checked = _settings.KeyMappings.ConvertEnterToShiftEnter;
             _ignoreShiftSpaceBox.Checked = _settings.KeyMappings.IgnoreShiftSpace;
+            var handoff = _settings.InputHandoff ??
+                InputHandoffSettings.CreateDefault();
+            _handoffEnabledBox.Checked = handoff.Enabled;
+            _handoffEdgeBox.SelectedIndex = Math.Max(0, Math.Min(
+                _handoffEdgeBox.Items.Count - 1,
+                (int)handoff.Edge));
+            _handoffHotkeyBox.Text = handoff.ReturnHotkey;
+            _handoffSpeedBox.Value = Clamp(
+                handoff.PhonePointerSpeedPercent,
+                _handoffSpeedBox);
             PopulateWirelessDevices();
             UpdateManualAdbControls();
             UpdateWirelessControls();
@@ -372,6 +382,7 @@ namespace DexManager.Forms
                     LocalizationService.Get(
                         "Settings.InvalidHotkey"));
             }
+            SaveInputHandoffValues(settings);
             if (HotkeyService.ShortcutsConflict(
                 settings.KeyMappings.CaptureHotkey,
                 settings.KeyMappings.ExitHotkey,
@@ -447,6 +458,37 @@ namespace DexManager.Forms
                         value),
                     ex);
             }
+        }
+
+        private void SaveInputHandoffValues(AppSettings settings)
+        {
+            var handoff = settings.InputHandoff ??
+                InputHandoffSettings.CreateDefault();
+            handoff.Enabled = _handoffEnabledBox.Checked;
+            var edge = _handoffEdgeBox.SelectedItem as HandoffEdgeOption;
+            handoff.Edge = edge == null ? InputHandoffEdge.Right : edge.Edge;
+            handoff.ReturnHotkey = _handoffHotkeyBox.Text.Trim();
+            handoff.PhonePointerSpeedPercent = (int)_handoffSpeedBox.Value;
+            if (!HotkeyService.IsValidShortcut(handoff.ReturnHotkey))
+            {
+                throw new InvalidOperationException(
+                    LocalizationService.Get("Settings.InvalidHotkey"));
+            }
+            // The return shortcut is matched by the handoff's own low-level
+            // hook, so compare in low-level mode.
+            if (HotkeyService.ShortcutsConflict(
+                    handoff.ReturnHotkey,
+                    settings.KeyMappings.CaptureHotkey,
+                    true) ||
+                HotkeyService.ShortcutsConflict(
+                    handoff.ReturnHotkey,
+                    settings.KeyMappings.ExitHotkey,
+                    true))
+            {
+                throw new InvalidOperationException(
+                    LocalizationService.Get("Settings.HandoffHotkeyConflict"));
+            }
+            settings.InputHandoff = handoff;
         }
 
         private void SaveSelectedDeviceConnection(AppSettings settings)

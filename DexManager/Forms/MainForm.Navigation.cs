@@ -116,6 +116,7 @@ namespace DexManager.Forms
             }
 
             ReconcileDeviceTabs(_physicalDeviceRegistry.Current);
+            ApplyInputHandoffSettings();
 
             try
             {

@@ -740,4 +740,31 @@
   <data name="Log.Scrcpy.DisplayWaiting" xml:space="preserve"><value>Waiting for the new scrcpy display ID (up to {0}ms; continues immediately when ready).</value></data>
   <data name="Log.Scrcpy.DisplayReceived" xml:space="preserve"><value>Received scrcpy display ID={0}: {1}ms</value></data>
   <data name="Error.Scrcpy.DisplayIdTimeout" xml:space="preserve"><value>No new display ID was received from scrcpy within {0}ms. Check the preceding scrcpy/ADB log for startup delays or errors.</value></data>
+  <data name="Settings.GroupHandoff" xml:space="preserve"><value>PC keyboard and mouse to phone</value></data>
+  <data name="Settings.HandoffEnabled" xml:space="preserve"><value>Hand the PC keyboard and mouse to the default phone (USB debugging)</value></data>
+  <data name="Settings.HandoffEdge" xml:space="preserve"><value>Phone position next to the PC screen</value></data>
+  <data name="Settings.HandoffEdgeLeft" xml:space="preserve"><value>Left</value></data>
+  <data name="Settings.HandoffEdgeRight" xml:space="preserve"><value>Right</value></data>
+  <data name="Settings.HandoffEdgeTop" xml:space="preserve"><value>Top</value></data>
+  <data name="Settings.HandoffEdgeBottom" xml:space="preserve"><value>Bottom</value></data>
+  <data name="Settings.HandoffReturnHotkey" xml:space="preserve"><value>Return-to-PC shortcut</value></data>
+  <data name="Settings.HandoffPhoneSpeed" xml:space="preserve"><value>Phone pointer speed factor (%)</value></data>
+  <data name="Settings.HandoffHint" xml:space="preserve"><value>Target: the default phone chosen above, connected by USB. Rest the PC pointer on that screen edge and keep pushing to move to the phone; push the pointer against the phone edge facing the PC, or press the shortcut, to come back. Paused while the same phone runs DeX or a single-app window. Text input follows the phone physical keyboard settings. On managed PCs, follow your organisation’s policies.</value></data>
+  <data name="Settings.HandoffHotkeyConflict" xml:space="preserve"><value>The return shortcut must differ from the capture and exit shortcuts.</value></data>
+  <data name="Log.Handoff.Ready" xml:space="preserve"><value>Keyboard and mouse handoff ready (control-only session).</value></data>
+  <data name="Log.Handoff.Entered" xml:space="preserve"><value>Keyboard and mouse handed to the phone.</value></data>
+  <data name="Log.Handoff.ReturnedByHotkey" xml:space="preserve"><value>Returned to the PC by shortcut.</value></data>
+  <data name="Log.Handoff.ReturnedByEdge" xml:space="preserve"><value>Returned to the PC by pushing the phone edge.</value></data>
+  <data name="Log.Handoff.ReturnedReleased" xml:space="preserve"><value>Phone capture was released; the pointer is back on the PC.</value></data>
+  <data name="Log.Handoff.SessionEnded" xml:space="preserve"><value>The control session ended; the pointer is back on the PC.</value></data>
+  <data name="Log.Handoff.TargetMissing" xml:space="preserve"><value>Keyboard and mouse handoff paused: the default phone is not connected by USB.</value></data>
+  <data name="Log.Handoff.TargetChanged" xml:space="preserve"><value>The default phone connection changed; restarting the control session.</value></data>
+  <data name="Log.Handoff.BlockedBySession" xml:space="preserve"><value>Keyboard and mouse handoff paused while the phone runs DeX or a single-app window.</value></data>
+  <data name="Log.Handoff.EnterFailed" xml:space="preserve"><value>Could not hand over to the phone; the pointer stays on the PC.</value></data>
+  <data name="Log.Handoff.GaveUp" xml:space="preserve"><value>The control session failed repeatedly; retrying after the phone reconnects.</value></data>
+  <data name="Log.Handoff.StartFailed" xml:space="preserve"><value>Could not start the control session: {0}</value></data>
+  <data name="Log.Handoff.ScrcpyMissing" xml:space="preserve"><value>scrcpy was not found.</value></data>
+  <data name="Log.Handoff.PhoneSizeUnknown" xml:space="preserve"><value>Could not read the phone screen size; return with the shortcut.</value></data>
+  <data name="Log.Handoff.HookFailed" xml:space="preserve"><value>Could not install the input hook for keyboard and mouse handoff.</value></data>
+  <data name="Log.Handoff.RawInputFailed" xml:space="preserve"><value>Could not register mouse raw input; return with the shortcut.</value></data>
 </root>

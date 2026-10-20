@@ -1,5 +1,16 @@
 # LocalDex build and validation
 
+## Keyboard and mouse handoff — 2.1.0-localdex.5 (2026-10-20)
+
+Settings → Connection → "PC keyboard and mouse to phone" hands the PC keyboard and mouse to the default phone over USB debugging, without mirroring (scrcpy control-only session: no video, no audio, UHID keyboard and mouse). Rest the pointer on the chosen screen edge and keep pushing to move to the phone; push against the phone edge facing the PC, or press the return shortcut (default Ctrl+Alt+Home), to come back at the same height. The pointer returns to the PC immediately if the session ends, the cable is unplugged or the target changes. Paused while the same phone runs DeX or a single-app window. Clipboard is shared; files are not.
+
+설정 → 연결 → 「PC 키보드·마우스 넘기기」로 화면 미러링 없이 PC 키보드·마우스를 USB 디버깅으로 기본 휴대폰에 넘깁니다(scrcpy 조종 전용 세션: 영상·소리 없음, UHID 키보드·마우스). 고른 쪽 화면 끝에 포인터를 댄 채 더 밀면 휴대폰으로 넘어가고, 휴대폰 화면의 PC 쪽 끝으로 더 밀거나 돌아오기 단축키(기본 Ctrl+Alt+Home)를 누르면 떠난 자리 높이로 돌아옵니다. 세션이 끝나거나 케이블이 빠지거나 대상이 바뀌면 포인터를 즉시 PC로 돌려놓습니다. 같은 휴대폰에서 DeX·단일 앱 창이 켜져 있는 동안은 쉽니다. 클립보드는 공유하고 파일 넘기기는 없습니다.
+
+Validation (Linux, 2026-10-20): Windows x64/net462 cross-build passed; xUnit 154 passed (30 new handoff cases: edge detection, states, safety, virtual phone pointer, settings), multi-device runner 39 passed. Hooks, the scrcpy window, raw input and the phone side are not exercised here; see the release notes for the on-device checklist.
+
+검증(Linux, 2026-10-20): Windows x64/net462 교차 빌드 통과, xUnit 154개(넘기기 시험 30개 포함)·다중 기기 39개 통과. 훅·scrcpy 창·원시 입력·휴대폰 쪽 동작은 실기 확인이 필요합니다.
+
+
 ## Default phone fix — 2.1.0-localdex.4 (2026-10-20)
 
 Settings → Connection → target phone is now saved as the default phone. Startup selection, connection attempts, automatic connection and reconnection use that phone whenever it is connected. When it is not connected, the previous rule (first phone in the list) is used and one log line is written; the fallback never replaces the saved default, and the default phone is selected again as soon as it reconnects. Clicking a phone tab still selects that phone for the current run. Existing settings files load unchanged; choose the target phone once in Settings and save.
@@ -108,7 +119,7 @@ After creating `dist/LocalDex`, run the following on Windows with Inno Setup 6 i
 
 ```powershell
 ./scripts/Build-Installer.ps1
-./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.4-win-x64-setup.exe
+./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.5-win-x64-setup.exe
 ```
 
 The Windows workflow runs both commands and publishes only after the installer smoke tests and regression tests succeed. Its `release:` commit-message trigger is intentional: ordinary pushes build artifacts without publishing a release.

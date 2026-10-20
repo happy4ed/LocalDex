@@ -423,6 +423,21 @@ namespace DexManager.Forms
                     StringComparison.OrdinalIgnoreCase);
         }
 
+        private sealed class HandoffEdgeOption
+        {
+            public HandoffEdgeOption(InputHandoffEdge edge)
+            {
+                Edge = edge;
+            }
+
+            public InputHandoffEdge Edge { get; private set; }
+
+            public override string ToString()
+            {
+                return LocalizationService.Get("Settings.HandoffEdge" + Edge);
+            }
+        }
+
         private sealed class WirelessDeviceOption
         {
             private readonly PhysicalDeviceInfo _device;

@@ -464,7 +464,7 @@ namespace DexManager.Services
             if (handler != null) handler(this, EventArgs.Empty);
         }
 
-        private sealed class ModifierState
+        internal sealed class ModifierState
         {
             public bool LeftAlt;
             public bool RightAlt;
@@ -508,7 +508,7 @@ namespace DexManager.Services
             }
         }
 
-        private sealed class KeyShortcut
+        internal sealed class KeyShortcut
         {
             public KeyShortcut(Keys key)
             {
