@@ -771,4 +771,9 @@
   <data name="Settings.HandoffDeviceHotkey" xml:space="preserve"><value>이 휴대폰(위 대상 휴대폰) 단축키</value></data>
   <data name="Log.Handoff.TargetSwitched" xml:space="preserve"><value>단축키로 넘길 대상을 바꿨습니다(이번 실행만 · 저장된 기본 휴대폰은 그대로).</value></data>
   <data name="Log.Handoff.OverrideCleared" xml:space="preserve"><value>단축키로 고른 휴대폰이 USB로 연결되어 있지 않아 저장된 기본 휴대폰으로 돌아갑니다.</value></data>
+  <data name="Handoff.Overlay.Arming" xml:space="preserve"><value>끝에 머무르면 휴대폰으로…</value></data>
+  <data name="Handoff.Overlay.OnPhone" xml:space="preserve"><value>휴대폰 사용 중 - 끝으로 밀거나 단축키로 돌아오기</value></data>
+  <data name="Settings.HandoffDwell" xml:space="preserve"><value>엣지 유지 시간(ms) 뒤 넘어가기</value></data>
+  <data name="Settings.HandoffHangul" xml:space="preserve"><value>한/영 키를 Shift+Space로 보내기</value></data>
+  <data name="Settings.HandoffDiagnostic" xml:space="preserve"><value>넘기기 진단 로그 남기기(serial·IP 없음)</value></data>
 </root>

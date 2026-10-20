@@ -31,6 +31,49 @@ namespace DexManager.Tests
         }
 
         [Fact]
+        public void APointJustInsideTheEdgeNeverCounts()
+        {
+            // The bug: on scaled displays the lower part of the screen was
+            // treated as the bottom edge.  Only the narrow band counts now.
+            var detector = Armed();
+            for (var i = 0; i < 40; i++)
+                Assert.False(Feed(detector, 1919 - 5, 500, 20, i * 20));
+            Assert.False(detector.IsTouching);
+        }
+
+        [Fact]
+        public void DwellWithoutPushingDoesNotHandOver()
+        {
+            var detector = Armed();
+            // Parked on the edge for well over the dwell, but no outward push.
+            for (var i = 0; i < 60; i++)
+                Assert.False(Feed(detector, 1919, 500, 0, i * 20));
+        }
+
+        [Fact]
+        public void ProgressClimbsWhileRestingOnTheEdge()
+        {
+            var detector = Armed();
+            Feed(detector, 1919, 500, 0, 0);
+            Assert.Equal(0.0, detector.Progress(0), 3);
+            Assert.True(detector.Progress(InputHandoffEdgeDetector.DefaultDwellMs / 2) > 0.3);
+            Assert.Equal(1.0, detector.Progress(InputHandoffEdgeDetector.DefaultDwellMs * 2), 3);
+            Feed(detector, 1900, 500, 0, 5000);
+            Assert.Equal(0.0, detector.Progress(5000), 3);
+        }
+
+        [Theory]
+        [InlineData(InputHandoffEdge.Left, -3, 5, 3)]
+        [InlineData(InputHandoffEdge.Right, 4, 5, 4)]
+        [InlineData(InputHandoffEdge.Bottom, 0, 7, 7)]
+        [InlineData(InputHandoffEdge.Top, 0, -6, 6)]
+        public void OutwardPushIsTheComponentAgainstTheEdge(
+            InputHandoffEdge edge, int dx, int dy, int expected)
+        {
+            Assert.Equal(expected, InputHandoffController.OutwardPush(edge, dx, dy));
+        }
+
+        [Fact]
         public void TouchingTheEdgeAloneDoesNotHandOver()
         {
             var detector = Armed();
@@ -68,7 +111,7 @@ namespace DexManager.Tests
             {
                 Assert.False(detector.Feed(
                     Screen, InputHandoffEdge.Right, 1919, 500,
-                    300 + i, false, true));
+                    20, 300 + i, false, true));
             }
         }
 
@@ -80,7 +123,7 @@ namespace DexManager.Tests
             {
                 Assert.False(detector.Feed(
                     Screen, InputHandoffEdge.Right, 1919, 500,
-                    i * 50, true, false));
+                    20, i * 50, true, false));
             }
         }
 
@@ -94,8 +137,8 @@ namespace DexManager.Tests
             Assert.False(Feed(detector, 1919 - InputHandoffEdgeDetector.RearmDistance, 500, 2000));
             Feed(detector, 1919, 500, 2100);
             var triggered = false;
-            for (var i = 0; i < 6; i++)
-                triggered |= Feed(detector, 1919, 500, 2400 + i);
+            for (var i = 0; i < 8; i++)
+                triggered |= Feed(detector, 1919, 500, 20, 2200 + i * 80);
             Assert.True(triggered);
         }
 
@@ -202,7 +245,7 @@ namespace DexManager.Tests
             PushToEdge(controller, 270);
             Assert.True(controller.EnterPhone(1919, 270));
             Assert.Equal(InputHandoffState.OnPhone, controller.State);
-            Assert.False(controller.OnPointerMoved(1919, 270, 5000, false, false));
+            Assert.False(controller.OnPointerMoved(1919, 270, 0, 5000, false, false));
 
             Assert.True(controller.ReturnToPc("Log.Handoff.ReturnedByHotkey"));
             Assert.Equal(InputHandoffState.Ready, controller.State);
@@ -431,7 +474,13 @@ namespace DexManager.Tests
 
         private static bool Feed(InputHandoffEdgeDetector detector, int x, int y, long t)
         {
-            return detector.Feed(Screen, InputHandoffEdge.Right, x, y, t, false, false);
+            return Feed(detector, x, y, 20, t);
+        }
+
+        private static bool Feed(InputHandoffEdgeDetector detector, int x, int y, int push, long t)
+        {
+            return detector.Feed(
+                Screen, InputHandoffEdge.Right, x, y, push, t, false, false);
         }
 
         private static InputHandoffController ReadyController(FakeHost host)
@@ -447,11 +496,12 @@ namespace DexManager.Tests
         // then dwell and push.
         private static void PushToEdge(InputHandoffController controller, int y)
         {
-            controller.OnPointerMoved(1800, y, 100000, false, false);
-            controller.OnPointerMoved(1919, y, 100010, false, false);
+            // Leave the edge, then dwell and keep pushing outward.
+            controller.OnPointerMoved(1800, y, 0, 100000, false, false);
+            controller.OnPointerMoved(1919, y, 0, 100010, false, false);
             var triggered = false;
-            for (var i = 0; i < 10 && !triggered; i++)
-                triggered = controller.OnPointerMoved(1925, y, 100300 + i, false, false);
+            for (var i = 0; i < 20 && !triggered; i++)
+                triggered = controller.OnPointerMoved(1919, y, 20, 100400 + i * 20, false, false);
             Assert.True(triggered);
         }
 

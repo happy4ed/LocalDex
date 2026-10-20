@@ -771,4 +771,9 @@
   <data name="Settings.HandoffDeviceHotkey" xml:space="preserve"><value>Shortcut for this phone (target phone above)</value></data>
   <data name="Log.Handoff.TargetSwitched" xml:space="preserve"><value>Handoff target changed by shortcut (this run only; the saved default phone is unchanged).</value></data>
   <data name="Log.Handoff.OverrideCleared" xml:space="preserve"><value>The phone picked by shortcut is no longer connected by USB; back to the saved default phone.</value></data>
+  <data name="Handoff.Overlay.Arming" xml:space="preserve"><value>Hold at edge to go to phone...</value></data>
+  <data name="Handoff.Overlay.OnPhone" xml:space="preserve"><value>On phone - push edge or shortcut to return</value></data>
+  <data name="Settings.HandoffDwell" xml:space="preserve"><value>Edge hold time before handoff (ms)</value></data>
+  <data name="Settings.HandoffHangul" xml:space="preserve"><value>Send the Korean/English key as Shift+Space</value></data>
+  <data name="Settings.HandoffDiagnostic" xml:space="preserve"><value>Write a handoff diagnostic log (no serial/IP)</value></data>
 </root>

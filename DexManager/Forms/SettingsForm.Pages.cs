@@ -313,11 +313,22 @@ namespace DexManager.Forms
             _handoffDeviceHotkeyBox = AddHotkey(
                 handoff,
                 LocalizationService.Get("Settings.HandoffDeviceHotkey"));
+            _handoffDwellBox = AddNumber(
+                handoff,
+                LocalizationService.Get("Settings.HandoffDwell"),
+                100,
+                2000);
             _handoffSpeedBox = AddNumber(
                 handoff,
                 LocalizationService.Get("Settings.HandoffPhoneSpeed"),
                 25,
                 400);
+            _handoffHangulBox = AddCheck(
+                handoff,
+                LocalizationService.Get("Settings.HandoffHangul"));
+            _handoffDiagnosticBox = AddCheck(
+                handoff,
+                LocalizationService.Get("Settings.HandoffDiagnostic"));
             AddRow(
                 handoff,
                 string.Empty,

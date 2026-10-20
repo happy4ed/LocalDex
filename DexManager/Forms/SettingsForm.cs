@@ -126,6 +126,9 @@ namespace DexManager.Forms
         private ThemedSelectControl _handoffEdgeBox;
         private ThemedHotkeyControl _handoffHotkeyBox;
         private ThemedNumberControl _handoffSpeedBox;
+        private ThemedNumberControl _handoffDwellBox;
+        private CheckBox _handoffHangulBox;
+        private CheckBox _handoffDiagnosticBox;
         private ThemedHotkeyControl _handoffEnterHotkeyBox;
         private ThemedHotkeyControl _handoffNextHotkeyBox;
         private ThemedHotkeyControl _handoffDeviceHotkeyBox;

@@ -1,5 +1,23 @@
 # LocalDex build and validation
 
+## Handoff accuracy, overlay, Korean key, diagnostics — 2.1.0-localdex.7 (2026-10-20)
+
+Fixes the keyboard and mouse handoff that misfired on scaled displays. Edge detection now uses logical cursor coordinates (GetCursorPos) consistent with the screen bounds, so the pointer only hands over inside a 2 px band of the chosen edge after resting there for the hold time (default 330 ms) while pushing outward -- no more handing over partway down a scaled screen, and no snap to the edge. Returning to the PC is now atomic: input to the phone stops, scrcpy loses its mouse grab and the PC pointer is restored in one transition, so the two cursors no longer move together for a moment. The handoff works whenever the target phone is connected over USB debugging, with or without a DeX or single-app window. The Korean/English key is sent to the phone as Shift+Space (toggle, on by default). A small click-through overlay near the edge shows the hold progress and a "can return" hint. An optional diagnostic log (no serial or IP) records each decision for troubleshooting.
+
+배율이 적용된 화면에서 잘못 넘어가던 키보드·마우스 넘기기를 고쳤습니다. 엣지 판정이 화면 경계와 같은 논리 좌표(GetCursorPos)를 쓰도록 바꿔, 고른 변의 2px 띠 안에서 유지 시간(기본 330ms) 동안 바깥으로 밀 때만 넘어갑니다 — 배율 화면 중간에서 넘어가거나 변에 툭 붙던 문제가 없어집니다. PC로 돌아오기를 원자적으로 바꿔(폰 입력 중단 → scrcpy 포인터 잡기 해제 → PC 포인터 복귀를 한 전이로) 두 커서가 잠깐 같이 움직이던 문제를 없앴습니다. 대상 휴대폰이 USB 디버깅으로 붙어 있으면 DeX·단일 앱 창이 없어도 동작합니다. 한/영 키는 Shift+Space로 폰에 보냅니다(기본 켬). 변 근처에 작은 클릭 통과 표시로 유지 진행과 "돌아올 수 있음"을 보여줍니다. 선택 진단 로그(serial·IP 없음)로 결정을 기록해 문제 분석에 씁니다.
+
+### Handoff diagnostic log
+
+Turn on Settings → Connection → "Write a handoff diagnostic log" and reproduce the problem. The file is `handoff-diagnostic.log` in the log folder (Settings → Paths, default `logs` next to `LocalDex.exe`; open it from Logs). It holds no device serial or IP. Lines:
+
+- `edge x=.. y=.. logical-bounds=(L,T WxH) edge=Bottom dist=.. push=.. progress=0.00 state=Ready` — a mouse sample while armed. `dist` is logical pixels from the chosen edge (0 = on it); handoff needs `dist<=2`, `progress` reaching 1.0 and `push` accumulating. A large `dist` when the cursor looks near the edge points to a coordinate/scale problem.
+- `enter phone ...`, `release pointer->pc at x,y`, `hangul->shift+space` — state transitions.
+
+Validation (Linux, 2026-10-20): Windows x64/net462 cross-build passed; xUnit 164 passed, multi-device runner 39 passed. Hooks, raw input, the scrcpy window, the overlay rendering and the phone side are not exercised here.
+
+검증(Linux, 2026-10-20): Windows x64/net462 교차 빌드 통과, xUnit 164개·다중 기기 39개 통과. 훅·원시 입력·scrcpy 창·overlay 렌더·휴대폰 쪽은 실기 확인이 필요합니다.
+
+
 ## Handoff shortcuts — 2.1.0-localdex.6 (2026-10-20)
 
 All handoff shortcuts are configurable in Settings → Connection, and each can be set to none (Delete/Backspace): return (default Ctrl+Alt+Home), go to phone without pushing the edge (default Ctrl+Alt+PageDown), next phone (default Ctrl+Alt+PageUp) and one shortcut per phone. Phone and next-phone shortcuts change the target for this run only and go to it; the saved default phone does not change. Conflicts with each other or with the capture/exit shortcuts are rejected on save. DeX and single-app windows on the same phone no longer pause the handoff.
@@ -130,7 +148,7 @@ After creating `dist/LocalDex`, run the following on Windows with Inno Setup 6 i
 
 ```powershell
 ./scripts/Build-Installer.ps1
-./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.6-win-x64-setup.exe
+./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.7-win-x64-setup.exe
 ```
 
 The Windows workflow runs both commands and publishes only after the installer smoke tests and regression tests succeed. Its `release:` commit-message trigger is intentional: ordinary pushes build artifacts without publishing a release.

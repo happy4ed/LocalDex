@@ -126,6 +126,9 @@ namespace DexManager.Forms
             _handoffSpeedBox.Value = Clamp(
                 handoff.PhonePointerSpeedPercent,
                 _handoffSpeedBox);
+            _handoffDwellBox.Value = Clamp(handoff.DwellMs, _handoffDwellBox);
+            _handoffHangulBox.Checked = handoff.ConvertHangulToShiftSpace;
+            _handoffDiagnosticBox.Checked = handoff.DiagnosticLog;
             PopulateWirelessDevices();
             UpdateManualAdbControls();
             UpdateWirelessControls();
@@ -476,6 +479,9 @@ namespace DexManager.Forms
             handoff.EnterHotkey = _handoffEnterHotkeyBox.Text.Trim();
             handoff.NextDeviceHotkey = _handoffNextHotkeyBox.Text.Trim();
             handoff.PhonePointerSpeedPercent = (int)_handoffSpeedBox.Value;
+            handoff.DwellMs = (int)_handoffDwellBox.Value;
+            handoff.ConvertHangulToShiftSpace = _handoffHangulBox.Checked;
+            handoff.DiagnosticLog = _handoffDiagnosticBox.Checked;
             SyncHandoffDeviceHotkey(true);
             foreach (var pending in _pendingDeviceHotkeys)
                 handoff.SetDeviceHotkey(pending.Key, pending.Value);

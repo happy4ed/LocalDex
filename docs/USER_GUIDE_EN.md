@@ -302,9 +302,13 @@ Place the phone next to the PC and control it with the PC keyboard and mouse. On
 - Return: move the pointer to the phone edge facing the PC and keep pushing, or press the return shortcut (default `Ctrl+Alt+Home`). After an edge return the PC pointer reappears on the edge it left at the same height (or width ratio for top/bottom); after going and returning by shortcut it comes back to where it was.
 - Change target: the next-phone shortcut (default `Ctrl+Alt+PageUp`) or a per-phone shortcut (one for each phone chosen as target phone) targets that phone and moves to it. This lasts for the current run only; the saved default phone does not change. If that phone disconnects, the default phone is used again.
 - All shortcuts are configurable; Delete or Backspace in a shortcut box sets "none". Shortcuts that conflict with each other or with the capture/exit shortcuts are rejected on save.
+- Edge detection: the pointer hands over only inside a very narrow band (2 px) of the chosen edge after resting there for the hold time (default 330 ms) while pushing outward. It does not hand over away from the edge (e.g. lower on the screen).
+- On-screen cue: a small indicator near the edge shows the hold progress (about to hand over) and a "can return" hint. It passes mouse clicks through.
+- Korean/English key: sent to the phone as Shift+Space (can be turned off). The actual language toggle follows the phone's physical-keyboard settings.
+- Diagnostic log: turn on Settings → Connection → "Write a handoff diagnostic log" and reproduce the issue; `handoff-diagnostic.log` is written to the log folder. It records no serial or IP.
 - Returning by edge uses a virtual phone pointer computed from the mouse movement LocalDex hands over. It may need a little extra push but never returns early. If the phone pointer speed is set slower than normal, lower "Phone pointer speed factor (%)".
 - Safety: if the control session ends, the cable is unplugged or the target phone changes, the pointer returns to the PC immediately. Leaving with scrcpy's Alt (release capture) or Alt+Tab also returns to the PC.
-- DeX and single-app windows on the same phone do not pause the handoff (separate windows). Android decides which phone display receives the handed-over input; this is still being confirmed on devices.
+- DeX and single-app windows on the same phone do not pause the handoff (separate windows); it works whenever the target phone is connected over USB debugging, with or without DeX. Android decides which phone display receives the handed-over input; this is still being confirmed on devices.
 - Clipboard: copy and paste are shared between the PC and the phone.
 - Korean/other input: the UHID keyboard follows the phone's physical keyboard settings (language switching and layout).
 - On managed PCs, follow your organisation's policies.

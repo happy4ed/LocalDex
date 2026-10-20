@@ -65,29 +65,51 @@ namespace DexManager.Services
     // pointer has dwelt on the configured outer edge and kept pushing.
     public sealed class InputHandoffEdgeDetector
     {
-        public const int DefaultDwellMs = 200;
-        public const int DefaultPushEvents = 4;
+        public const int DefaultDwellMs = 330;
+        // The pointer counts as touching the edge only inside this very
+        // narrow band (logical pixels).  Must stay tiny: on scaled displays
+        // the caller already feeds coordinates in the same logical space as
+        // the bounds, so a wide band would hand over far from the edge.
+        public const int DefaultBandPx = 2;
+        // Accumulated outward push (raw mouse counts) required during the
+        // dwell, so that merely parking the pointer on the edge does not
+        // hand over -- the user must keep pushing past it.
+        public const int DefaultMinPushPx = 10;
         // After a return the pointer must move this far from the edge
         // before another handoff can trigger (prevents ping-pong).
         public const int RearmDistance = 16;
 
         private long _touchStartMs = -1;
-        private int _pushEvents;
+        private int _pushAccum;
         private bool _armed = true;
 
         public InputHandoffEdgeDetector()
         {
             DwellMs = DefaultDwellMs;
-            PushEvents = DefaultPushEvents;
+            BandPx = DefaultBandPx;
+            MinPushPx = DefaultMinPushPx;
         }
 
         public int DwellMs { get; set; }
-        public int PushEvents { get; set; }
+        public int BandPx { get; set; }
+        public int MinPushPx { get; set; }
+
+        // 0 while not touching; climbs to 1 as the dwell completes.  Used by
+        // the overlay to show the "about to hand over" progress.
+        public double Progress(long timeMs)
+        {
+            if (_touchStartMs < 0 || DwellMs <= 0) return 0;
+            var elapsed = timeMs - _touchStartMs;
+            if (elapsed <= 0) return 0;
+            return elapsed >= DwellMs ? 1.0 : elapsed / (double)DwellMs;
+        }
+
+        public bool IsTouching { get { return _touchStartMs >= 0; } }
 
         public void Reset(bool requireLeaveEdge)
         {
             _touchStartMs = -1;
-            _pushEvents = 0;
+            _pushAccum = 0;
             _armed = !requireLeaveEdge;
         }
 
@@ -121,40 +143,46 @@ namespace DexManager.Services
             }
         }
 
-        // Returns true once per push: the pointer stayed on the edge for at
-        // least DwellMs and then produced PushEvents more movements against
-        // it.  Injected input and drags (button held) never trigger.
+        // Returns true once: the pointer stayed inside the narrow edge band
+        // for at least DwellMs while the user kept pushing outward past it
+        // (outwardPush accumulates to MinPushPx).  x/y and the bounds must be
+        // in the same coordinate space (logical).  Drags (button held) and
+        // injected movement never trigger.
         public bool Feed(
             HandoffRect bounds,
             InputHandoffEdge edge,
             int x,
             int y,
+            int outwardPush,
             long timeMs,
             bool injected,
             bool buttonDown)
         {
             if (injected) return false;
+            var distance = DistanceFromEdge(bounds, edge, x, y);
             if (!_armed)
             {
-                if (DistanceFromEdge(bounds, edge, x, y) >= RearmDistance)
-                    _armed = true;
+                if (distance >= RearmDistance) _armed = true;
                 return false;
             }
-            if (buttonDown || !IsAtEdge(bounds, edge, x, y))
+            // Within [0, BandPx] of the configured edge.  Negative distance
+            // (reported beyond the edge) still counts as touching.
+            var atBand = distance <= BandPx;
+            if (buttonDown || !atBand)
             {
                 _touchStartMs = -1;
-                _pushEvents = 0;
+                _pushAccum = 0;
                 return false;
             }
             if (_touchStartMs < 0)
             {
                 _touchStartMs = timeMs;
-                _pushEvents = 0;
+                _pushAccum = 0;
                 return false;
             }
+            if (outwardPush > 0) _pushAccum += outwardPush;
             if (timeMs - _touchStartMs < DwellMs) return false;
-            _pushEvents++;
-            if (_pushEvents < PushEvents) return false;
+            if (_pushAccum < MinPushPx) return false;
             Reset(true);
             return true;
         }
@@ -220,11 +248,15 @@ namespace DexManager.Services
         private long _touchStartMs = -1;
         private int _pushEvents;
 
+        // Raw movements against the facing edge required after the dwell to
+        // return; small so a short extra push brings the pointer back.
+        public const int DefaultPushEvents = 4;
+
         public PhonePointerTracker()
         {
             SpeedMultiplier = 1.0;
             DwellMs = InputHandoffEdgeDetector.DefaultDwellMs;
-            PushEvents = InputHandoffEdgeDetector.DefaultPushEvents;
+            PushEvents = DefaultPushEvents;
         }
 
         public int Width { get; private set; }
@@ -478,6 +510,7 @@ namespace DexManager.Services
         public void SetPhoneSpeed(double multiplier)
         {
             _phone.SpeedMultiplier = multiplier > 0 ? multiplier : 1.0;
+            _phone.DwellMs = _detector.DwellMs;
         }
 
         public void Configure(
@@ -563,11 +596,14 @@ namespace DexManager.Services
             }
         }
 
-        // Called from the low-level mouse hook.  Pure: no host calls.  When
-        // it returns true the caller posts EnterPhone to the UI thread.
+        // Fed from raw mouse input while Ready (pure: no host calls).  x/y is
+        // the logical cursor position; outwardPush is this event's movement
+        // against the configured edge (>=0).  Returns true when the caller
+        // should hand over.
         public bool OnPointerMoved(
             int x,
             int y,
+            int outwardPush,
             long timeMs,
             bool injected,
             bool buttonDown)
@@ -578,9 +614,38 @@ namespace DexManager.Services
                 _edge,
                 x,
                 y,
+                outwardPush,
                 timeMs,
                 injected,
                 buttonDown);
+        }
+
+        // Dwell progress (0..1) for the overlay; >0 only while the pointer
+        // is resting on the edge about to hand over.
+        public double EdgeProgress(long timeMs)
+        {
+            return State == InputHandoffState.Ready
+                ? _detector.Progress(timeMs)
+                : 0;
+        }
+
+        public void ConfigureDwell(int dwellMs)
+        {
+            _detector.DwellMs = dwellMs > 0
+                ? dwellMs
+                : InputHandoffEdgeDetector.DefaultDwellMs;
+        }
+
+        // Outward component of a raw mouse delta for the given edge (>=0).
+        public static int OutwardPush(InputHandoffEdge edge, int dx, int dy)
+        {
+            switch (edge)
+            {
+                case InputHandoffEdge.Left: return dx < 0 ? -dx : 0;
+                case InputHandoffEdge.Right: return dx > 0 ? dx : 0;
+                case InputHandoffEdge.Top: return dy < 0 ? -dy : 0;
+                default: return dy > 0 ? dy : 0;
+            }
         }
 
         public bool EnterPhone(int x, int y)

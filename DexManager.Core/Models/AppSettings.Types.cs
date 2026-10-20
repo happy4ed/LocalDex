@@ -112,6 +112,7 @@ namespace DexManager.Models
         public const string DefaultEnterHotkey = "Ctrl+Alt+PageDown";
         public const string DefaultNextDeviceHotkey = "Ctrl+Alt+PageUp";
         public const int DefaultPhonePointerSpeedPercent = 100;
+        public const int DefaultDwellMs = 330;
 
         [DataMember(Order = 1)] public bool Enabled { get; set; }
         [DataMember(Order = 2)] public InputHandoffEdge Edge { get; set; }
@@ -126,6 +127,13 @@ namespace DexManager.Models
         // One shortcut per phone: target that phone and go to it.
         [DataMember(Order = 7)]
         public List<InputHandoffDeviceHotkey> DeviceHotkeys { get; set; }
+        // Time the pointer must rest on the edge, pushing outward, before it
+        // hands over.
+        [DataMember(Order = 8)] public int DwellMs { get; set; }
+        // Convert the Korean/English key to Shift+Space for the phone.
+        [DataMember(Order = 9)] public bool ConvertHangulToShiftSpace { get; set; }
+        // Write a diagnostic log of every handoff decision (no serial/IP).
+        [DataMember(Order = 10)] public bool DiagnosticLog { get; set; }
 
         public string GetDeviceHotkey(string identity)
         {
@@ -173,7 +181,10 @@ namespace DexManager.Models
                 PhonePointerSpeedPercent = DefaultPhonePointerSpeedPercent,
                 EnterHotkey = DefaultEnterHotkey,
                 NextDeviceHotkey = DefaultNextDeviceHotkey,
-                DeviceHotkeys = new List<InputHandoffDeviceHotkey>()
+                DeviceHotkeys = new List<InputHandoffDeviceHotkey>(),
+                DwellMs = DefaultDwellMs,
+                ConvertHangulToShiftSpace = true,
+                DiagnosticLog = false
             };
         }
 
@@ -197,6 +208,8 @@ namespace DexManager.Models
                 string.IsNullOrWhiteSpace(item.Hotkey));
             if (PhonePointerSpeedPercent < 25 || PhonePointerSpeedPercent > 400)
                 PhonePointerSpeedPercent = DefaultPhonePointerSpeedPercent;
+            if (DwellMs < 100 || DwellMs > 2000)
+                DwellMs = DefaultDwellMs;
         }
     }
 
