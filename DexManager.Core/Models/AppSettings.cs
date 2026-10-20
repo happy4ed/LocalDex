@@ -37,6 +37,11 @@ namespace DexManager.Models
         [DataMember(Order = 16)]
         public List<DeviceWirelessConnectionProfile>
             DeviceWirelessConnectionProfiles { get; set; }
+        // Physical identity of the phone chosen as the default target in
+        // Settings.  Only an explicit user choice changes it; automatic
+        // fallback selections never overwrite it.
+        [DataMember(Order = 17)]
+        public string PreferredDeviceIdentity { get; set; }
 
         public static AppSettings CreateDefault()
         {
@@ -168,6 +173,10 @@ namespace DexManager.Models
             if (DeviceWirelessConnectionProfiles == null)
                 DeviceWirelessConnectionProfiles =
                     new List<DeviceWirelessConnectionProfile>();
+            PreferredDeviceIdentity = string.IsNullOrWhiteSpace(
+                PreferredDeviceIdentity)
+                ? string.Empty
+                : PreferredDeviceIdentity.Trim();
             if (SingleWindowSlots == null)
                 SingleWindowSlots = new List<SingleWindowSlotSettings>();
             while (SingleWindowSlots.Count < 3)

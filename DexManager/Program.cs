@@ -98,6 +98,11 @@ namespace DexManager
                     settingsService,
                     settings,
                     logService);
+                wirelessAdbService.SetPreferredDeviceResolver(
+                    () => Models.DevicePresentationOrder
+                        .FindPreferredTransportSerial(
+                            physicalDeviceRegistry.Current.Devices,
+                            settings.PreferredDeviceIdentity));
                 wirelessAdbService.InitializeTarget();
                 var scrcpyPath = settingsService.ResolvePath(settings.Paths.ScrcpyPath);
                 bundledProcessCleanup.AddExecutablePath(scrcpyPath);

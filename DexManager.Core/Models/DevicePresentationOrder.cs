@@ -44,6 +44,75 @@ namespace DexManager.Models
             return new List<string>(_identities);
         }
 
+        // Automatic selection rule shared by startup, reconnect and the
+        // settings default: the saved default phone wins whenever it is
+        // connected; otherwise the first connected phone in presentation
+        // order is used.  The fallback never replaces the saved default.
+        public static string ChooseIdentity(
+            IList<string> orderedIdentities,
+            Func<string, bool> isConnected,
+            string preferredIdentity)
+        {
+            if (orderedIdentities == null || isConnected == null)
+                return string.Empty;
+            var preferred = string.IsNullOrWhiteSpace(preferredIdentity)
+                ? string.Empty
+                : preferredIdentity.Trim();
+            if (preferred.Length > 0)
+            {
+                foreach (var identity in orderedIdentities)
+                {
+                    if (string.Equals(
+                            identity,
+                            preferred,
+                            StringComparison.OrdinalIgnoreCase) &&
+                        isConnected(identity))
+                    {
+                        return identity;
+                    }
+                }
+            }
+            foreach (var identity in orderedIdentities)
+            {
+                if (!string.IsNullOrWhiteSpace(identity) &&
+                    isConnected(identity))
+                {
+                    return identity;
+                }
+            }
+            return string.Empty;
+        }
+
+        // Returns the authorized ADB serial (USB first, then wireless) of the
+        // saved default phone, or an empty string when it is not connected.
+        public static string FindPreferredTransportSerial(
+            IList<PhysicalDeviceInfo> devices,
+            string preferredIdentity)
+        {
+            if (devices == null ||
+                string.IsNullOrWhiteSpace(preferredIdentity))
+            {
+                return string.Empty;
+            }
+            var preferred = preferredIdentity.Trim();
+            foreach (var device in devices)
+            {
+                if (device == null || !string.Equals(
+                        device.Identity,
+                        preferred,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                var transport = device.SelectPreferredTransport(null);
+                return transport != null && transport.IsAuthorized &&
+                    !string.IsNullOrWhiteSpace(transport.Serial)
+                    ? transport.Serial.Trim()
+                    : string.Empty;
+            }
+            return string.Empty;
+        }
+
         public static int CompareNewestFirst(
             PhysicalDeviceInfo left,
             PhysicalDeviceInfo right)

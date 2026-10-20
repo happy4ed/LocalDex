@@ -58,17 +58,45 @@ namespace DexManager.Forms
                     HandleContextDisconnected(context);
             }
 
-            if (initialSelectionPending ||
-                _selectedDeviceContext == null ||
-                string.IsNullOrWhiteSpace(_selectedDeviceContext.Identity))
+            var preferredIdentity = _settings.PreferredDeviceIdentity ??
+                string.Empty;
+            if (!string.Equals(
+                    preferredIdentity,
+                    _appliedPreferredIdentity,
+                    StringComparison.OrdinalIgnoreCase))
             {
-                foreach (var identity in
-                    _devicePresentationOrder.GetIdentities())
+                // The default phone was changed in Settings: select it now
+                // if it is connected, otherwise as soon as it connects.
+                _appliedPreferredIdentity = preferredIdentity;
+                _selectionAwaitingPreferred = true;
+            }
+            var automaticIdentity = DevicePresentationOrder.ChooseIdentity(
+                _devicePresentationOrder.GetIdentities(),
+                IsDeviceIdentityConnected,
+                preferredIdentity);
+            var preferredConnected = preferredIdentity.Length > 0 &&
+                string.Equals(
+                    automaticIdentity,
+                    preferredIdentity,
+                    StringComparison.OrdinalIgnoreCase);
+            var selectionMissing = initialSelectionPending ||
+                _selectedDeviceContext == null ||
+                string.IsNullOrWhiteSpace(_selectedDeviceContext.Identity);
+            var reclaimForPreferred = preferredConnected &&
+                _selectionAwaitingPreferred &&
+                !string.Equals(
+                    _selectedDeviceIdentity,
+                    preferredIdentity,
+                    StringComparison.OrdinalIgnoreCase);
+            if (selectionMissing || reclaimForPreferred)
+            {
+                DeviceUiContext context;
+                if (automaticIdentity.Length > 0 &&
+                    _deviceContexts.TryGetValue(
+                        automaticIdentity,
+                        out context))
                 {
-                    DeviceUiContext context;
-                    if (_deviceContexts.TryGetValue(identity, out context) &&
-                        context.Device != null &&
-                        context.Device.IsConnected)
+                    _selectionAwaitingPreferred = !preferredConnected;
                     {
                         if (initialSelectionPending)
                         {
@@ -87,7 +115,6 @@ namespace DexManager.Forms
                         {
                             SelectDeviceContext(context);
                         }
-                        break;
                     }
                 }
             }
@@ -96,6 +123,15 @@ namespace DexManager.Forms
             RefreshSelectedDeviceState();
             if (_settingsForm != null && !_settingsForm.IsDisposed)
                 _settingsForm.RefreshSelectedDeviceContext();
+        }
+
+        private bool IsDeviceIdentityConnected(string identity)
+        {
+            DeviceUiContext context;
+            return !string.IsNullOrWhiteSpace(identity) &&
+                _deviceContexts.TryGetValue(identity, out context) &&
+                context.Device != null &&
+                context.Device.IsConnected;
         }
 
         private void RefreshInitiallyBoundDeviceSettings(

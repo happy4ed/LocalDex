@@ -219,6 +219,15 @@ namespace DexManager.Forms
 
         private void PopulateWirelessDevices()
         {
+            // Keep a choice the user has made but not saved yet; otherwise
+            // show the saved default phone, and only then the phone that is
+            // currently selected in the main window.
+            var pending = _preferredDeviceChangedByUser
+                ? GetSelectedWirelessDeviceOption()
+                : null;
+            var pendingIdentity = pending == null
+                ? string.Empty
+                : pending.DeviceIdentity;
             _loadingWirelessDevice = true;
             try
             {
@@ -237,22 +246,16 @@ namespace DexManager.Forms
                     }
                 }
 
-                var selectedIdentity = _getSelectedDeviceIdentity();
-                var selectedIndex = -1;
-                for (var index = 0;
-                    index < _wirelessDeviceBox.Items.Count;
-                    index++)
+                var selectedIndex = FindWirelessDeviceIndex(pendingIdentity);
+                if (selectedIndex < 0)
                 {
-                    var option = _wirelessDeviceBox.Items[index] as
-                        WirelessDeviceOption;
-                    if (option != null && string.Equals(
-                        option.DeviceIdentity,
-                        selectedIdentity,
-                        StringComparison.OrdinalIgnoreCase))
-                    {
-                        selectedIndex = index;
-                        break;
-                    }
+                    selectedIndex = FindWirelessDeviceIndex(
+                        _settings.PreferredDeviceIdentity);
+                }
+                if (selectedIndex < 0)
+                {
+                    selectedIndex = FindWirelessDeviceIndex(
+                        _getSelectedDeviceIdentity());
                 }
                 if (selectedIndex < 0 &&
                     _wirelessDeviceBox.Items.Count > 0)
@@ -266,6 +269,26 @@ namespace DexManager.Forms
                 _loadingWirelessDevice = false;
             }
             LoadSelectedWirelessProfile();
+        }
+
+        private int FindWirelessDeviceIndex(string identity)
+        {
+            if (string.IsNullOrWhiteSpace(identity)) return -1;
+            for (var index = 0;
+                index < _wirelessDeviceBox.Items.Count;
+                index++)
+            {
+                var option = _wirelessDeviceBox.Items[index] as
+                    WirelessDeviceOption;
+                if (option != null && string.Equals(
+                    option.DeviceIdentity,
+                    identity.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return index;
+                }
+            }
+            return -1;
         }
 
         public void RefreshSelectedDeviceContext()
@@ -292,6 +315,7 @@ namespace DexManager.Forms
             EventArgs e)
         {
             if (_loadingWirelessDevice) return;
+            _preferredDeviceChangedByUser = true;
             SaveLoadedWirelessProfileToMemory();
             LoadSelectedWirelessProfile();
         }
@@ -413,6 +437,11 @@ namespace DexManager.Forms
             public string DeviceIdentity
             {
                 get { return _device.Identity ?? string.Empty; }
+            }
+
+            public string DisplayName
+            {
+                get { return _device.DisplayName ?? string.Empty; }
             }
 
             public string UsbSerial

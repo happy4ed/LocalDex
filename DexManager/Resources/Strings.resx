@@ -187,6 +187,8 @@
   <data name="Error.Adb.PairingCodeEmpty" xml:space="preserve"><value>The pairing code is empty.</value></data>
   <data name="Log.Adb.TargetCleared" xml:space="preserve"><value>Cleared the initial connection-monitoring target.</value></data>
   <data name="Log.Adb.TargetSelected" xml:space="preserve"><value>Selected initial connection-monitoring target: {0}</value></data>
+  <data name="Log.Adb.PreferredDeviceMissing" xml:space="preserve"><value>The default phone selected in Settings is not connected. Another connected phone is used until it reconnects; the saved default is kept.</value></data>
+  <data name="Log.Adb.PreferredDeviceChanged" xml:space="preserve"><value>Default phone changed in Settings: {0}</value></data>
   <data name="Log.Adb.StartServerResult" xml:space="preserve"><value>ADB start-server result</value></data>
   <data name="Log.Adb.SelectedPath" xml:space="preserve"><value>Selected ADB path: {0}</value></data>
   <data name="Log.Adb.VersionResult" xml:space="preserve"><value>ADB version result</value></data>

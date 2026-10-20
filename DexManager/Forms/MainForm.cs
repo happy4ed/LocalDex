@@ -171,6 +171,12 @@ namespace DexManager.Forms
         private DeviceUiContext _selectedDeviceContext;
         private DeviceUiContext _initialDeviceContext;
         private string _selectedDeviceIdentity = string.Empty;
+        // True while the selected tab is an automatic fallback because the
+        // saved default phone was not connected.  The default phone then
+        // takes the selection back as soon as it is connected again.  An
+        // explicit tab click clears it.
+        private bool _selectionAwaitingPreferred = true;
+        private string _appliedPreferredIdentity;
         private bool _interactiveServicesStarted;
         private bool _deviceTabsVisibleForRun;
 

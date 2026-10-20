@@ -1,5 +1,16 @@
 # LocalDex build and validation
 
+## Default phone fix — 2.1.0-localdex.4 (2026-10-20)
+
+Settings → Connection → target phone is now saved as the default phone. Startup selection, connection attempts, automatic connection and reconnection use that phone whenever it is connected. When it is not connected, the previous rule (first phone in the list) is used and one log line is written; the fallback never replaces the saved default, and the default phone is selected again as soon as it reconnects. Clicking a phone tab still selects that phone for the current run. Existing settings files load unchanged; choose the target phone once in Settings and save.
+
+설정 → 연결의 「대상 휴대폰」을 기본 휴대폰으로 저장합니다. 시작 시 고르기, 연결 시도, 자동 연결, 재연결은 그 휴대폰이 연결돼 있으면 항상 그 휴대폰을 씁니다. 연결돼 있지 않을 때만 이전 규칙(목록 첫 휴대폰)을 쓰고 로그를 한 줄 남깁니다. 이 대체 선택은 저장된 기본 휴대폰을 덮어쓰지 않으며, 기본 휴대폰이 다시 연결되면 다시 그 휴대폰을 고릅니다. 휴대폰 탭을 직접 누르면 이번 실행에서는 그 휴대폰을 씁니다. 기존 설정 파일은 그대로 읽으며, 설정에서 대상 휴대폰을 한 번 골라 저장하면 됩니다.
+
+Validation (Linux, 2026-10-20): Windows x64/net462 cross-build passed; xUnit 124 passed (VSTest and in-process runner, including 8 new default-phone cases), multi-device runner 39 passed. Inno Setup is not available here, so the setup EXE is built by the Windows workflow. Not yet confirmed on Windows with attached phones.
+
+검증(Linux, 2026-10-20): Windows x64/net462 교차 빌드 통과, xUnit 124개 통과(기본 휴대폰 시험 8개 포함), 다중 기기 39개 통과. 이 환경에는 Inno Setup이 없어 설치 EXE는 Windows 워크플로가 만듭니다. 실기 확인은 아직입니다.
+
+
 ## Windows installer and release — 2026-10-13
 
 Added an Inno Setup per-user installer and a Windows build/release workflow. Install/upgrade/uninstall smoke tests preserve runtime settings, phone recovery records and captures. Source commits exclude downloaded scrcpy binaries; the pinned runtime is verified and included in release assets. CI publication is gated on build, regression and installer checks.
@@ -97,7 +108,7 @@ After creating `dist/LocalDex`, run the following on Windows with Inno Setup 6 i
 
 ```powershell
 ./scripts/Build-Installer.ps1
-./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.3-win-x64-setup.exe
+./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.4-win-x64-setup.exe
 ```
 
 The Windows workflow runs both commands and publishes only after the installer smoke tests and regression tests succeed. Its `release:` commit-message trigger is intentional: ordinary pushes build artifacts without publishing a release.

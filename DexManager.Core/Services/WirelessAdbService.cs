@@ -17,6 +17,9 @@ namespace DexManager.Services
         private DateTime _lastReconnectAttemptUtc = DateTime.MinValue;
         private long _transitionGeneration;
         private string _selectedSerial = string.Empty;
+        private Func<string> _preferredSerialResolver;
+        private bool _preferredMissingLogged;
+        private string _loggedPreferredIdentity = string.Empty;
 
         public WirelessAdbService(
             AdbService adbService,
@@ -71,6 +74,16 @@ namespace DexManager.Services
                 lock (_reconnectSync)
                     return _selectedSerial;
             }
+        }
+
+        // Resolves the authorized ADB serial of the default phone saved in
+        // Settings (empty when it is not connected).  The default phone is
+        // matched before the in-memory current target, so an automatic
+        // fallback target can never displace it.
+        public void SetPreferredDeviceResolver(Func<string> resolver)
+        {
+            lock (_reconnectSync)
+                _preferredSerialResolver = resolver;
         }
 
         public void InitializeTarget()
@@ -629,6 +642,73 @@ namespace DexManager.Services
                         device.IsAuthorized);
             }
 
+            var preferredSerial = ResolvePreferredSerial();
+            if (preferredSerial.Length > 0)
+            {
+                var preferredDevice = candidates.FirstOrDefault(device =>
+                    device != null &&
+                    string.Equals(
+                        device.Serial,
+                        preferredSerial,
+                        StringComparison.OrdinalIgnoreCase) &&
+                    !AdbService.IsEmulatorSerial(device.Serial) &&
+                    device.IsAuthorized);
+                if (preferredDevice != null)
+                {
+                    _preferredMissingLogged = false;
+                    return preferredDevice;
+                }
+            }
+
+            var fallback = FindFallbackDevice(candidates, currentSerial);
+            var savedPreferred = _settings.PreferredDeviceIdentity ??
+                string.Empty;
+            if (!string.Equals(
+                    savedPreferred,
+                    _loggedPreferredIdentity,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                _loggedPreferredIdentity = savedPreferred;
+                _preferredMissingLogged = false;
+            }
+            if (fallback != null &&
+                !string.IsNullOrWhiteSpace(
+                    _settings.PreferredDeviceIdentity) &&
+                !_preferredMissingLogged)
+            {
+                _preferredMissingLogged = true;
+                _logService.Info(LocalizationService.Get(
+                    "Log.Adb.PreferredDeviceMissing"));
+            }
+            return fallback;
+        }
+
+        private string ResolvePreferredSerial()
+        {
+            var resolver = _preferredSerialResolver;
+            if (resolver == null ||
+                string.IsNullOrWhiteSpace(_settings.PreferredDeviceIdentity))
+            {
+                return string.Empty;
+            }
+            try
+            {
+                var serial = resolver();
+                return string.IsNullOrWhiteSpace(serial)
+                    ? string.Empty
+                    : serial.Trim();
+            }
+            catch (Exception ex)
+            {
+                _logService.Warning(ex.Message);
+                return string.Empty;
+            }
+        }
+
+        private static AdbDeviceInfo FindFallbackDevice(
+            IList<AdbDeviceInfo> candidates,
+            string currentSerial)
+        {
             var current = candidates.FirstOrDefault(device =>
                 string.Equals(
                     device.Serial,

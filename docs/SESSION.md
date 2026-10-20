@@ -19,6 +19,13 @@ Added an Inno Setup per-user installer and a Windows build/release workflow. Ins
 Inno Setup 설치판과 Windows 빌드·릴리스 작업을 추가했습니다. 설치·재설치·제거 시 설정·복원 기록·캡처 보존을 검증합니다. scrcpy 바이너리는 해시 검증 후 릴리스에 포함하며 소스에서는 다운로드 스크립트로 관리합니다.
 
 
+## Default phone fix — 2.1.0-localdex.4 (2026-10-20)
+
+Settings → Connection → target phone is now saved as the default phone. Startup selection, connection attempts, automatic connection and reconnection use that phone whenever it is connected. When it is not connected, the previous rule (first phone in the list) is used and one log line is written; the fallback never replaces the saved default, and the default phone is selected again as soon as it reconnects. Clicking a phone tab still selects that phone for the current run. Existing settings files load unchanged; choose the target phone once in Settings and save.
+
+설정 → 연결의 「대상 휴대폰」을 기본 휴대폰으로 저장합니다. 시작 시 고르기, 연결 시도, 자동 연결, 재연결은 그 휴대폰이 연결돼 있으면 항상 그 휴대폰을 씁니다. 연결돼 있지 않을 때만 이전 규칙(목록 첫 휴대폰)을 쓰고 로그를 한 줄 남깁니다. 이 대체 선택은 저장된 기본 휴대폰을 덮어쓰지 않으며, 기본 휴대폰이 다시 연결되면 다시 그 휴대폰을 고릅니다. 휴대폰 탭을 직접 누르면 이번 실행에서는 그 휴대폰을 씁니다. 기존 설정 파일은 그대로 읽으며, 설정에서 대상 휴대폰을 한 번 골라 저장하면 됩니다.
+
+
 ## QHD preset — 2.1.0-localdex.3 (2026-10-13)
 
 Added `2560 x 1440 (QHD)` to the Windows resolution selection list between Full HD and 4K. Saved 2560×1440 settings now select the QHD preset automatically. Existing device settings are preserved; the startup fixes from localdex.2 remain included.

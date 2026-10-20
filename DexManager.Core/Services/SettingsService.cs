@@ -611,6 +611,8 @@ namespace DexManager.Services
                 source.DeviceRunSettingsProfiles;
             target.DeviceWirelessConnectionProfiles =
                 source.DeviceWirelessConnectionProfiles;
+            target.PreferredDeviceIdentity =
+                source.PreferredDeviceIdentity;
         }
     }
 }

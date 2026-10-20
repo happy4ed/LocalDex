@@ -187,6 +187,8 @@
   <data name="Error.Adb.PairingCodeEmpty" xml:space="preserve"><value>페어링 코드가 비어 있습니다.</value></data>
   <data name="Log.Adb.TargetCleared" xml:space="preserve"><value>기본 연결 감시 대상 선택을 해제했습니다.</value></data>
   <data name="Log.Adb.TargetSelected" xml:space="preserve"><value>기본 연결 감시 대상 선택: {0}</value></data>
+  <data name="Log.Adb.PreferredDeviceMissing" xml:space="preserve"><value>설정의 기본 휴대폰이 연결되어 있지 않아 다시 연결될 때까지 연결된 다른 휴대폰을 사용합니다. 저장된 기본 휴대폰은 유지합니다.</value></data>
+  <data name="Log.Adb.PreferredDeviceChanged" xml:space="preserve"><value>설정에서 기본 휴대폰을 변경했습니다: {0}</value></data>
   <data name="Log.Adb.StartServerResult" xml:space="preserve"><value>ADB start-server 결과</value></data>
   <data name="Log.Adb.SelectedPath" xml:space="preserve"><value>선택된 ADB 경로: {0}</value></data>
   <data name="Log.Adb.VersionResult" xml:space="preserve"><value>ADB version 결과</value></data>

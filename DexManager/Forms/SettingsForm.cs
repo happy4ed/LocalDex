@@ -121,6 +121,7 @@ namespace DexManager.Forms
         private BundledCompanionStatus _bundledCompanionStatus;
         private bool _displayCleanupOperationRunning;
         private bool _loadingWirelessDevice;
+        private bool _preferredDeviceChangedByUser;
         private string _loadedWirelessDeviceIdentity = string.Empty;
         private int _activePageIndex;
         private Label _deviceDiagnosticsStatusLabel;

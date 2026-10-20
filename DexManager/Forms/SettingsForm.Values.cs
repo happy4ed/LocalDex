@@ -120,9 +120,22 @@ namespace DexManager.Forms
         private void SaveButton_Click(object sender, EventArgs e)
         {
             var previousTheme = _settings.Theme;
+            var previousPreferred = _settings.PreferredDeviceIdentity ??
+                string.Empty;
             try
             {
                 _settingsService.UpdateAndSave(_settings, SaveValues);
+                _preferredDeviceChangedByUser = false;
+                if (!string.Equals(
+                        previousPreferred,
+                        _settings.PreferredDeviceIdentity ?? string.Empty,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    var saved = GetSelectedWirelessDeviceOption();
+                    _logService.Info(LocalizationService.Format(
+                        "Log.Adb.PreferredDeviceChanged",
+                        saved == null ? string.Empty : saved.DisplayName));
+                }
             }
             catch (Exception ex)
             {
@@ -443,6 +456,18 @@ namespace DexManager.Forms
                 string.IsNullOrWhiteSpace(option.DeviceIdentity))
             {
                 return;
+            }
+            // The target phone chosen here is the saved default phone.  It is
+            // written only when the user picked it (or none is saved yet), so
+            // automatic fallbacks never overwrite the saved default.
+            if ((_preferredDeviceChangedByUser ||
+                    string.IsNullOrWhiteSpace(
+                        settings.PreferredDeviceIdentity)) &&
+                !PhysicalDeviceRegistry.IsTemporaryIdentity(
+                    option.DeviceIdentity))
+            {
+                settings.PreferredDeviceIdentity =
+                    option.DeviceIdentity.Trim();
             }
             var host = _wirelessHostBox.Text.Trim();
             var port = (int)_wirelessPortBox.Value;

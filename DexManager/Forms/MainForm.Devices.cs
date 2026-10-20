@@ -139,6 +139,7 @@ namespace DexManager.Forms
                     };
                     button.Click += delegate
                     {
+                        _selectionAwaitingPreferred = false;
                         SelectDeviceContext(context);
                     };
                     _deviceTabToolTip.SetToolTip(
