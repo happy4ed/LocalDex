@@ -244,29 +244,40 @@ namespace DexManager.Services
     {
         private double _x;
         private double _y;
-        private bool _knownAtReturnEdge;
+        private bool _armed;
         private long _touchStartMs = -1;
-        private int _pushEvents;
+        private double _pushAccum;
+        private int _reanchors;
 
-        // Raw movements against the facing edge required after the dwell to
-        // return; small so a short extra push brings the pointer back.
-        public const int DefaultPushEvents = 4;
+        // Returning is deliberately easier than entering: a short dwell and a
+        // small push once the pointer is back on the facing edge.
+        public const int DefaultReturnDwellMs = 120;
+        public const double DefaultReturnPushPx = 6;
+        // The pointer must first move this far into the phone (away from the
+        // facing edge) before a return can trigger, so entering does not
+        // immediately bounce back.
+        public const int ArmDistance = 60;
+        // How near the facing edge counts as "about to return" (overlay cue).
+        public const int NearDistance = 48;
 
         public PhonePointerTracker()
         {
             SpeedMultiplier = 1.0;
-            DwellMs = InputHandoffEdgeDetector.DefaultDwellMs;
-            PushEvents = DefaultPushEvents;
+            ReturnDwellMs = DefaultReturnDwellMs;
+            ReturnPushPx = DefaultReturnPushPx;
         }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
         public double SpeedMultiplier { get; set; }
-        public int DwellMs { get; set; }
-        public int PushEvents { get; set; }
+        public int ReturnDwellMs { get; set; }
+        public double ReturnPushPx { get; set; }
         public InputHandoffEdge PcEdge { get; set; }
         public double X { get { return _x; } }
         public double Y { get { return _y; } }
+        public bool Armed { get { return _armed; } }
+        public int Reanchors { get { return _reanchors; } }
+        public double PushAccum { get { return _pushAccum; } }
         public bool HasExtent { get { return Width > 0 && Height > 0; } }
 
         public void SetExtent(int width, int height)
@@ -287,72 +298,98 @@ namespace DexManager.Services
             }
         }
 
+        // Entry places the virtual pointer on the facing edge -- that is the
+        // phone edge the pointer just crossed in from.  It starts disarmed,
+        // so the user must move into the phone (ArmDistance) before pushing
+        // back out returns; then pushing to that edge (where the clamp
+        // re-anchors the estimate) brings the pointer back to the PC.
         public void Begin()
         {
             _touchStartMs = -1;
-            _pushEvents = 0;
+            _pushAccum = 0;
+            _armed = false;
             var edge = ReturnEdgeFor(PcEdge);
-            var atEdge = _knownAtReturnEdge;
-            _knownAtReturnEdge = false;
             _x = Width / 2.0;
             _y = Height / 2.0;
             switch (edge)
             {
-                case InputHandoffEdge.Left: _x = atEdge ? 0 : Width; break;
-                case InputHandoffEdge.Right: _x = atEdge ? Width : 0; break;
-                case InputHandoffEdge.Top: _y = atEdge ? 0 : Height; break;
-                default: _y = atEdge ? Height : 0; break;
+                case InputHandoffEdge.Left: _x = 0; break;
+                case InputHandoffEdge.Right: _x = Width; break;
+                case InputHandoffEdge.Top: _y = 0; break;
+                default: _y = Height; break;
             }
         }
 
-        // Call after a return by edge push: the phone pointer is then known
-        // to rest on the return edge.
-        public void RememberAtReturnEdge()
+        // Distance (phone pixels) from the facing (return) edge; 0 = on it.
+        public int ReturnDistance()
         {
-            _knownAtReturnEdge = true;
+            switch (ReturnEdgeFor(PcEdge))
+            {
+                case InputHandoffEdge.Left: return (int)Math.Round(_x);
+                case InputHandoffEdge.Right: return (int)Math.Round(Width - _x);
+                case InputHandoffEdge.Top: return (int)Math.Round(_y);
+                default: return (int)Math.Round(Height - _y);
+            }
         }
 
-        public void Forget()
+        public bool NearReturnEdge()
         {
-            _knownAtReturnEdge = false;
+            return HasExtent && _armed && ReturnDistance() <= NearDistance;
         }
 
-        // Feeds one raw relative movement.  Returns true when the virtual
-        // pointer rests on the return edge for DwellMs and keeps pushing
-        // against it for PushEvents more movements.
+        // Feeds one raw relative movement.  Returns true when the pointer,
+        // once armed, rests on the facing edge for ReturnDwellMs while
+        // pushing outward by ReturnPushPx.
         public bool Feed(int dx, int dy, long timeMs, bool buttonDown)
         {
             if (!HasExtent) return false;
             var scale = SpeedMultiplier > 0 ? SpeedMultiplier : 1.0;
-            _x = Math.Max(0, Math.Min(Width, _x + dx * scale));
-            _y = Math.Max(0, Math.Min(Height, _y + dy * scale));
+            var nx = Math.Max(0, Math.Min(Width, _x + dx * scale));
+            var ny = Math.Max(0, Math.Min(Height, _y + dy * scale));
+            // Clamping to an edge re-anchors the estimate there, so drift
+            // cannot accumulate and pushing fully to the edge always lands
+            // on it.
+            if ((nx != _x + dx * scale && (nx == 0 || nx == Width)) ||
+                (ny != _y + dy * scale && (ny == 0 || ny == Height)))
+            {
+                _reanchors++;
+            }
+            _x = nx;
+            _y = ny;
             var edge = ReturnEdgeFor(PcEdge);
-            bool atEdge;
             bool pushing;
+            double outward;
             switch (edge)
             {
-                case InputHandoffEdge.Left: atEdge = _x <= 0; pushing = dx < 0; break;
-                case InputHandoffEdge.Right: atEdge = _x >= Width; pushing = dx > 0; break;
-                case InputHandoffEdge.Top: atEdge = _y <= 0; pushing = dy < 0; break;
-                default: atEdge = _y >= Height; pushing = dy > 0; break;
+                case InputHandoffEdge.Left: pushing = dx < 0; outward = -dx * scale; break;
+                case InputHandoffEdge.Right: pushing = dx > 0; outward = dx * scale; break;
+                case InputHandoffEdge.Top: pushing = dy < 0; outward = -dy * scale; break;
+                default: pushing = dy > 0; outward = dy * scale; break;
             }
+            var distance = ReturnDistance();
+            if (!_armed)
+            {
+                if (distance >= ArmDistance) _armed = true;
+                return false;
+            }
+            var atEdge = distance <= 1;
             if (buttonDown || !atEdge)
             {
                 _touchStartMs = -1;
-                _pushEvents = 0;
+                _pushAccum = 0;
                 return false;
             }
             if (_touchStartMs < 0)
             {
                 _touchStartMs = timeMs;
-                _pushEvents = 0;
+                _pushAccum = 0;
                 return false;
             }
-            if (!pushing || timeMs - _touchStartMs < DwellMs) return false;
-            _pushEvents++;
-            if (_pushEvents < PushEvents) return false;
+            if (pushing && outward > 0) _pushAccum += outward;
+            if (timeMs - _touchStartMs < ReturnDwellMs) return false;
+            if (_pushAccum < ReturnPushPx) return false;
             _touchStartMs = -1;
-            _pushEvents = 0;
+            _pushAccum = 0;
             return true;
         }
     }
@@ -499,6 +536,33 @@ namespace DexManager.Services
         public string SessionSerial { get { return _sessionSerial; } }
         public PhonePointerTracker Phone { get { return _phone; } }
 
+        // The virtual phone pointer is near the facing edge: the overlay
+        // then tells the user they can push a little more to return.
+        public bool PhoneNearReturnEdge
+        {
+            get
+            {
+                return State == InputHandoffState.OnPhone &&
+                    _phone.NearReturnEdge();
+            }
+        }
+
+        // One diagnostic line of the return estimate (no serial/IP).
+        public string PhoneReturnDebug()
+        {
+            return string.Format(
+                "phone vx={0} vy={1} extent={2}x{3} returnEdge={4} returnDist={5} push={6:0.0} armed={7} reanchors={8}",
+                (int)_phone.X,
+                (int)_phone.Y,
+                _phone.Width,
+                _phone.Height,
+                PhonePointerTracker.ReturnEdgeFor(_edge),
+                _phone.ReturnDistance(),
+                _phone.PushAccum,
+                _phone.Armed,
+                _phone.Reanchors);
+        }
+
         // Phone screen size (read once per session) and the speed factor
         // of the virtual phone pointer.  Without a size, returning by edge
         // push is unavailable and only the hotkey returns.
@@ -510,7 +574,6 @@ namespace DexManager.Services
         public void SetPhoneSpeed(double multiplier)
         {
             _phone.SpeedMultiplier = multiplier > 0 ? multiplier : 1.0;
-            _phone.DwellMs = _detector.DwellMs;
         }
 
         public void Configure(
@@ -701,16 +764,13 @@ namespace DexManager.Services
         public bool ReturnByEdge()
         {
             _hasExactReturn = false;
-            if (!ReturnToPc("Log.Handoff.ReturnedByEdge")) return false;
-            _phone.RememberAtReturnEdge();
-            return true;
+            return ReturnToPc("Log.Handoff.ReturnedByEdge");
         }
 
         // Hotkey, capture released on the phone side, or watchdog.
         public bool ReturnToPc(string reasonKey)
         {
             if (State != InputHandoffState.OnPhone) return false;
-            _phone.Forget();
             _host.ReleaseToPc(_hasExactReturn
                 ? _exactReturn
                 : InputHandoffEdgeDetector.ReturnPoint(
@@ -758,7 +818,6 @@ namespace DexManager.Services
             if (_sessionSerial.Length > 0)
             {
                 _sessionSerial = string.Empty;
-                _phone.Forget();
                 _phone.SetExtent(0, 0);
                 _host.StopSession();
             }

@@ -776,4 +776,5 @@
   <data name="Settings.HandoffDwell" xml:space="preserve"><value>Edge hold time before handoff (ms)</value></data>
   <data name="Settings.HandoffHangul" xml:space="preserve"><value>Send the Korean/English key as Shift+Space</value></data>
   <data name="Settings.HandoffDiagnostic" xml:space="preserve"><value>Write a handoff diagnostic log (no serial/IP)</value></data>
+  <data name="Handoff.Overlay.ReturnNow" xml:space="preserve"><value>Push the edge now to return to the PC</value></data>
 </root>

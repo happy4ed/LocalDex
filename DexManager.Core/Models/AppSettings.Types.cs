@@ -134,6 +134,10 @@ namespace DexManager.Models
         [DataMember(Order = 9)] public bool ConvertHangulToShiftSpace { get; set; }
         // Write a diagnostic log of every handoff decision (no serial/IP).
         [DataMember(Order = 10)] public bool DiagnosticLog { get; set; }
+        // Optional exact virtual-key of the Korean/English key (0 = auto
+        // detect).  Set from the diagnostic log when a keyboard uses an
+        // unusual code.
+        [DataMember(Order = 11)] public int HangulKeyVk { get; set; }
 
         public string GetDeviceHotkey(string identity)
         {

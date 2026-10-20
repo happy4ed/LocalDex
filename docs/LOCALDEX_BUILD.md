@@ -1,5 +1,20 @@
 # LocalDex build and validation
 
+## Multi-monitor, return and Korean-key diagnostics — 2.1.0-localdex.8 (2026-10-20)
+
+Multi-monitor and return fixes. The overlay and edge detection now use the monitor the cursor is on (Screen.FromPoint), not the whole virtual desktop, so the toast appears at the bottom of the monitor in use and each monitor's own edge triggers the handoff -- no more toast in the gap between two monitors. Returning from the phone is reworked: the virtual phone pointer starts on the edge facing the PC, must first move into the phone (arm), then a short push back to that edge returns (shorter dwell and smaller push than entering), with edge clamping re-anchoring the estimate so pushing fully to the edge always lands on it. The overlay shows a "push now to return" cue when the pointer is near that edge. The Korean/English key detection is widened (VK_HANGUL/VK_HANJA, extended right Alt, common scan codes, plus an optional exact code), only injected when the scrcpy window is focused; the diagnostic log records every key's code so an unusual Korean/English key can be identified from one press, and the phone return estimate (virtual position, distance, push, re-anchors) for troubleshooting.
+
+다중 모니터·돌아오기 고침. overlay 와 엣지 판정이 가상 화면 전체가 아니라 커서가 있는 모니터(Screen.FromPoint) 기준으로 바뀌어, 토스트가 사용 중인 모니터 아래에 뜨고 각 모니터의 자기 변에서 넘어갑니다 — 두 모니터 사이에 토스트가 뜨던 문제 해결. 폰에서 돌아오기 재작업: 가상 폰 포인터가 PC 쪽 변에서 시작해 먼저 폰 안으로 들어가야(arm) 하고, 그 변으로 짧게 밀면 돌아옵니다(진입보다 짧은 유지·작은 밀기). 변 클램프가 추정을 재앵커해 끝까지 밀면 반드시 변에 닿습니다. 포인터가 그 변 근처면 overlay 가 "지금 밀면 돌아옴"을 표시합니다. 한/영 키 감지를 넓혔고(VK_HANGUL/VK_HANJA·확장 오른Alt·흔한 스캔코드·선택 지정 코드), scrcpy 창이 포커스일 때만 주입합니다. 진단 로그가 모든 키의 코드와 폰 돌아오기 추정(가상 위치·거리·밀기·재앵커)을 남겨 문제를 숫자로 분석합니다.
+
+### Handoff diagnostic log additions (localdex.8)
+
+With the diagnostic log on, each mouse sample now also records `mon=<index>` and `dpi=<n>` for the monitor under the cursor, every key event is logged as `key vk=0x.. scan=0x.. ext=.. up/down injected=.. onPhone=..` (identifies the Korean/English key), the injection line is `hangul->shift+space injected focus=scrcpy|other(skipped)`, and while on the phone a line `phone vx=.. vy=.. extent=.. returnEdge=.. returnDist=.. push=.. armed=.. reanchors=..` tracks why a return does or does not fire. No serial or IP. An unusual Korean/English key can be pinned with `InputHandoff.HangulKeyVk` in `config/settings.json`.
+
+Validation (Linux, 2026-10-20): Windows x64/net462 cross-build passed; xUnit 166 passed, multi-device runner 39 passed. Real multiple monitors, hooks, raw input, scrcpy focus/injection and the phone side are not exercised here.
+
+검증(Linux, 2026-10-20): Windows x64/net462 교차 빌드 통과, xUnit 166개·다중 기기 39개 통과. 실제 다중 모니터·훅·원시 입력·scrcpy 포커스/주입·휴대폰 쪽은 실기 확인이 필요합니다.
+
+
 ## Handoff accuracy, overlay, Korean key, diagnostics — 2.1.0-localdex.7 (2026-10-20)
 
 Fixes the keyboard and mouse handoff that misfired on scaled displays. Edge detection now uses logical cursor coordinates (GetCursorPos) consistent with the screen bounds, so the pointer only hands over inside a 2 px band of the chosen edge after resting there for the hold time (default 330 ms) while pushing outward -- no more handing over partway down a scaled screen, and no snap to the edge. Returning to the PC is now atomic: input to the phone stops, scrcpy loses its mouse grab and the PC pointer is restored in one transition, so the two cursors no longer move together for a moment. The handoff works whenever the target phone is connected over USB debugging, with or without a DeX or single-app window. The Korean/English key is sent to the phone as Shift+Space (toggle, on by default). A small click-through overlay near the edge shows the hold progress and a "can return" hint. An optional diagnostic log (no serial or IP) records each decision for troubleshooting.
@@ -148,7 +163,7 @@ After creating `dist/LocalDex`, run the following on Windows with Inno Setup 6 i
 
 ```powershell
 ./scripts/Build-Installer.ps1
-./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.7-win-x64-setup.exe
+./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.8-win-x64-setup.exe
 ```
 
 The Windows workflow runs both commands and publishes only after the installer smoke tests and regression tests succeed. Its `release:` commit-message trigger is intentional: ordinary pushes build artifacts without publishing a release.

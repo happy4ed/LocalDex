@@ -776,4 +776,5 @@
   <data name="Settings.HandoffDwell" xml:space="preserve"><value>엣지 유지 시간(ms) 뒤 넘어가기</value></data>
   <data name="Settings.HandoffHangul" xml:space="preserve"><value>한/영 키를 Shift+Space로 보내기</value></data>
   <data name="Settings.HandoffDiagnostic" xml:space="preserve"><value>넘기기 진단 로그 남기기(serial·IP 없음)</value></data>
+  <data name="Handoff.Overlay.ReturnNow" xml:space="preserve"><value>지금 끝으로 밀면 PC로 돌아옵니다</value></data>
 </root>

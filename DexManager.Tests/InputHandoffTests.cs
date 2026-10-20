@@ -160,53 +160,62 @@ namespace DexManager.Tests
         }
 
         [Fact]
-        public void PhonePointerReturnsOnlyAfterReachingTheFacingEdge()
+        public void PhonePointerArmsThenReturnsAtTheFacingEdge()
         {
+            // Phone right of the PC -> facing (return) edge is the phone's
+            // left.  Entry puts the virtual pointer on that edge, disarmed.
             var phone = new PhonePointerTracker { PcEdge = InputHandoffEdge.Right };
             phone.SetExtent(2340, 2340);
             phone.Begin();
-            // Phone right of the PC: start on the far (right) side.
-            Assert.Equal(2340, phone.X);
-            // Moving left 2000 px does not reach the left edge yet.
-            for (var i = 0; i < 100; i++)
-                Assert.False(phone.Feed(-20, 0, i, false));
-            // Reach the edge, dwell, keep pushing.
-            Assert.False(phone.Feed(-400, 0, 200, false));
+            Assert.Equal(0, phone.X);
+            Assert.False(phone.Armed);
+            // Pushing the edge before arming does nothing.
+            for (var i = 0; i < 5; i++)
+                Assert.False(phone.Feed(-50, 0, i, false));
+            // Move into the phone (right) past the arm distance.
+            Assert.False(phone.Feed(200, 0, 50, false));
+            Assert.True(phone.Armed);
+            // Back to the left edge, then a short dwell + push returns.
+            Assert.False(phone.Feed(-400, 0, 100, false));
             var returned = false;
-            for (var i = 0; i < 8; i++)
-                returned |= phone.Feed(-5, 0, 500 + i * 10, false);
+            for (var i = 0; i < 12; i++)
+                returned |= phone.Feed(-10, 0, 150 + i * 40, false);
             Assert.True(returned);
         }
 
         [Fact]
-        public void PhonePointerEdgesResynchroniseAndRightMovesDoNotReturn()
+        public void PhonePointerEdgesResynchroniseAndOffAxisDoesNotReturn()
         {
             var phone = new PhonePointerTracker { PcEdge = InputHandoffEdge.Right };
             phone.SetExtent(1000, 1000);
             phone.Begin();
-            // Overshooting the far edge clamps (like the real pointer).
+            // Arm by moving into the phone; overshoot clamps (re-anchors).
             phone.Feed(5000, 0, 0, false);
             Assert.Equal(1000, phone.X);
+            Assert.True(phone.Armed);
+            Assert.True(phone.Reanchors > 0);
             for (var i = 0; i < 20; i++)
                 Assert.False(phone.Feed(50, 0, 100 + i * 50, false));
-            phone.Feed(-1000, 0, 2000, false);
+            phone.Feed(-5000, 0, 2000, false);
             Assert.Equal(0, phone.X);
-            // Pushing away from the return edge never returns.
+            // Resting on the return edge but pushing only off-axis (no
+            // outward push) never returns.
             for (var i = 0; i < 20; i++)
-                Assert.False(phone.Feed(0, 5, 2300 + i * 20, false));
+                Assert.False(phone.Feed(0, 5, 2300 + i * 40, false));
         }
 
         [Fact]
         public void PhonePointerSpeedMultiplierAndUnknownSize()
         {
+            // Phone left of the PC -> facing edge is the phone's right.
             var phone = new PhonePointerTracker { PcEdge = InputHandoffEdge.Left };
             phone.Begin();
             Assert.False(phone.Feed(10000, 0, 0, false));
             phone.SetExtent(1000, 1000);
             phone.SpeedMultiplier = 0.5;
             phone.Begin();
-            Assert.Equal(0, phone.X);
-            phone.Feed(1000, 0, 0, false);
+            Assert.Equal(1000, phone.X);
+            phone.Feed(-1000, 0, 0, false);
             Assert.Equal(500, phone.X);
         }
 
@@ -225,6 +234,49 @@ namespace DexManager.Tests
             Assert.Equal(2340, height);
             Assert.False(PhoneScreenSize.TryParseWmSize(
                 "error: no devices", out width, out height));
+        }
+
+        [Fact]
+        public void EdgeDetectionWorksOnASecondMonitorBottom()
+        {
+            // A second monitor to the right, taller, with its own origin:
+            // handoff must use that monitor's own bottom edge, not the
+            // virtual desktop. Bounds are passed per-monitor by the host.
+            var monitorB = new HandoffRect(1920, 0, 2560, 1440);
+            var detector = new InputHandoffEdgeDetector();
+            detector.Reset(false);
+            // A point near the virtual-desktop bottom (1079) but well inside
+            // monitor B must NOT count as that monitor's bottom edge.
+            Assert.False(detector.Feed(
+                monitorB, InputHandoffEdge.Bottom, 3000, 1079, 20, 0, false, false));
+            Assert.False(detector.IsTouching);
+            // Monitor B's own bottom (1439) does.
+            Assert.False(detector.Feed(
+                monitorB, InputHandoffEdge.Bottom, 3000, 1439, 0, 10, false, false));
+            var returned = false;
+            for (var i = 0; i < 12; i++)
+            {
+                returned |= detector.Feed(
+                    monitorB, InputHandoffEdge.Bottom, 3000, 1439, 20,
+                    10 + 400 + i * 40, false, false);
+            }
+            Assert.True(returned);
+        }
+
+        [Fact]
+        public void PhoneNearReturnEdgeTracksTheVirtualPointer()
+        {
+            var host = new FakeHost();
+            var controller = ReadyController(host);  // edge = Right
+            controller.SetPhoneExtent(1000, 1000);
+            controller.EnterPhone(1919, 500);
+            // Arm by going into the phone; now far from the facing edge.
+            controller.OnPhoneMouseDelta(400, 0, 100, false);
+            Assert.False(controller.PhoneNearReturnEdge);
+            // Move back to the facing (left) edge.
+            controller.OnPhoneMouseDelta(-500, 0, 200, false);
+            Assert.True(controller.PhoneNearReturnEdge);
+            Assert.Contains("returnDist=", controller.PhoneReturnDebug());
         }
 
         [Fact]
@@ -262,9 +314,13 @@ namespace DexManager.Tests
             controller.SetPhoneExtent(1000, 1000);
             PushToEdge(controller, 540);
             controller.EnterPhone(1919, 540);
+            // Arm by moving into the phone (right), then push back to the
+            // facing (left) edge to return.
+            controller.OnPhoneMouseDelta(300, 0, 9000, false);
+            Assert.False(controller.PhoneNearReturnEdge);
             var returned = false;
-            for (var i = 0; i < 40 && !returned; i++)
-                returned = controller.OnPhoneMouseDelta(-100, 0, 10000 + i * 50, false);
+            for (var i = 0; i < 60 && !returned; i++)
+                returned = controller.OnPhoneMouseDelta(-100, 0, 10000 + i * 40, false);
             Assert.True(returned);
             Assert.True(controller.ReturnByEdge());
             Assert.Equal(InputHandoffState.Ready, controller.State);

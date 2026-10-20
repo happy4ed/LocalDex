@@ -55,6 +55,7 @@ namespace DexManager.Services
         private IntPtr _keyboardHook;
         private bool _rawInputRegistered;
         private bool _convertHangul = true;
+        private int _hangulVkOverride;
         private Process _process;
         private IntPtr _sessionWindow;
         private IntPtr _foregroundBeforeStart;
@@ -109,10 +110,11 @@ namespace DexManager.Services
                 InputHandoffSettings.CreateDefault();
             BuildBindings(config);
             _convertHangul = config.ConvertHangulToShiftSpace;
+            _hangulVkOverride = config.HangulKeyVk;
             _diagnostics.Enabled = config.DiagnosticLog;
             _controller.ConfigureDwell(config.DwellMs);
             _controller.SetPhoneSpeed(config.PhonePointerSpeedPercent / 100.0);
-            _controller.Configure(config.Enabled, config.Edge, GetBounds());
+            _controller.Configure(config.Enabled, config.Edge, CursorMonitorBounds());
             if (config.Enabled) InstallHooks();
             else { RemoveHooks(); _overlay.HideOverlay(); }
             Refresh();
@@ -122,7 +124,6 @@ namespace DexManager.Services
         public void Refresh()
         {
             if (_disposed) return;
-            _controller.UpdateBounds(GetBounds());
             var serial = string.Empty;
             try
             {
@@ -308,7 +309,7 @@ namespace DexManager.Services
                     LocalizationService.Get("Log.Handoff.ScrcpyMissing")));
                 return false;
             }
-            var bounds = GetBounds();
+            var bounds = CursorMonitorBounds();
             var startInfo = new ProcessStartInfo
             {
                 FileName = scrcpy,
@@ -378,7 +379,7 @@ namespace DexManager.Services
                 return false;
             Native.POINT cursor;
             if (!Native.GetCursorPos(out cursor)) return false;
-            var bounds = GetBounds();
+            var bounds = MonitorBoundsAt(cursor.X, cursor.Y);
             var size = SessionWindowSize;
             int x;
             int y;
@@ -540,6 +541,9 @@ namespace DexManager.Services
 
             Native.POINT cursor;
             if (!Native.GetCursorPos(out cursor)) return;
+            // Use the monitor the cursor is on, so each monitor's own edge
+            // triggers the handoff (not the whole virtual desktop).
+            _controller.UpdateBounds(MonitorBoundsAt(cursor.X, cursor.Y));
             var push = InputHandoffController.OutwardPush(
                 _controller.Edge, dx, dy);
             if (_diagnostics.Enabled)
@@ -565,14 +569,16 @@ namespace DexManager.Services
 
         private void RecordEdgeSample(Native.POINT cursor, int push, long now)
         {
-            var bounds = GetBounds();
+            var bounds = MonitorBoundsAt(cursor.X, cursor.Y);
             var edge = _controller.Edge;
             var distance = InputHandoffEdgeDetector.DistanceFromEdge(
                 bounds, edge, cursor.X, cursor.Y);
             _diagnostics.Record(string.Format(
-                "edge x={0} y={1} logical-bounds=({2},{3} {4}x{5}) edge={6} dist={7} push={8} progress={9:0.00} state={10}",
+                "edge x={0} y={1} mon={2} dpi={3} logical-bounds=({4},{5} {6}x{7}) edge={8} dist={9} push={10} progress={11:0.00} state={12}",
                 cursor.X,
                 cursor.Y,
+                MonitorIndexAt(cursor.X, cursor.Y),
+                MonitorDpiAt(cursor.X, cursor.Y),
                 bounds.Left,
                 bounds.Top,
                 bounds.Width,
@@ -586,7 +592,7 @@ namespace DexManager.Services
 
         private IntPtr KeyboardHookCallback(int code, IntPtr wParam, IntPtr lParam)
         {
-            if (code >= 0 && _bindings.Count > 0)
+            if (code >= 0)
             {
                 var data = (Native.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(
                     lParam,
@@ -595,7 +601,21 @@ namespace DexManager.Services
                 var key = (Keys)data.vkCode;
                 var down = message == Native.WmKeyDown ||
                     message == Native.WmSysKeyDown;
-                if ((data.flags & Native.LlkhfInjected) == 0)
+                var injected = (data.flags & Native.LlkhfInjected) != 0;
+                // Diagnostic: the exact code of every key, so the Korean/
+                // English key can be identified from one press in the log.
+                if (_diagnostics.Enabled)
+                {
+                    _diagnostics.Record(string.Format(
+                        "key vk=0x{0:X2} scan=0x{1:X2} ext={2} {3} injected={4} onPhone={5}",
+                        data.vkCode,
+                        data.scanCode,
+                        (data.flags & Native.LlkhfExtended) != 0 ? 1 : 0,
+                        down ? "down" : "up",
+                        injected ? 1 : 0,
+                        _controller.State == InputHandoffState.OnPhone));
+                }
+                if (!injected)
                 {
                     var onPhoneNow =
                         _controller.State == InputHandoffState.OnPhone;
@@ -603,13 +623,12 @@ namespace DexManager.Services
                     // phone's own physical-keyboard toggle).  Only while on
                     // the phone; the injected keys reach the focused scrcpy
                     // window and are ignored by this hook (injected flag).
-                    if (_convertHangul && onPhoneNow && IsHangulKey(data))
+                    if (_convertHangul && onPhoneNow &&
+                        IsHangulKey(data, _hangulVkOverride))
                     {
                         if (down && _swallowedKeys.Add(key))
                         {
                             PostAction(SendShiftSpaceToPhone);
-                            if (_diagnostics.Enabled)
-                                _diagnostics.Record("hangul->shift+space");
                         }
                         else if (!down)
                         {
@@ -646,22 +665,40 @@ namespace DexManager.Services
             return Native.CallNextHookEx(_keyboardHook, code, wParam, lParam);
         }
 
-        private static bool IsHangulKey(Native.KBDLLHOOKSTRUCT data)
+        // Keyboards vary: laptops send VK_HANGUL (0x15)/VK_HANJA (0x19),
+        // many externals send the Korean/English key as the extended right
+        // Alt (VK_RMENU 0xA5) or a dedicated scan code (0x71/0x72/0xF1/0xF2).
+        // An exact VK can also be pinned from the diagnostic log (override).
+        private static bool IsHangulKey(Native.KBDLLHOOKSTRUCT data, int overrideVk)
         {
-            if (data.scanCode == Native.HangulScanCode) return true;
+            if (overrideVk > 0) return data.vkCode == (uint)overrideVk;
             if (data.vkCode == Native.VkHangul || data.vkCode == Native.VkHanja)
                 return true;
-            // Some Korean keyboards emit the key as extended right-Alt with
-            // VK_HANGUL; never match plain scan 0x38 (AltGr on other layouts).
-            return data.vkCode == Native.VkHangul &&
-                data.scanCode == Native.AltScanCode &&
-                (data.flags & Native.LlkhfExtended) != 0;
+            if (data.scanCode == 0xF2 || data.scanCode == 0xF1 ||
+                data.scanCode == 0x71 || data.scanCode == 0x72)
+            {
+                return true;
+            }
+            var extended = (data.flags & Native.LlkhfExtended) != 0;
+            // Extended right Alt used as the Korean/English key.  Plain
+            // (non-extended) Alt is left alone -- it is AltGr elsewhere.
+            return extended &&
+                (data.vkCode == Native.VkRMenu || data.vkCode == Native.VkHangul) &&
+                (data.scanCode == Native.AltScanCode ||
+                 data.scanCode == Native.HangulScanCode);
         }
 
-        private static void SendShiftSpaceToPhone()
+        private void SendShiftSpaceToPhone()
         {
-            // keybd_event injects to the focused scrcpy window, which sends
-            // Shift+Space to the phone over UHID.  Non-blocking.
+            // keybd_event injects to the focused window; only send when the
+            // scrcpy session window is focused, so the keys actually reach
+            // the phone (and not some PC window).
+            var focused = Native.GetForegroundWindow();
+            var toScrcpy = _sessionWindow != IntPtr.Zero && focused == _sessionWindow;
+            if (_diagnostics.Enabled)
+                _diagnostics.Record("hangul->shift+space injected focus=" +
+                    (toScrcpy ? "scrcpy" : "other(skipped)"));
+            if (!toScrcpy) return;
             Native.keybd_event((byte)Native.VkShift, 0, 0, UIntPtr.Zero);
             Native.keybd_event((byte)Native.VkSpace, 0, 0, UIntPtr.Zero);
             Native.keybd_event((byte)Native.VkSpace, 0, Native.KeyEventKeyUp, UIntPtr.Zero);
@@ -715,7 +752,11 @@ namespace DexManager.Services
             if (process != null && _sessionWindow == IntPtr.Zero)
                 FindAndHideSessionWindow(process);
             if (_controller.State == InputHandoffState.OnPhone)
+            {
                 WatchOnPhone();
+                if (_diagnostics.Enabled)
+                    _diagnostics.Record(_controller.PhoneReturnDebug());
+            }
             UpdateOverlay();
             // The timer runs fast for smooth overlay progress; refresh the
             // target and flush diagnostics about four times a second.
@@ -730,9 +771,11 @@ namespace DexManager.Services
         private void UpdateOverlay()
         {
             var state = _controller.State;
+            var bounds = CursorMonitorBounds();
             if (state == InputHandoffState.OnPhone)
             {
-                _overlay.ShowReturn(GetBounds(), _controller.Edge);
+                _overlay.ShowReturn(
+                    bounds, _controller.Edge, _controller.PhoneNearReturnEdge);
                 return;
             }
             if (state == InputHandoffState.Ready)
@@ -741,7 +784,7 @@ namespace DexManager.Services
                     _clock.ElapsedMilliseconds);
                 if (progress > 0)
                 {
-                    _overlay.ShowArming(GetBounds(), _controller.Edge, progress);
+                    _overlay.ShowArming(bounds, _controller.Edge, progress);
                     return;
                 }
             }
@@ -975,10 +1018,56 @@ namespace DexManager.Services
                 new Win32Exception(Marshal.GetLastWin32Error()).Message);
         }
 
-        private static HandoffRect GetBounds()
+        // Bounds of the monitor the cursor is on (or the primary one when
+        // the cursor cannot be read).  Multi-monitor: detection and the
+        // overlay are per-monitor, not across the whole virtual desktop, so
+        // the toast shows at the bottom of the monitor in use, not in the
+        // gap between two monitors.  Logical coordinates, consistent with
+        // GetCursorPos.
+        private static HandoffRect MonitorBoundsAt(int x, int y)
         {
-            var screen = SystemInformation.VirtualScreen;
-            return new HandoffRect(screen.Left, screen.Top, screen.Width, screen.Height);
+            var screen = Screen.FromPoint(new System.Drawing.Point(x, y));
+            var b = screen.Bounds;
+            return new HandoffRect(b.Left, b.Top, b.Width, b.Height);
+        }
+
+        private static HandoffRect CursorMonitorBounds()
+        {
+            Native.POINT cursor;
+            if (Native.GetCursorPos(out cursor))
+                return MonitorBoundsAt(cursor.X, cursor.Y);
+            var b = Screen.PrimaryScreen.Bounds;
+            return new HandoffRect(b.Left, b.Top, b.Width, b.Height);
+        }
+
+        private static int MonitorIndexAt(int x, int y)
+        {
+            var screen = Screen.FromPoint(new System.Drawing.Point(x, y));
+            var all = Screen.AllScreens;
+            for (var i = 0; i < all.Length; i++)
+            {
+                if (all[i].DeviceName == screen.DeviceName) return i;
+            }
+            return 0;
+        }
+
+        private static int MonitorDpiAt(int x, int y)
+        {
+            try
+            {
+                var monitor = Native.MonitorFromPoint(
+                    new Native.POINT { X = x, Y = y }, Native.MonitorDefaultToNearest);
+                uint dpiX;
+                uint dpiY;
+                // GetDpiForMonitor returns the true DPI regardless of the
+                // process's DPI-awareness.
+                if (Native.GetDpiForMonitor(monitor, 0, out dpiX, out dpiY) == 0)
+                    return (int)dpiX;
+            }
+            catch
+            {
+            }
+            return 0;
         }
 
         private static int Clamp(int value, int min, int max)
@@ -1044,6 +1133,7 @@ namespace DexManager.Services
             internal const int VkSpace = 0x20;
             internal const int VkHangul = 0x15;
             internal const int VkHanja = 0x19;
+            internal const uint VkRMenu = 0xA5;
             internal const uint HangulScanCode = 0xF2;
             internal const uint AltScanCode = 0x38;
             internal const uint LlkhfExtended = 0x01;
@@ -1223,6 +1313,11 @@ namespace DexManager.Services
             internal static extern IntPtr SetWindowsHookEx(int hook, LowLevelProc callback, IntPtr module, uint threadId);
             [DllImport("user32.dll")]
             internal static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
+            internal const uint MonitorDefaultToNearest = 2;
+            [DllImport("user32.dll")]
+            internal static extern IntPtr MonitorFromPoint(POINT point, uint flags);
+            [DllImport("shcore.dll")]
+            internal static extern int GetDpiForMonitor(IntPtr monitor, int type, out uint dpiX, out uint dpiY);
             [DllImport("user32.dll", SetLastError = true)]
             internal static extern bool UnhookWindowsHookEx(IntPtr hook);
             [DllImport("user32.dll")]
@@ -1403,11 +1498,11 @@ namespace DexManager.Services
                 LocalizationService.Get("Handoff.Overlay.Arming"));
         }
 
-        public void ShowReturn(HandoffRect bounds, InputHandoffEdge edge)
+        public void ShowReturn(HandoffRect bounds, InputHandoffEdge edge, bool nearEdge)
         {
             _progress = 0;
-            Present(bounds, edge,
-                LocalizationService.Get("Handoff.Overlay.OnPhone"));
+            Present(bounds, edge, LocalizationService.Get(
+                nearEdge ? "Handoff.Overlay.ReturnNow" : "Handoff.Overlay.OnPhone"));
         }
 
         public void HideOverlay()
