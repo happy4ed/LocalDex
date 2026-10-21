@@ -57,6 +57,7 @@ namespace DexManager.Services
         private bool _convertHangul = true;
         private int _hangulVkOverride;
         private string _monitorDeviceName = string.Empty;
+        private bool _attached = true;
         private Process _process;
         private IntPtr _sessionWindow;
         private IntPtr _foregroundBeforeStart;
@@ -113,6 +114,7 @@ namespace DexManager.Services
             _convertHangul = config.ConvertHangulToShiftSpace;
             _hangulVkOverride = config.HangulKeyVk;
             _monitorDeviceName = config.MonitorDeviceName ?? string.Empty;
+            _attached = config.MonitorAttached;
             _diagnostics.Enabled = config.DiagnosticLog;
             _controller.ConfigureDwell(config.DwellMs);
             _controller.SetPhoneSpeed(config.PhonePointerSpeedPercent / 100.0);
@@ -546,6 +548,9 @@ namespace DexManager.Services
             // Use the chosen monitor (or the one the cursor is on), so each
             // monitor's own edge triggers the handoff (not the whole virtual
             // desktop).  With a fixed monitor, ignore the cursor elsewhere.
+            // Detached in the layout: no edge auto-handoff (the go-to-phone
+            // and device shortcuts still work).
+            if (!_attached) return;
             if (!OnActiveMonitor(cursor.X, cursor.Y)) return;
             _controller.UpdateBounds(ActiveBounds(cursor.X, cursor.Y));
             var push = InputHandoffController.OutwardPush(

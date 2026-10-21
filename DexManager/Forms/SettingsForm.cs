@@ -123,8 +123,8 @@ namespace DexManager.Forms
         private bool _loadingWirelessDevice;
         private bool _preferredDeviceChangedByUser;
         private CheckBox _handoffEnabledBox;
-        private ThemedSelectControl _handoffEdgeBox;
-        private ThemedSelectControl _handoffMonitorBox;
+        private InputHandoffLayoutPanel _handoffLayoutPanel;
+        private Button _handoffResetButton;
         private ThemedHotkeyControl _handoffHotkeyBox;
         private ThemedNumberControl _handoffSpeedBox;
         private ThemedNumberControl _handoffDwellBox;

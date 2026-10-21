@@ -230,6 +230,7 @@
     <Compile Include="Services\VirtualDisplayService.cs" />
     <Compile Include="..\Shared\DexFreeformJournal.cs"><Link>Shared\DexFreeformJournal.cs</Link></Compile>
     <Compile Include="..\Shared\InputHandoff.cs"><Link>Shared\InputHandoff.cs</Link></Compile>
+    <Compile Include="Forms\InputHandoffLayoutPanel.cs" />
     <Compile Include="Services\InputHandoffService.cs" />
     <Compile Include="Services\WirelessAdbService.cs" />
     <Compile Include="Utils\ProcessRunner.cs" />

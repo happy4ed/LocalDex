@@ -390,6 +390,101 @@ namespace DexManager.Services
     // Which phone the handoff targets.  A phone picked with a device or
     // "next phone" shortcut overrides the saved default for this run only;
     // the saved default phone (Settings) is never changed by shortcuts.
+    // Visual monitor-layout attachment: dragging a phone rectangle onto a
+    // monitor edge decides which monitor and which edge the handoff uses.
+    // Pure geometry in a single coordinate space (the layout canvas), so it
+    // is testable without any UI.
+    public static class InputHandoffLayout
+    {
+        public const int DefaultSnapPx = 18;
+
+        private static int Overlap(int a1, int a2, int b1, int b2)
+        {
+            return Math.Max(0, Math.Min(a2, b2) - Math.Max(a1, b1));
+        }
+
+        // Finds the monitor edge nearest the phone rectangle.  monitorIndex
+        // and edge are always set to the best candidate (for display); the
+        // return value is whether the phone is close enough to snap/attach.
+        public static bool ResolveAttachment(
+            System.Collections.Generic.IList<HandoffRect> monitors,
+            HandoffRect phone,
+            int snapPx,
+            out int monitorIndex,
+            out InputHandoffEdge edge)
+        {
+            monitorIndex = -1;
+            edge = InputHandoffEdge.Right;
+            if (monitors == null || monitors.Count == 0) return false;
+            var best = double.MaxValue;
+            for (var i = 0; i < monitors.Count; i++)
+            {
+                var m = monitors[i];
+                var vOverlap = Overlap(phone.Top, phone.Bottom, m.Top, m.Bottom);
+                var hOverlap = Overlap(phone.Left, phone.Right, m.Left, m.Right);
+                // Each edge requires overlap along the parallel axis so the
+                // phone is beside that edge, not diagonally off the corner.
+                Consider(vOverlap, Math.Abs(phone.Left - m.Right), i,
+                    InputHandoffEdge.Right, ref best, ref monitorIndex, ref edge);
+                Consider(vOverlap, Math.Abs(m.Left - phone.Right), i,
+                    InputHandoffEdge.Left, ref best, ref monitorIndex, ref edge);
+                Consider(hOverlap, Math.Abs(phone.Top - m.Bottom), i,
+                    InputHandoffEdge.Bottom, ref best, ref monitorIndex, ref edge);
+                Consider(hOverlap, Math.Abs(m.Top - phone.Bottom), i,
+                    InputHandoffEdge.Top, ref best, ref monitorIndex, ref edge);
+            }
+            return monitorIndex >= 0 && best <= snapPx;
+        }
+
+        private static void Consider(
+            int overlap,
+            double distance,
+            int index,
+            InputHandoffEdge candidate,
+            ref double best,
+            ref int monitorIndex,
+            ref InputHandoffEdge edge)
+        {
+            if (overlap <= 0) return;
+            if (distance >= best) return;
+            best = distance;
+            monitorIndex = index;
+            edge = candidate;
+        }
+
+        // Positions the phone flush against the given monitor edge, centred
+        // along it, so a snap looks docked.
+        public static HandoffRect SnapFlush(
+            HandoffRect monitor,
+            InputHandoffEdge edge,
+            int phoneWidth,
+            int phoneHeight)
+        {
+            int left;
+            int top;
+            switch (edge)
+            {
+                case InputHandoffEdge.Right:
+                    left = monitor.Right;
+                    top = monitor.Top + (monitor.Height - phoneHeight) / 2;
+                    break;
+                case InputHandoffEdge.Left:
+                    left = monitor.Left - phoneWidth;
+                    top = monitor.Top + (monitor.Height - phoneHeight) / 2;
+                    break;
+                case InputHandoffEdge.Top:
+                    left = monitor.Left + (monitor.Width - phoneWidth) / 2;
+                    top = monitor.Top - phoneHeight;
+                    break;
+                default:
+                    left = monitor.Left + (monitor.Width - phoneWidth) / 2;
+                    top = monitor.Bottom;
+                    break;
+            }
+            return new HandoffRect(left, top, phoneWidth, phoneHeight);
+        }
+    }
+
     public static class InputHandoffTargets
     {
         public static string Resolve(

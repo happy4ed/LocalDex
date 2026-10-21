@@ -777,8 +777,13 @@
   <data name="Settings.HandoffHangul" xml:space="preserve"><value>Send the Korean/English key as Shift+Space</value></data>
   <data name="Settings.HandoffDiagnostic" xml:space="preserve"><value>Write a handoff diagnostic log (no serial/IP)</value></data>
   <data name="Handoff.Overlay.ReturnNow" xml:space="preserve"><value>Push the edge now to return to the PC</value></data>
-  <data name="Settings.HandoffMonitor" xml:space="preserve"><value>Monitor for the handoff edge</value></data>
+  <data name="Settings.HandoffMonitor" xml:space="preserve"><value>Drag your phone onto a monitor edge</value></data>
   <data name="Settings.HandoffMonitorCursor" xml:space="preserve"><value>Monitor the cursor is on</value></data>
   <data name="Settings.HandoffMonitorPrimary" xml:space="preserve"><value>primary</value></data>
   <data name="Settings.HandoffMonitorItem" xml:space="preserve"><value>Monitor {0} {1} {2}x{3} at ({4},{5})</value></data>
+  <data name="Settings.HandoffLayoutReset" xml:space="preserve"><value>Reset layout</value></data>
+  <data name="Settings.HandoffLayoutMonitor" xml:space="preserve"><value>Monitor {0}</value></data>
+  <data name="Settings.HandoffLayoutPrimary" xml:space="preserve"><value>primary</value></data>
+  <data name="Settings.HandoffLayoutPhoneAuto" xml:space="preserve"><value>Phone (auto)</value></data>
+  <data name="Settings.HandoffLayoutPhoneManual" xml:space="preserve"><value>Phone (manual)</value></data>
 </root>

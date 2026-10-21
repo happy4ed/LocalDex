@@ -241,6 +241,87 @@ namespace DexManager.Tests
                 "error: no devices", out width, out height));
         }
 
+        private static List<HandoffRect> TwoMonitors()
+        {
+            // Monitor 0 primary 1920x1080 at origin, monitor 1 1920x1080 to
+            // its right.
+            return new List<HandoffRect>
+            {
+                new HandoffRect(0, 0, 1920, 1080),
+                new HandoffRect(1920, 0, 1920, 1080)
+            };
+        }
+
+        [Fact]
+        public void DraggingThePhoneOntoAMonitorRightEdgeAttachesThere()
+        {
+            var monitors = TwoMonitors();
+            // A phone just off monitor 1's right edge, vertically overlapping.
+            var phone = new HandoffRect(1920 + 1920 + 10, 400, 200, 400);
+            int index;
+            InputHandoffEdge edge;
+            var attached = InputHandoffLayout.ResolveAttachment(
+                monitors, phone, 24, out index, out edge);
+            Assert.True(attached);
+            Assert.Equal(1, index);
+            Assert.Equal(InputHandoffEdge.Right, edge);
+        }
+
+        [Fact]
+        public void DraggingThePhoneUnderMonitorZeroAttachesToItsBottom()
+        {
+            var monitors = TwoMonitors();
+            var phone = new HandoffRect(800, 1080 + 8, 200, 400);
+            int index;
+            InputHandoffEdge edge;
+            var attached = InputHandoffLayout.ResolveAttachment(
+                monitors, phone, 24, out index, out edge);
+            Assert.True(attached);
+            Assert.Equal(0, index);
+            Assert.Equal(InputHandoffEdge.Bottom, edge);
+        }
+
+        [Fact]
+        public void DroppingThePhoneFarAwayIsDetachedButReportsTheNearest()
+        {
+            var monitors = TwoMonitors();
+            var phone = new HandoffRect(5000, 400, 200, 400);
+            int index;
+            InputHandoffEdge edge;
+            var attached = InputHandoffLayout.ResolveAttachment(
+                monitors, phone, 24, out index, out edge);
+            Assert.False(attached);
+            Assert.Equal(1, index);
+            Assert.Equal(InputHandoffEdge.Right, edge);
+        }
+
+        [Fact]
+        public void SingleMonitorAttachesOnItsChosenEdge()
+        {
+            var monitors = new List<HandoffRect> { new HandoffRect(0, 0, 2560, 1440) };
+            var phone = new HandoffRect(-205, 500, 200, 400); // just left
+            int index;
+            InputHandoffEdge edge;
+            Assert.True(InputHandoffLayout.ResolveAttachment(
+                monitors, phone, 24, out index, out edge));
+            Assert.Equal(0, index);
+            Assert.Equal(InputHandoffEdge.Left, edge);
+        }
+
+        [Fact]
+        public void SnapFlushDocksThePhoneAgainstTheEdge()
+        {
+            var monitor = new HandoffRect(0, 0, 1920, 1080);
+            var right = InputHandoffLayout.SnapFlush(
+                monitor, InputHandoffEdge.Right, 200, 400);
+            Assert.Equal(1920, right.Left);
+            Assert.Equal((1080 - 400) / 2, right.Top);
+            var bottom = InputHandoffLayout.SnapFlush(
+                monitor, InputHandoffEdge.Bottom, 200, 400);
+            Assert.Equal(1080, bottom.Top);
+            Assert.Equal((1920 - 200) / 2, bottom.Left);
+        }
+
         [Fact]
         public void EdgeDetectionWorksOnASecondMonitorBottom()
         {

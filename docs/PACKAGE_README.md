@@ -1,4 +1,11 @@
-# LocalDex 2.1.0-localdex.9
+# LocalDex 2.1.0-localdex.10
+
+## Visual monitor layout for the handoff — 2.1.0-localdex.10 (2026-10-21)
+
+Replaces the handoff monitor dropdown with a visual layout canvas. Settings -> Connection now draws your real Windows monitors (Screen.AllScreens) to scale, with number, resolution and a primary badge, and a phone rectangle you drag onto a monitor edge. Snapping the phone to an edge attaches the handoff to that monitor and edge (shown in accent), dropping it away detaches it (grey = manual, shortcut only, no edge auto-handoff). The attached monitor and edge are saved as the handoff's monitor and edge; detection, overlay and return use that edge from the layout. A "Reset layout" button re-docks the phone to the primary monitor's right. Works with one or several monitors and re-reads the monitor configuration.
+
+넘기기 모니터 드롭다운을 시각 배치 캔버스로 바꿨습니다. 설정 → 연결에 실제 Windows 모니터(Screen.AllScreens)를 비율대로 그리고(번호·해상도·주 모니터 배지), 폰 사각형을 끌어 모니터 변에 붙입니다. 변에 스냅하면 그 모니터·변에 넘기기가 붙고(강조색), 떨어뜨리면 분리(회색=수동, 단축키만, 엣지 자동 넘김 없음)됩니다. 붙인 모니터·변이 넘기기 모니터·변으로 저장되고, 판정·overlay·돌아오기가 그 변을 씁니다. 「배치 초기화」로 폰을 주 모니터 오른쪽에 다시 붙입니다. 모니터 1개·여러 개 모두 동작하고 구성 변경을 다시 읽습니다.
+
 
 ## Monitor picker and real-resolution return — 2.1.0-localdex.9 (2026-10-21)
 

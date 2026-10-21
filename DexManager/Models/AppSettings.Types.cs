@@ -141,6 +141,9 @@ namespace DexManager.Models
         // Monitor whose edge is used, by Screen device name.  Empty = the
         // monitor the cursor is currently on.
         [DataMember(Order = 12)] public string MonitorDeviceName { get; set; }
+        // Phone attached to a monitor edge in the layout: false = detached
+        // (manual, shortcut only, no edge auto-handoff).
+        [DataMember(Order = 13)] public bool MonitorAttached { get; set; }
 
         public string GetDeviceHotkey(string identity)
         {
@@ -191,7 +194,8 @@ namespace DexManager.Models
                 DeviceHotkeys = new List<InputHandoffDeviceHotkey>(),
                 DwellMs = DefaultDwellMs,
                 ConvertHangulToShiftSpace = true,
-                DiagnosticLog = false
+                DiagnosticLog = false,
+                MonitorAttached = true
             };
         }
 

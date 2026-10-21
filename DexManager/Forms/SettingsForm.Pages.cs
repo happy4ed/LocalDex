@@ -294,38 +294,22 @@ namespace DexManager.Forms
             _handoffEnabledBox = AddCheck(
                 handoff,
                 LocalizationService.Get("Settings.HandoffEnabled"));
-            _handoffEdgeBox = CreateSelect();
-            foreach (InputHandoffEdge edge in Enum.GetValues(typeof(InputHandoffEdge)))
-                _handoffEdgeBox.Items.Add(new HandoffEdgeOption(edge));
-            AddRow(
-                handoff,
-                LocalizationService.Get("Settings.HandoffEdge"),
-                _handoffEdgeBox);
-            _handoffMonitorBox = CreateSelect();
-            _handoffMonitorBox.Items.Add(new HandoffMonitorOption(
-                string.Empty,
-                LocalizationService.Get("Settings.HandoffMonitorCursor")));
-            var screens = Screen.AllScreens;
-            for (var i = 0; i < screens.Length; i++)
+            _handoffLayoutPanel = new InputHandoffLayoutPanel
             {
-                var b = screens[i].Bounds;
-                var label = LocalizationService.Format(
-                    "Settings.HandoffMonitorItem",
-                    i + 1,
-                    screens[i].Primary
-                        ? LocalizationService.Get("Settings.HandoffMonitorPrimary")
-                        : string.Empty,
-                    b.Width,
-                    b.Height,
-                    b.Left,
-                    b.Top);
-                _handoffMonitorBox.Items.Add(
-                    new HandoffMonitorOption(screens[i].DeviceName, label));
-            }
+                Width = CardContentWidth - 8,
+                Height = 230
+            };
             AddRow(
                 handoff,
                 LocalizationService.Get("Settings.HandoffMonitor"),
-                _handoffMonitorBox);
+                _handoffLayoutPanel);
+            _handoffResetButton = CreateActionButton(
+                LocalizationService.Get("Settings.HandoffLayoutReset"), 120);
+            _handoffResetButton.Click += delegate
+            {
+                if (_handoffLayoutPanel != null) _handoffLayoutPanel.ResetPhone();
+            };
+            AddRow(handoff, string.Empty, _handoffResetButton);
             _handoffHotkeyBox = AddHotkey(
                 handoff,
                 LocalizationService.Get("Settings.HandoffReturnHotkey"));
