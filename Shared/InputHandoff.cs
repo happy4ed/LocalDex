@@ -580,7 +580,9 @@ namespace DexManager.Services
         bool EnterPhone();
         // Releases any cursor clip, hides the session window and moves the
         // PC pointer to the given point.  Must always succeed.
-        void ReleaseToPc(HandoffPoint point);
+        // reason is a short code for the diagnostic log (edge / shortcut
+        // / scrcpy-exit / target-missing ...), never a cursor-watchdog.
+        void ReleaseToPc(HandoffPoint point, string reason);
         void Log(string resourceKey);
     }
 
@@ -851,6 +853,19 @@ namespace DexManager.Services
             return _phone.Feed(dx, dy, timeMs, buttonDown);
         }
 
+        // Short, stable code for the release reason in the diagnostic log.
+        private static string ReasonCode(string reasonKey)
+        {
+            if (string.IsNullOrEmpty(reasonKey)) return "stop";
+            if (reasonKey.EndsWith("ReturnedByEdge")) return "edge";
+            if (reasonKey.EndsWith("ReturnedByHotkey")) return "shortcut";
+            if (reasonKey.EndsWith("SessionEnded")) return "scrcpy-exit";
+            if (reasonKey.EndsWith("TargetMissing")) return "target-missing";
+            if (reasonKey.EndsWith("TargetChanged")) return "target-changed";
+            if (reasonKey.EndsWith("EnterFailed")) return "enter-failed";
+            return reasonKey;
+        }
+
         public bool ReturnByEdge()
         {
             _hasExactReturn = false;
@@ -861,13 +876,15 @@ namespace DexManager.Services
         public bool ReturnToPc(string reasonKey)
         {
             if (State != InputHandoffState.OnPhone) return false;
-            _host.ReleaseToPc(_hasExactReturn
-                ? _exactReturn
-                : InputHandoffEdgeDetector.ReturnPoint(
-                    _bounds,
-                    _edge,
-                    _exitRatio,
-                    ReturnInset));
+            _host.ReleaseToPc(
+                _hasExactReturn
+                    ? _exactReturn
+                    : InputHandoffEdgeDetector.ReturnPoint(
+                        _bounds,
+                        _edge,
+                        _exitRatio,
+                        ReturnInset),
+                ReasonCode(reasonKey));
             _hasExactReturn = false;
             _detector.Reset(true);
             State = _sessionSerial.Length > 0

@@ -1,5 +1,24 @@
 # LocalDex build and validation
 
+## Version placement, no on-phone toast, watchdog-return fix, NO_COMPANION — 2.1.0-localdex.11 (2026-10-21)
+
+Three fixes from on-device feedback. The version string moved to the bottom-left of the main window so it no longer crowds and truncates the Settings button. The persistent "on phone" toast is gone -- only the brief arming progress shows before handing over. And the root of "returning away from the edge" is fixed: while on the phone the cursor/foreground watchdog that caused false mid-screen returns (release with returnDist>0, push=0 in the logs) was removed; a return now only happens from a real edge reach + dwell + push, the return shortcut, or a genuine safety event (the scrcpy process ending). Each release records its reason (edge / shortcut / scrcpy-exit / target-missing...) in the diagnostic log, and a low-frequency phone-pointer probe logs whether the real cursor position is readable. DX Companion is kept in the repo but excluded from the app build behind a NO_COMPANION flag.
+
+실기 피드백 3건 반영. 버전 문자열을 메인 창 좌측 하단으로 옮겨 설정 버튼을 가리거나 자르지 않게 했습니다. 「휴대폰 사용 중」 상주 토스트를 제거했고, 넘어가기 직전 대기 진행 표시만 남겼습니다. 「엣지 아닌데 빠져나옴」 뿌리 수정: 폰에 있는 동안 중간 복귀를 일으키던 커서/포커스 감시(로그의 returnDist>0·push=0 release)를 제거했습니다. 이제 복귀는 실제 엣지 도달+유지+밀기, 돌아오기 단축키, 진짜 안전 이벤트(scrcpy 프로세스 종료)로만 일어납니다. 복귀 줄에 사유(edge / shortcut / scrcpy-exit / target-missing…)를 남기고, 저빈도 폰 포인터 프로브로 실제 커서 위치를 읽을 수 있는지 로그에 남깁니다. DX Companion 은 저장소에 두되 NO_COMPANION 플래그로 앱 빌드에서 제외했습니다.
+
+### Handoff diagnostic additions (localdex.11)
+
+The release line now carries the reason: `release pointer->pc reason=edge|shortcut|scrcpy-exit|target-missing|... at x,y`. While on the phone a `phone-pointer x=.. y=..` (or `phone-pointer unavailable`) line records a low-frequency probe of the real phone cursor via `adb shell dumpsys input`, so whether the position is readable can be confirmed from a log. No serial or IP.
+
+### DX Companion build flag (localdex.11)
+
+DX Companion is kept in the repo but excluded from the app build by default. The `NoCompanion` MSBuild property (default true) sets the `NO_COMPANION` compile constant, which drops the Companion settings UI, and gates the APK sync target; `scripts/Package-Release.ps1` bundles/verifies the APK only with `-IncludeCompanion`. Build `/p:NoCompanion=false` to restore it.
+
+Validation (Linux, 2026-10-21): Windows x64/net462 cross-build passed with NoCompanion default and NoCompanion=false; xUnit 172 passed (new: release-reason codes), multi-device runner 39 passed. Real on-phone watchdog behaviour and dumpsys pointer reads are not exercised here.
+
+검증(Linux, 2026-10-21): NoCompanion 기본·NoCompanion=false 양쪽 Windows x64/net462 교차 빌드 통과, xUnit 172개(신규: 복귀 사유 코드)·다중 기기 39개 통과. 실제 폰 감시 동작·dumpsys 포인터 읽기는 실기 확인이 필요합니다.
+
+
 ## Visual monitor layout for the handoff — 2.1.0-localdex.10 (2026-10-21)
 
 Replaces the handoff monitor dropdown with a visual layout canvas. Settings -> Connection now draws your real Windows monitors (Screen.AllScreens) to scale, with number, resolution and a primary badge, and a phone rectangle you drag onto a monitor edge. Snapping the phone to an edge attaches the handoff to that monitor and edge (shown in accent), dropping it away detaches it (grey = manual, shortcut only, no edge auto-handoff). The attached monitor and edge are saved as the handoff's monitor and edge; detection, overlay and return use that edge from the layout. A "Reset layout" button re-docks the phone to the primary monitor's right. Works with one or several monitors and re-reads the monitor configuration.
@@ -189,7 +208,7 @@ After creating `dist/LocalDex`, run the following on Windows with Inno Setup 6 i
 
 ```powershell
 ./scripts/Build-Installer.ps1
-./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.10-win-x64-setup.exe
+./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.11-win-x64-setup.exe
 ```
 
 The Windows workflow runs both commands and publishes only after the installer smoke tests and regression tests succeed. Its `release:` commit-message trigger is intentional: ordinary pushes build artifacts without publishing a release.

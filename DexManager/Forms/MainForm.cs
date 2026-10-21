@@ -102,6 +102,7 @@ namespace DexManager.Forms
         private Label _deviceSectionLabel;
         private Label _modeSectionLabel;
         private Label _sidebarHintLabel;
+        private Label _versionLabel;
         private Panel _deviceSectionDivider;
         private int _selectedMode;
         private int _phoneScreenWakeSuppression;

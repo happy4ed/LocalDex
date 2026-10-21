@@ -57,6 +57,10 @@ namespace DexManager.Services
         private bool _convertHangul = true;
         private int _hangulVkOverride;
         private string _monitorDeviceName = string.Empty;
+        private string _sessionSerial = string.Empty;
+        private string _sessionAdb = string.Empty;
+        private int _probeTick;
+        private int _probing;
         private bool _attached = true;
         private Process _process;
         private IntPtr _sessionWindow;
@@ -341,6 +345,8 @@ namespace DexManager.Services
                     Native.AssignProcessToJobObject(_job, process.Handle);
                 _process = process;
                 _sessionWindow = IntPtr.Zero;
+                _sessionSerial = serial;
+                _sessionAdb = adb;
                 ReadPhoneSizeAsync(serial, adb, process);
                 return true;
             }
@@ -454,7 +460,7 @@ namespace DexManager.Services
         //      topmost + foreground a PC window),
         //   3. then place the PC pointer.
         // Every step is independent so one failure cannot strand the pointer.
-        void IInputHandoffHost.ReleaseToPc(HandoffPoint point)
+        void IInputHandoffHost.ReleaseToPc(HandoffPoint point, string reason)
         {
             _returnGuardUntilMs = _clock.ElapsedMilliseconds + ReturnGuardMs;
             try { Native.ClipCursor(IntPtr.Zero); } catch { }
@@ -492,8 +498,8 @@ namespace DexManager.Services
             }
             try { Native.ClipCursor(IntPtr.Zero); } catch { }
             try { Native.SetCursorPos(point.X, point.Y); } catch { }
-            _diagnostics.Record("release pointer->pc at " +
-                point.X + "," + point.Y);
+            _diagnostics.Record("release pointer->pc reason=" + reason +
+                " at " + point.X + "," + point.Y);
         }
 
         void IInputHandoffHost.Log(string resourceKey)
@@ -764,7 +770,12 @@ namespace DexManager.Services
             {
                 WatchOnPhone();
                 if (_diagnostics.Enabled)
+                {
                     _diagnostics.Record(_controller.PhoneReturnDebug());
+                    // Low-frequency probe of the real phone pointer position
+                    // (diagnostic only): ~ every 1.5 s, off the UI thread.
+                    if (++_probeTick >= 6) { _probeTick = 0; ProbePhonePointer(); }
+                }
             }
             UpdateOverlay();
             // The timer runs fast for smooth overlay progress; refresh the
@@ -780,20 +791,16 @@ namespace DexManager.Services
         private void UpdateOverlay()
         {
             var state = _controller.State;
-            var bounds = ActiveBoundsForCursor();
-            if (state == InputHandoffState.OnPhone)
-            {
-                _overlay.ShowReturn(
-                    bounds, _controller.Edge, _controller.PhoneNearReturnEdge);
-                return;
-            }
+            // No persistent toast while on the phone; only the brief arming
+            // progress shown before handing over.
             if (state == InputHandoffState.Ready)
             {
                 var progress = _controller.EdgeProgress(
                     _clock.ElapsedMilliseconds);
                 if (progress > 0)
                 {
-                    _overlay.ShowArming(bounds, _controller.Edge, progress);
+                    _overlay.ShowArming(
+                        ActiveBoundsForCursor(), _controller.Edge, progress);
                     return;
                 }
             }
@@ -806,36 +813,20 @@ namespace DexManager.Services
         // different foreground window, means the capture is gone (scrcpy
         // capture key, Alt+Tab, Ctrl+Alt+Del, crash...).  The PC then gets
         // its pointer back at the edge it left from.
+        // Safety net while on the phone.  It must NOT return based on the
+        // PC cursor position or the foreground window: scrcpy holds and
+        // warps the captured cursor and windows (our own overlay included)
+        // can take focus, which produced false mid-screen returns.  A return
+        // only happens from a real edge reach, the return shortcut, or a
+        // genuine safety event -- here, the scrcpy process ending (crash,
+        // cable pulled, device gone).  Win+L / UAC are covered because the
+        // session process dies or input stops; the return shortcut is always
+        // available otherwise.
         private void WatchOnPhone()
         {
             var process = _process;
             if (process == null || process.HasExited)
-            {
                 _controller.OnSessionExited(_clock.ElapsedMilliseconds);
-                return;
-            }
-            if (_clock.ElapsedMilliseconds - _enteredAtMs < EnterGraceMs)
-                return;
-            var window = _sessionWindow;
-            var lost = window == IntPtr.Zero ||
-                !Native.IsWindow(window) ||
-                Native.GetForegroundWindow() != window;
-            if (!lost)
-            {
-                Native.RECT rect;
-                Native.POINT cursor;
-                if (Native.GetWindowRect(window, out rect) &&
-                    Native.GetCursorPos(out cursor))
-                {
-                    var inside = cursor.X >= rect.Left - 2 &&
-                        cursor.X <= rect.Right + 2 &&
-                        cursor.Y >= rect.Top - 2 &&
-                        cursor.Y <= rect.Bottom + 2;
-                    _outsideTicks = inside ? 0 : _outsideTicks + 1;
-                    lost = _outsideTicks >= 2;
-                }
-            }
-            if (lost) _controller.ReturnToPc("Log.Handoff.ReturnedReleased");
         }
 
         private void Process_Exited(object sender, EventArgs e)
@@ -889,6 +880,84 @@ namespace DexManager.Services
                 (current == found || current == IntPtr.Zero))
             {
                 Native.SetForegroundWindow(previous);
+            }
+        }
+
+        // Investigates whether the real phone pointer position is readable
+        // via adb, for the diagnostic log.  dumpsys formats vary by Android /
+        // One UI version, so several patterns are tried; the raw matched
+        // value is logged so main can confirm feasibility.  Not used to
+        // trigger returns (the mid-screen false returns came from the cursor
+        // watchdog, now removed, not from the estimate).
+        private void ProbePhonePointer()
+        {
+            if (Interlocked.Exchange(ref _probing, 1) == 1) return;
+            var serial = _sessionSerial;
+            var adb = _sessionAdb;
+            if (string.IsNullOrWhiteSpace(serial) ||
+                string.IsNullOrWhiteSpace(adb) || !File.Exists(adb))
+            {
+                _probing = 0;
+                return;
+            }
+            Task.Run(delegate
+            {
+                string line;
+                try
+                {
+                    line = ReadPhonePointerLine(adb, serial);
+                }
+                catch (Exception ex)
+                {
+                    line = "error " + ex.Message;
+                }
+                _ui.Post(delegate
+                {
+                    _probing = 0;
+                    if (_disposed) return;
+                    _diagnostics.Record("phone-pointer " +
+                        (string.IsNullOrEmpty(line) ? "unavailable" : line));
+                }, null);
+            });
+        }
+
+        private static readonly string[] PointerPatterns =
+        {
+            @"(?:PointerLocation|mPointer|mMousePointer|Pointer)[^
+]*?\(?\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)?",
+            @"position=\(?\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)",
+            @"mX\s*=\s*(-?\d+(?:\.\d+)?)[^
+]*mY\s*=\s*(-?\d+(?:\.\d+)?)"
+        };
+
+        private static string ReadPhonePointerLine(string adb, string serial)
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = adb,
+                Arguments = "-s " + serial + " shell dumpsys input",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            using (var process = Process.Start(startInfo))
+            {
+                var output = process.StandardOutput.ReadToEnd();
+                if (!process.WaitForExit(4000))
+                {
+                    try { process.Kill(); } catch { }
+                    return "timeout";
+                }
+                foreach (var pattern in PointerPatterns)
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(
+                        output, pattern,
+                        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    if (match.Success)
+                        return "x=" + match.Groups[1].Value + " y=" + match.Groups[2].Value;
+                }
+                return string.Empty;
             }
         }
 

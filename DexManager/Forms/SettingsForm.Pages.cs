@@ -483,6 +483,7 @@ namespace DexManager.Forms
                 LocalizationService.Get("Settings.SelectedDeviceDiagnostics"),
                 BuildSelectedDeviceDiagnosticsPanel());
 
+#if !NO_COMPANION
             var displayCleanup = new FlowLayoutPanel
             {
                 AutoSize = true,
@@ -550,6 +551,7 @@ namespace DexManager.Forms
                 LocalizationService.Get(
                     "Settings.GroupDisplayCleanup"),
                 displayCleanup);
+#endif
 
             var advanced = CreateTable();
             _wakeUpModeBox = AddCombo<ScrcpyWakeUpMode>(

@@ -366,6 +366,26 @@ namespace DexManager.Tests
         }
 
         [Fact]
+        public void ReleaseReasonIsRecordedForEachReturnPath()
+        {
+            var host = new FakeHost();
+            var controller = ReadyController(host);
+            controller.EnterPhone(700, 400, false);
+            controller.ReturnToPc("Log.Handoff.ReturnedByHotkey");
+            Assert.Equal("shortcut", host.ReleaseReasons[0]);
+
+            controller.SetPhoneExtent(1000, 1000);
+            controller.EnterPhone(700, 540, false);
+            controller.ReturnByEdge();
+            Assert.Equal("edge", host.ReleaseReasons[1]);
+
+            PushToEdge(controller, 300);
+            controller.EnterPhone(1919, 300);
+            controller.OnSessionExited(99000);
+            Assert.Equal("scrcpy-exit", host.ReleaseReasons[2]);
+        }
+
+        [Fact]
         public void StatesGoWaitingReadyOnPhoneAndBack()
         {
             var host = new FakeHost();
@@ -675,9 +695,12 @@ namespace DexManager.Tests
                 return EnterResult;
             }
 
-            public void ReleaseToPc(HandoffPoint point)
+            public readonly List<string> ReleaseReasons = new List<string>();
+
+            public void ReleaseToPc(HandoffPoint point, string reason)
             {
                 Released.Add(point);
+                ReleaseReasons.Add(reason ?? string.Empty);
                 Calls.Add("release");
             }
 

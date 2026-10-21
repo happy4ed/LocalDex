@@ -1,7 +1,10 @@
 param(
     [string]$Version = "",
     [switch]$SkipBuild,
-    [string]$TargetFrameworkRootPath = ""
+    [string]$TargetFrameworkRootPath = "",
+    # DX Companion is excluded from the app build by default (NoCompanion).
+    # Pass -IncludeCompanion to bundle and verify the signed APK again.
+    [switch]$IncludeCompanion
 )
 
 $ErrorActionPreference = "Stop"
@@ -89,11 +92,14 @@ if ($releaseAdbProcesses -and (Test-Path -LiteralPath $releaseAdbPath)) {
 
 if (!$SkipBuild) {
     & (Join-Path $PSScriptRoot "Update-Scrcpy.ps1")
-    & (Join-Path $PSScriptRoot "Prepare-Companion.ps1")
+    if ($IncludeCompanion) {
+        & (Join-Path $PSScriptRoot "Prepare-Companion.ps1")
+    }
     $msbuild = Find-MSBuild
     $arguments = @(
         $solutionPath,
         "/t:Rebuild",
+        ("/p:NoCompanion=" + (!$IncludeCompanion).ToString().ToLowerInvariant()),
         "/p:Configuration=Release",
         "/m"
     )
@@ -179,17 +185,19 @@ foreach ($item in $requiredFiles) {
     }
 }
 
-if (!(Test-Path -LiteralPath $companionApkSource -PathType Leaf)) {
-    throw "The signed DX Companion Release APK is missing: $companionApkSource"
-}
-$actualCompanionHash = (Get-FileHash `
-    -LiteralPath $companionApkSource `
-    -Algorithm SHA256).Hash
-if (![string]::Equals(
-    $actualCompanionHash,
-    $companionApkSha256,
-    [StringComparison]::OrdinalIgnoreCase)) {
-    throw "The signed DX Companion APK hash does not match the verified 2.0.0 build."
+if ($IncludeCompanion) {
+    if (!(Test-Path -LiteralPath $companionApkSource -PathType Leaf)) {
+        throw "The signed DX Companion Release APK is missing: $companionApkSource"
+    }
+    $actualCompanionHash = (Get-FileHash `
+        -LiteralPath $companionApkSource `
+        -Algorithm SHA256).Hash
+    if (![string]::Equals(
+        $actualCompanionHash,
+        $companionApkSha256,
+        [StringComparison]::OrdinalIgnoreCase)) {
+        throw "The signed DX Companion APK hash does not match the verified 2.0.0 build."
+    }
 }
 
 if ([string]::IsNullOrWhiteSpace($Version)) {
@@ -228,11 +236,13 @@ foreach ($item in $requiredOutput) {
     Copy-Item -LiteralPath (Join-Path $releaseRoot $item) -Destination $packageRoot -Recurse -Force
 }
 
-$packageCompanionDirectory = Join-Path $packageRoot "tools\companion"
-New-Item -ItemType Directory -Path $packageCompanionDirectory -Force |
-    Out-Null
-Copy-Item -LiteralPath $companionApkSource `
-    -Destination (Join-Path $packageCompanionDirectory "DX-Companion.apk")
+if ($IncludeCompanion) {
+    $packageCompanionDirectory = Join-Path $packageRoot "tools\companion"
+    New-Item -ItemType Directory -Path $packageCompanionDirectory -Force |
+        Out-Null
+    Copy-Item -LiteralPath $companionApkSource `
+        -Destination (Join-Path $packageCompanionDirectory "DX-Companion.apk")
+}
 
 # Release builds create a PDB for the managed ADB helper under tools. Keep
 # debugging symbols out of the public portable package.

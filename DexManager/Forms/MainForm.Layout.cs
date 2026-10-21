@@ -364,16 +364,27 @@ namespace DexManager.Forms
 
             _settingsSidebarButton = CreateSidebarButton(
                 LocalizationService.Get("Main.Settings"),
-                _sidebar.Height - 48,
+                _sidebar.Height - 62,
                 false,
                 false);
             _settingsSidebarButton.ShowSettingsIcon = true;
-            _settingsSidebarButton.TrailingText =
-                "v" + Application.ProductVersion;
             _settingsSidebarButton.Anchor =
                 AnchorStyles.Left | AnchorStyles.Bottom;
             _settingsSidebarButton.Click += delegate { ShowSettingsForm(); };
             _sidebar.Controls.Add(_settingsSidebarButton);
+
+            // Version sits on its own line at the bottom-left, so it does
+            // not crowd the Settings button label.
+            _versionLabel = new Label
+            {
+                AutoSize = true,
+                ForeColor = _theme.TextTertiary,
+                BackColor = _theme.NavigationBackground,
+                Location = new Point(22, _sidebar.Height - 24),
+                Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
+                Text = "v" + Application.ProductVersion
+            };
+            _sidebar.Controls.Add(_versionLabel);
 
             Controls.Add(_sidebar);
             _sidebar.BringToFront();
