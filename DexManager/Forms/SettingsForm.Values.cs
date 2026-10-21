@@ -118,6 +118,20 @@ namespace DexManager.Forms
             _handoffEdgeBox.SelectedIndex = Math.Max(0, Math.Min(
                 _handoffEdgeBox.Items.Count - 1,
                 (int)handoff.Edge));
+            var monitorIndex = 0;
+            for (var i = 0; i < _handoffMonitorBox.Items.Count; i++)
+            {
+                var option = _handoffMonitorBox.Items[i] as HandoffMonitorOption;
+                if (option != null && string.Equals(
+                        option.DeviceName,
+                        handoff.MonitorDeviceName ?? string.Empty,
+                        StringComparison.Ordinal))
+                {
+                    monitorIndex = i;
+                    break;
+                }
+            }
+            _handoffMonitorBox.SelectedIndex = monitorIndex;
             _handoffHotkeyBox.Text = handoff.ReturnHotkey;
             _handoffEnterHotkeyBox.Text = handoff.EnterHotkey;
             _handoffNextHotkeyBox.Text = handoff.NextDeviceHotkey;
@@ -474,6 +488,10 @@ namespace DexManager.Forms
             handoff.Enabled = _handoffEnabledBox.Checked;
             var edge = _handoffEdgeBox.SelectedItem as HandoffEdgeOption;
             handoff.Edge = edge == null ? InputHandoffEdge.Right : edge.Edge;
+            var monitor = _handoffMonitorBox.SelectedItem as HandoffMonitorOption;
+            handoff.MonitorDeviceName = monitor == null
+                ? string.Empty
+                : monitor.DeviceName;
             // Empty = no shortcut (cleared with Delete or Backspace).
             handoff.ReturnHotkey = _handoffHotkeyBox.Text.Trim();
             handoff.EnterHotkey = _handoffEnterHotkeyBox.Text.Trim();

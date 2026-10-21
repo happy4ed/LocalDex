@@ -244,21 +244,16 @@ namespace DexManager.Services
     {
         private double _x;
         private double _y;
-        private bool _armed;
         private long _touchStartMs = -1;
         private double _pushAccum;
         private int _reanchors;
 
-        // Returning is deliberately easier than entering: a short dwell and a
-        // small push once the pointer is back on the facing edge.
-        public const int DefaultReturnDwellMs = 120;
-        public const double DefaultReturnPushPx = 6;
-        // The pointer must first move this far into the phone (away from the
-        // facing edge) before a return can trigger, so entering does not
-        // immediately bounce back.
-        public const int ArmDistance = 60;
+        // Returning is symmetric with entering: hold on the actual facing
+        // edge for the dwell while pushing outward.
+        public const int DefaultReturnDwellMs = 330;
+        public const double DefaultReturnPushPx = 10;
         // How near the facing edge counts as "about to return" (overlay cue).
-        public const int NearDistance = 48;
+        public const int NearDistance = 60;
 
         public PhonePointerTracker()
         {
@@ -275,7 +270,6 @@ namespace DexManager.Services
         public InputHandoffEdge PcEdge { get; set; }
         public double X { get { return _x; } }
         public double Y { get { return _y; } }
-        public bool Armed { get { return _armed; } }
         public int Reanchors { get { return _reanchors; } }
         public double PushAccum { get { return _pushAccum; } }
         public bool HasExtent { get { return Width > 0 && Height > 0; } }
@@ -299,15 +293,15 @@ namespace DexManager.Services
         }
 
         // Entry places the virtual pointer on the facing edge -- that is the
-        // phone edge the pointer just crossed in from.  It starts disarmed,
-        // so the user must move into the phone (ArmDistance) before pushing
-        // back out returns; then pushing to that edge (where the clamp
-        // re-anchors the estimate) brings the pointer back to the PC.
+        // phone edge the pointer just crossed in from (e.g. the phone's top
+        // when the phone is below the PC).  With the extent set to the real
+        // phone resolution the estimate then covers the whole phone screen,
+        // and a return needs the pointer pushed all the way back to that
+        // actual edge (not the middle), held for the dwell.
         public void Begin()
         {
             _touchStartMs = -1;
             _pushAccum = 0;
-            _armed = false;
             var edge = ReturnEdgeFor(PcEdge);
             _x = Width / 2.0;
             _y = Height / 2.0;
@@ -334,23 +328,27 @@ namespace DexManager.Services
 
         public bool NearReturnEdge()
         {
-            return HasExtent && _armed && ReturnDistance() <= NearDistance;
+            return HasExtent && ReturnDistance() <= NearDistance;
         }
 
-        // Feeds one raw relative movement.  Returns true when the pointer,
-        // once armed, rests on the facing edge for ReturnDwellMs while
-        // pushing outward by ReturnPushPx.
+        // Feeds one raw relative movement.  Returns true when the pointer
+        // rests on the actual facing edge for ReturnDwellMs while pushing
+        // outward by ReturnPushPx -- symmetric with entering, so the whole
+        // phone screen is usable and returning needs the real edge.
         public bool Feed(int dx, int dy, long timeMs, bool buttonDown)
         {
             if (!HasExtent) return false;
             var scale = SpeedMultiplier > 0 ? SpeedMultiplier : 1.0;
+            var px = _x;
+            var py = _y;
             var nx = Math.Max(0, Math.Min(Width, _x + dx * scale));
             var ny = Math.Max(0, Math.Min(Height, _y + dy * scale));
-            // Clamping to an edge re-anchors the estimate there, so drift
-            // cannot accumulate and pushing fully to the edge always lands
-            // on it.
-            if ((nx != _x + dx * scale && (nx == 0 || nx == Width)) ||
-                (ny != _y + dy * scale && (ny == 0 || ny == Height)))
+            // A re-anchor is a fresh arrival at an edge (from off it), where
+            // the clamp resets the estimate so drift cannot accumulate.
+            // Counting only the transition keeps the number meaningful
+            // (staying pinned does not inflate it).
+            if ((nx == 0 && px > 0) || (nx == Width && px < Width) ||
+                (ny == 0 && py > 0) || (ny == Height && py < Height))
             {
                 _reanchors++;
             }
@@ -367,11 +365,6 @@ namespace DexManager.Services
                 default: pushing = dy > 0; outward = dy * scale; break;
             }
             var distance = ReturnDistance();
-            if (!_armed)
-            {
-                if (distance >= ArmDistance) _armed = true;
-                return false;
-            }
             var atEdge = distance <= 1;
             if (buttonDown || !atEdge)
             {
@@ -551,7 +544,7 @@ namespace DexManager.Services
         public string PhoneReturnDebug()
         {
             return string.Format(
-                "phone vx={0} vy={1} extent={2}x{3} returnEdge={4} returnDist={5} push={6:0.0} armed={7} reanchors={8}",
+                "phone vx={0} vy={1} extent={2}x{3} returnEdge={4} returnDist={5} push={6:0.0} reanchors={7}",
                 (int)_phone.X,
                 (int)_phone.Y,
                 _phone.Width,
@@ -559,7 +552,6 @@ namespace DexManager.Services
                 PhonePointerTracker.ReturnEdgeFor(_edge),
                 _phone.ReturnDistance(),
                 _phone.PushAccum,
-                _phone.Armed,
                 _phone.Reanchors);
         }
 
@@ -694,9 +686,12 @@ namespace DexManager.Services
 
         public void ConfigureDwell(int dwellMs)
         {
-            _detector.DwellMs = dwellMs > 0
+            var value = dwellMs > 0
                 ? dwellMs
                 : InputHandoffEdgeDetector.DefaultDwellMs;
+            _detector.DwellMs = value;
+            // Returning uses the same dwell as entering (symmetric).
+            _phone.ReturnDwellMs = value;
         }
 
         // Outward component of a raw mouse delta for the given edge (>=0).

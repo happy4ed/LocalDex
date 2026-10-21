@@ -124,6 +124,7 @@ namespace DexManager.Forms
         private bool _preferredDeviceChangedByUser;
         private CheckBox _handoffEnabledBox;
         private ThemedSelectControl _handoffEdgeBox;
+        private ThemedSelectControl _handoffMonitorBox;
         private ThemedHotkeyControl _handoffHotkeyBox;
         private ThemedNumberControl _handoffSpeedBox;
         private ThemedNumberControl _handoffDwellBox;

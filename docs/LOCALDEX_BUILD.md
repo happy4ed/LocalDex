@@ -1,5 +1,20 @@
 # LocalDex build and validation
 
+## Monitor picker and real-resolution return — 2.1.0-localdex.9 (2026-10-21)
+
+Adds a monitor picker for the handoff and fixes returning from the phone. Settings -> Connection now has "Monitor for the handoff edge": "Monitor the cursor is on" (default) or a specific monitor by number, position and resolution (Screen.AllScreens). With a specific monitor pinned, only that monitor's chosen edge hands over. Returning from the phone was fixed at the root: the virtual phone pointer's extent is now the phone's real resolution per axis (adb wm size), not a square of the long side, so the estimate covers the whole phone screen and a return needs the pointer pushed to the phone's actual facing edge -- no more returning from the middle, and the whole phone screen is usable. Returning is symmetric with entering: hold on the real edge for the dwell (default 0.33 s, configurable) while pushing outward; the early mid-screen arm was removed. The return shortcut still returns immediately. Re-anchoring is counted only when the pointer first reaches an edge, so the inflated re-anchor count is gone. Diagnostics add the phone's real resolution and the selected monitor index.
+
+넘기기용 모니터 선택을 더하고 폰에서 돌아오기를 고쳤습니다. 설정 → 연결에 「넘기기 변을 쓸 모니터」가 생겼습니다: 「커서가 있는 모니터」(기본) 또는 번호·위치·해상도로 특정 모니터(Screen.AllScreens). 특정 모니터를 고르면 그 모니터의 설정된 변에서만 넘어갑니다. 폰에서 돌아오기 뿌리 고침: 가상 폰 포인터 extent 를 긴 변 정사각이 아니라 폰 실제 해상도(adb wm size)로 축별로 맞춰, 추정이 폰 화면 전체를 덮고 실제 변까지 밀어야 돌아옵니다 — 중간에서 돌아오던 문제 해결, 폰 전체 조작 가능. 돌아오기는 진입과 대칭입니다: 실제 변에서 유지 시간(기본 0.33초·설정값) 동안 바깥으로 밀기. 중간에서 arm 되던 것 제거. 단축키 즉시 복귀는 그대로. 재앵커는 변에 처음 닿을 때만 세어 과다 카운트가 사라졌습니다. 진단에 폰 실제 해상도·선택 모니터 번호 추가.
+
+### Handoff diagnostic additions (localdex.9)
+
+The mouse sample's `mon=` is the active monitor (pinned one, or the cursor's). When the phone size is read, a line `phone extent set WxH from wm size` records the real resolution used for the virtual pointer, and the on-phone line `phone vx=.. vy=.. extent=.. returnEdge=.. returnDist=.. push=.. reanchors=..` now reflects that real extent (returnDist 0 = the actual phone edge). No serial or IP.
+
+Validation (Linux, 2026-10-21): Windows x64/net462 cross-build passed; xUnit 166 passed, multi-device runner 39 passed. Real monitors, hooks, raw input, the scrcpy window and the phone side are not exercised here.
+
+검증(Linux, 2026-10-21): Windows x64/net462 교차 빌드 통과, xUnit 166개·다중 기기 39개 통과. 실제 모니터·훅·원시 입력·scrcpy 창·휴대폰 쪽은 실기 확인이 필요합니다.
+
+
 ## Multi-monitor, return and Korean-key diagnostics — 2.1.0-localdex.8 (2026-10-20)
 
 Multi-monitor and return fixes. The overlay and edge detection now use the monitor the cursor is on (Screen.FromPoint), not the whole virtual desktop, so the toast appears at the bottom of the monitor in use and each monitor's own edge triggers the handoff -- no more toast in the gap between two monitors. Returning from the phone is reworked: the virtual phone pointer starts on the edge facing the PC, must first move into the phone (arm), then a short push back to that edge returns (shorter dwell and smaller push than entering), with edge clamping re-anchoring the estimate so pushing fully to the edge always lands on it. The overlay shows a "push now to return" cue when the pointer is near that edge. The Korean/English key detection is widened (VK_HANGUL/VK_HANJA, extended right Alt, common scan codes, plus an optional exact code), only injected when the scrcpy window is focused; the diagnostic log records every key's code so an unusual Korean/English key can be identified from one press, and the phone return estimate (virtual position, distance, push, re-anchors) for troubleshooting.
@@ -163,7 +178,7 @@ After creating `dist/LocalDex`, run the following on Windows with Inno Setup 6 i
 
 ```powershell
 ./scripts/Build-Installer.ps1
-./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.8-win-x64-setup.exe
+./scripts/Test-Installer.ps1 -Installer ./dist/LocalDex-v2.1.0-localdex.9-win-x64-setup.exe
 ```
 
 The Windows workflow runs both commands and publishes only after the installer smoke tests and regression tests succeed. Its `release:` commit-message trigger is intentional: ordinary pushes build artifacts without publishing a release.

@@ -56,6 +56,7 @@ namespace DexManager.Services
         private bool _rawInputRegistered;
         private bool _convertHangul = true;
         private int _hangulVkOverride;
+        private string _monitorDeviceName = string.Empty;
         private Process _process;
         private IntPtr _sessionWindow;
         private IntPtr _foregroundBeforeStart;
@@ -111,10 +112,11 @@ namespace DexManager.Services
             BuildBindings(config);
             _convertHangul = config.ConvertHangulToShiftSpace;
             _hangulVkOverride = config.HangulKeyVk;
+            _monitorDeviceName = config.MonitorDeviceName ?? string.Empty;
             _diagnostics.Enabled = config.DiagnosticLog;
             _controller.ConfigureDwell(config.DwellMs);
             _controller.SetPhoneSpeed(config.PhonePointerSpeedPercent / 100.0);
-            _controller.Configure(config.Enabled, config.Edge, CursorMonitorBounds());
+            _controller.Configure(config.Enabled, config.Edge, ActiveBoundsForCursor());
             if (config.Enabled) InstallHooks();
             else { RemoveHooks(); _overlay.HideOverlay(); }
             Refresh();
@@ -309,7 +311,7 @@ namespace DexManager.Services
                     LocalizationService.Get("Log.Handoff.ScrcpyMissing")));
                 return false;
             }
-            var bounds = CursorMonitorBounds();
+            var bounds = ActiveBoundsForCursor();
             var startInfo = new ProcessStartInfo
             {
                 FileName = scrcpy,
@@ -379,7 +381,7 @@ namespace DexManager.Services
                 return false;
             Native.POINT cursor;
             if (!Native.GetCursorPos(out cursor)) return false;
-            var bounds = MonitorBoundsAt(cursor.X, cursor.Y);
+            var bounds = ActiveBounds(cursor.X, cursor.Y);
             var size = SessionWindowSize;
             int x;
             int y;
@@ -541,9 +543,11 @@ namespace DexManager.Services
 
             Native.POINT cursor;
             if (!Native.GetCursorPos(out cursor)) return;
-            // Use the monitor the cursor is on, so each monitor's own edge
-            // triggers the handoff (not the whole virtual desktop).
-            _controller.UpdateBounds(MonitorBoundsAt(cursor.X, cursor.Y));
+            // Use the chosen monitor (or the one the cursor is on), so each
+            // monitor's own edge triggers the handoff (not the whole virtual
+            // desktop).  With a fixed monitor, ignore the cursor elsewhere.
+            if (!OnActiveMonitor(cursor.X, cursor.Y)) return;
+            _controller.UpdateBounds(ActiveBounds(cursor.X, cursor.Y));
             var push = InputHandoffController.OutwardPush(
                 _controller.Edge, dx, dy);
             if (_diagnostics.Enabled)
@@ -569,7 +573,7 @@ namespace DexManager.Services
 
         private void RecordEdgeSample(Native.POINT cursor, int push, long now)
         {
-            var bounds = MonitorBoundsAt(cursor.X, cursor.Y);
+            var bounds = ActiveBounds(cursor.X, cursor.Y);
             var edge = _controller.Edge;
             var distance = InputHandoffEdgeDetector.DistanceFromEdge(
                 bounds, edge, cursor.X, cursor.Y);
@@ -771,7 +775,7 @@ namespace DexManager.Services
         private void UpdateOverlay()
         {
             var state = _controller.State;
-            var bounds = CursorMonitorBounds();
+            var bounds = ActiveBoundsForCursor();
             if (state == InputHandoffState.OnPhone)
             {
                 _overlay.ShowReturn(
@@ -905,11 +909,13 @@ namespace DexManager.Services
                             "Log.Handoff.PhoneSizeUnknown"));
                         return;
                     }
-                    // Orientation is not known; use the long side for both
-                    // axes so that the virtual pointer never reaches the
-                    // return edge before the real one.
-                    var side = Math.Max(width, height);
-                    _controller.SetPhoneExtent(side, side);
+                    // Use the phone's real resolution per axis so the
+                    // virtual pointer covers the whole phone screen and only
+                    // reaches the return edge at the phone's actual edge.
+                    _controller.SetPhoneExtent(width, height);
+                    if (_diagnostics.Enabled)
+                        _diagnostics.Record("phone extent set " +
+                            width + "x" + height + " from wm size");
                 }, null);
             });
         }
@@ -1038,6 +1044,48 @@ namespace DexManager.Services
                 return MonitorBoundsAt(cursor.X, cursor.Y);
             var b = Screen.PrimaryScreen.Bounds;
             return new HandoffRect(b.Left, b.Top, b.Width, b.Height);
+        }
+
+        // The chosen monitor's bounds when one is pinned in Settings and it
+        // still exists; otherwise the monitor at the given point.
+        private HandoffRect ActiveBounds(int x, int y)
+        {
+            var chosen = ChosenMonitor();
+            if (chosen != null)
+            {
+                var b = chosen.Bounds;
+                return new HandoffRect(b.Left, b.Top, b.Width, b.Height);
+            }
+            return MonitorBoundsAt(x, y);
+        }
+
+        private HandoffRect ActiveBoundsForCursor()
+        {
+            var chosen = ChosenMonitor();
+            if (chosen != null)
+            {
+                var b = chosen.Bounds;
+                return new HandoffRect(b.Left, b.Top, b.Width, b.Height);
+            }
+            return CursorMonitorBounds();
+        }
+
+        // True when no monitor is pinned, or the point is on the pinned one.
+        private bool OnActiveMonitor(int x, int y)
+        {
+            var chosen = ChosenMonitor();
+            if (chosen == null) return true;
+            return chosen.Bounds.Contains(new System.Drawing.Point(x, y));
+        }
+
+        private Screen ChosenMonitor()
+        {
+            if (string.IsNullOrWhiteSpace(_monitorDeviceName)) return null;
+            foreach (var screen in Screen.AllScreens)
+            {
+                if (screen.DeviceName == _monitorDeviceName) return screen;
+            }
+            return null; // pinned monitor gone: fall back to cursor monitor
         }
 
         private static int MonitorIndexAt(int x, int y)

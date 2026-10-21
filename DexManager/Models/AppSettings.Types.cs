@@ -138,6 +138,9 @@ namespace DexManager.Models
         // detect).  Set from the diagnostic log when a keyboard uses an
         // unusual code.
         [DataMember(Order = 11)] public int HangulKeyVk { get; set; }
+        // Monitor whose edge is used, by Screen device name.  Empty = the
+        // monitor the cursor is currently on.
+        [DataMember(Order = 12)] public string MonitorDeviceName { get; set; }
 
         public string GetDeviceHotkey(string identity)
         {
@@ -214,6 +217,8 @@ namespace DexManager.Models
                 PhonePointerSpeedPercent = DefaultPhonePointerSpeedPercent;
             if (DwellMs < 100 || DwellMs > 2000)
                 DwellMs = DefaultDwellMs;
+            if (MonitorDeviceName == null)
+                MonitorDeviceName = string.Empty;
         }
     }
 

@@ -458,6 +458,23 @@ namespace DexManager.Forms
                     StringComparison.OrdinalIgnoreCase);
         }
 
+        private sealed class HandoffMonitorOption
+        {
+            public HandoffMonitorOption(string deviceName, string label)
+            {
+                DeviceName = deviceName ?? string.Empty;
+                Label = label ?? string.Empty;
+            }
+
+            public string DeviceName { get; private set; }
+            public string Label { get; private set; }
+
+            public override string ToString()
+            {
+                return Label;
+            }
+        }
+
         private sealed class HandoffEdgeOption
         {
             public HandoffEdgeOption(InputHandoffEdge edge)

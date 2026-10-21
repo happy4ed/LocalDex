@@ -777,4 +777,8 @@
   <data name="Settings.HandoffHangul" xml:space="preserve"><value>한/영 키를 Shift+Space로 보내기</value></data>
   <data name="Settings.HandoffDiagnostic" xml:space="preserve"><value>넘기기 진단 로그 남기기(serial·IP 없음)</value></data>
   <data name="Handoff.Overlay.ReturnNow" xml:space="preserve"><value>지금 끝으로 밀면 PC로 돌아옵니다</value></data>
+  <data name="Settings.HandoffMonitor" xml:space="preserve"><value>넘기기 변을 쓸 모니터</value></data>
+  <data name="Settings.HandoffMonitorCursor" xml:space="preserve"><value>커서가 있는 모니터</value></data>
+  <data name="Settings.HandoffMonitorPrimary" xml:space="preserve"><value>주</value></data>
+  <data name="Settings.HandoffMonitorItem" xml:space="preserve"><value>모니터 {0} {1} {2}x{3} ({4},{5})</value></data>
 </root>

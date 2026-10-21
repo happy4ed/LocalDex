@@ -301,6 +301,31 @@ namespace DexManager.Forms
                 handoff,
                 LocalizationService.Get("Settings.HandoffEdge"),
                 _handoffEdgeBox);
+            _handoffMonitorBox = CreateSelect();
+            _handoffMonitorBox.Items.Add(new HandoffMonitorOption(
+                string.Empty,
+                LocalizationService.Get("Settings.HandoffMonitorCursor")));
+            var screens = Screen.AllScreens;
+            for (var i = 0; i < screens.Length; i++)
+            {
+                var b = screens[i].Bounds;
+                var label = LocalizationService.Format(
+                    "Settings.HandoffMonitorItem",
+                    i + 1,
+                    screens[i].Primary
+                        ? LocalizationService.Get("Settings.HandoffMonitorPrimary")
+                        : string.Empty,
+                    b.Width,
+                    b.Height,
+                    b.Left,
+                    b.Top);
+                _handoffMonitorBox.Items.Add(
+                    new HandoffMonitorOption(screens[i].DeviceName, label));
+            }
+            AddRow(
+                handoff,
+                LocalizationService.Get("Settings.HandoffMonitor"),
+                _handoffMonitorBox);
             _handoffHotkeyBox = AddHotkey(
                 handoff,
                 LocalizationService.Get("Settings.HandoffReturnHotkey"));

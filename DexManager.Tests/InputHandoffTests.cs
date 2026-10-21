@@ -160,26 +160,30 @@ namespace DexManager.Tests
         }
 
         [Fact]
-        public void PhonePointerArmsThenReturnsAtTheFacingEdge()
+        public void PhonePointerReturnsOnlyAtTheRealFacingEdgeNotTheMiddle()
         {
             // Phone right of the PC -> facing (return) edge is the phone's
-            // left.  Entry puts the virtual pointer on that edge, disarmed.
+            // left.  Extent is the real resolution (1080x2340), so the
+            // estimate covers the whole phone and the left edge is x=0.
             var phone = new PhonePointerTracker { PcEdge = InputHandoffEdge.Right };
-            phone.SetExtent(2340, 2340);
+            phone.SetExtent(1080, 2340);
             phone.Begin();
             Assert.Equal(0, phone.X);
-            Assert.False(phone.Armed);
-            // Pushing the edge before arming does nothing.
-            for (var i = 0; i < 5; i++)
-                Assert.False(phone.Feed(-50, 0, i, false));
-            // Move into the phone (right) past the arm distance.
-            Assert.False(phone.Feed(200, 0, 50, false));
-            Assert.True(phone.Armed);
-            // Back to the left edge, then a short dwell + push returns.
-            Assert.False(phone.Feed(-400, 0, 100, false));
+            // Move deep into the phone (right), near the far side.
+            phone.Feed(1000, 0, 0, false);
+            // Halfway back is NOT the edge: no return even while pushing.
+            phone.Feed(-540, 0, 100, false);
+            Assert.True(phone.ReturnDistance() > 100);
+            var mid = false;
+            for (var i = 0; i < 20; i++)
+                mid |= phone.Feed(-10, 0, 200 + i * 40, false);
+            Assert.False(mid);
+            // All the way to the real left edge, hold the dwell + push.
+            phone.Feed(-2000, 0, 2000, false);
+            Assert.Equal(0, phone.X);
             var returned = false;
-            for (var i = 0; i < 12; i++)
-                returned |= phone.Feed(-10, 0, 150 + i * 40, false);
+            for (var i = 0; i < 20; i++)
+                returned |= phone.Feed(-10, 0, 2100 + i * 40, false);
             Assert.True(returned);
         }
 
@@ -189,13 +193,14 @@ namespace DexManager.Tests
             var phone = new PhonePointerTracker { PcEdge = InputHandoffEdge.Right };
             phone.SetExtent(1000, 1000);
             phone.Begin();
-            // Arm by moving into the phone; overshoot clamps (re-anchors).
+            // Overshoot the far edge clamps (re-anchors), not every move.
             phone.Feed(5000, 0, 0, false);
             Assert.Equal(1000, phone.X);
-            Assert.True(phone.Armed);
             Assert.True(phone.Reanchors > 0);
+            var anchored = phone.Reanchors;
             for (var i = 0; i < 20; i++)
                 Assert.False(phone.Feed(50, 0, 100 + i * 50, false));
+            Assert.Equal(anchored, phone.Reanchors);
             phone.Feed(-5000, 0, 2000, false);
             Assert.Equal(0, phone.X);
             // Resting on the return edge but pushing only off-axis (no
