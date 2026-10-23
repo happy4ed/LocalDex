@@ -77,10 +77,12 @@ namespace DexManager.Forms
                 _settings.Features.ManagedFileTransferEnabled;
             _fileTransferTargetFolderBox.Text =
                 _settings.Paths.FileTransferTargetFolder;
+#if !NO_COMPANION
             _phoneToPcTransferBox.Checked =
                 _settings.Features.PhoneToPcTransferEnabled;
             _phoneToPcReceiveFolderBox.Text = ResolveDisplayPath(
                 _settings.Paths.PhoneToPcReceiveFolder);
+#endif
 
             _deviceMonitorIntervalBox.Value = MillisecondsToSeconds(
                 _settings.Timing.DeviceMonitorIntervalMs,
@@ -326,6 +328,7 @@ namespace DexManager.Forms
             settings.Paths.FileTransferTargetFolder =
                 NormalizeFileTransferTargetFolder(
                     _fileTransferTargetFolderBox.Text);
+#if !NO_COMPANION
             settings.Paths.PhoneToPcReceiveFolder = ToConfiguredPath(
                 _phoneToPcReceiveFolderBox.Text);
             if (string.IsNullOrWhiteSpace(
@@ -335,6 +338,7 @@ namespace DexManager.Forms
                     LocalizationService.Get(
                         "Settings.PhoneToPcReceiveFolderRequired"));
             }
+#endif
             settings.Paths.LogFolder = ToConfiguredPath(
                 _logFolderBox.Text);
 
@@ -350,8 +354,10 @@ namespace DexManager.Forms
             settings.Features.PushCaptureToDevice = _pushCaptureBox.Checked;
             settings.Features.ManagedFileTransferEnabled =
                 _managedFileTransferBox.Checked;
+#if !NO_COMPANION
             settings.Features.PhoneToPcTransferEnabled =
                 _phoneToPcTransferBox.Checked;
+#endif
             settings.Features.MiniControlBarEnabled =
                 _miniControlBarBox.Checked;
             var miniControlBarSide =

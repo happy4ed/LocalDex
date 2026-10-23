@@ -522,6 +522,8 @@ namespace DexManager.Forms
             FormClosing += MainForm_FormClosing;
             FormClosed += MainForm_FormClosed;
             _deviceMonitor.StateChanged += DeviceMonitor_StateChanged;
+            _deviceMonitor.DeviceIdentityAliasFound +=
+                DeviceMonitor_DeviceIdentityAliasFound;
             _scrcpyService.RunningChanged += ScrcpyService_RunningChanged;
             _singleWindowService.RunningChanged +=
                 SingleWindowService_RunningChanged;

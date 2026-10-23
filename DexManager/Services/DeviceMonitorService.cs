@@ -56,6 +56,7 @@ namespace DexManager.Services
         public event EventHandler<DeviceStateChangedEventArgs> StateChanged;
         public event EventHandler<DeviceStateChangedEventArgs> DeviceConnected;
         public event EventHandler<DeviceStateChangedEventArgs> DeviceDisconnected;
+        public event EventHandler<DeviceIdentityAliasEventArgs> DeviceIdentityAliasFound;
 
         public DeviceState CurrentState
         {
@@ -418,8 +419,33 @@ namespace DexManager.Services
 
             var identity = _adbService.GetDeviceIdentity(serial);
             if (!string.IsNullOrWhiteSpace(identity))
+            {
                 _deviceIdentityCache[serial] = identity;
+                ReportIdentityAlias(serial, identity);
+            }
             return identity ?? string.Empty;
+        }
+
+        // A phone identified by its serial number may have settings saved
+        // under its android_id identity (older builds fell back to it when a
+        // property read failed).  Report that alias once per transport so the
+        // UI can move those settings back and drop the duplicate entry.
+        private void ReportIdentityAlias(string serial, string identity)
+        {
+            if (!identity.StartsWith("serial:", StringComparison.OrdinalIgnoreCase))
+                return;
+            var handler = DeviceIdentityAliasFound;
+            if (handler == null) return;
+            var alias = _adbService.GetAndroidIdIdentity(serial);
+            if (string.IsNullOrWhiteSpace(alias)) return;
+            try
+            {
+                handler(this, new DeviceIdentityAliasEventArgs(alias, identity));
+            }
+            catch (Exception ex)
+            {
+                _logService.Warning("Device identity alias handler failed: " + ex.Message);
+            }
         }
 
         private void RefreshVisibleDevices(IList<AdbDeviceInfo> devices)
@@ -509,5 +535,17 @@ namespace DexManager.Services
 
         public DeviceState Previous { get; private set; }
         public DeviceState Current { get; private set; }
+    }
+
+    public sealed class DeviceIdentityAliasEventArgs : EventArgs
+    {
+        public DeviceIdentityAliasEventArgs(string alias, string identity)
+        {
+            Alias = alias ?? string.Empty;
+            Identity = identity ?? string.Empty;
+        }
+
+        public string Alias { get; private set; }
+        public string Identity { get; private set; }
     }
 }

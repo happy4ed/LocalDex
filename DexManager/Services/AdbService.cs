@@ -185,6 +185,14 @@ namespace DexManager.Services
             return string.Empty;
         }
 
+        // Stable physical identity: ro.serialno, then ro.boot.serialno, and
+        // android_id only when the device really has no serial property.
+        // A failed or timed-out read (a phone that is still waking up right
+        // after it reconnects) returns no identity so the caller asks again
+        // later.  Falling back to android_id on a transient failure split one
+        // phone into two physical devices: the saved default phone and the
+        // keyboard/mouse handoff target kept the old identity and the new one
+        // never matched it.
         public string GetDeviceIdentity(string serial)
         {
             var serialProperties = new[]
@@ -193,43 +201,91 @@ namespace DexManager.Services
                 "ro.boot.serialno"
             };
 
+            var definitive = true;
             foreach (var property in serialProperties)
             {
-                var value = ReadDeviceText(
-                    serial,
-                    "getprop " + property);
-                if (!string.IsNullOrWhiteSpace(value))
+                string value;
+                if (!TryReadDeviceText(serial, "getprop " + property, out value))
+                {
+                    definitive = false;
+                    continue;
+                }
+                if (IsPlausibleDeviceSerial(value))
                     return "serial:" + value;
             }
+            if (!definitive) return string.Empty;
 
-            var androidId = ReadDeviceText(
-                serial,
-                "settings get secure android_id");
-            return string.IsNullOrWhiteSpace(androidId)
-                ? string.Empty
-                : "android:" + androidId;
+            return GetAndroidIdIdentity(serial);
+        }
+
+        // "android:<id>" for the device, or empty.  Also used to recognise
+        // settings saved under the android_id identity of a phone whose
+        // stable identity is its serial number.
+        public string GetAndroidIdIdentity(string serial)
+        {
+            string androidId;
+            return TryReadDeviceText(
+                    serial,
+                    "settings get secure android_id",
+                    out androidId) &&
+                IsPlausibleAndroidId(androidId)
+                ? "android:" + androidId
+                : string.Empty;
+        }
+
+        internal static bool IsPlausibleDeviceSerial(string value)
+        {
+            return !string.IsNullOrWhiteSpace(value) &&
+                Regex.IsMatch(value, "^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$");
+        }
+
+        internal static bool IsPlausibleAndroidId(string value)
+        {
+            return !string.IsNullOrWhiteSpace(value) &&
+                Regex.IsMatch(value, "^[0-9A-Fa-f]{8,32}$");
         }
 
         private string ReadDeviceText(string serial, string command)
         {
-            var result = ShellForSerial(serial, command, false);
-            if (!result.IsSuccess ||
-                string.IsNullOrWhiteSpace(result.StandardOutput))
-            {
-                return string.Empty;
-            }
+            string value;
+            return TryReadDeviceText(serial, command, out value)
+                ? value
+                : string.Empty;
+        }
 
-            var value = result.StandardOutput.Trim();
-            return string.Equals(
-                       value,
-                       "null",
-                       StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(
-                       value,
-                       "unknown",
-                       StringComparison.OrdinalIgnoreCase)
-                ? string.Empty
-                : value;
+        // False when the command itself failed (timeout, offline device).
+        // True with an empty value when the device answered but has no value
+        // ("null", "unknown", or a non-Android shell error message).
+        private bool TryReadDeviceText(
+            string serial,
+            string command,
+            out string value)
+        {
+            value = string.Empty;
+            var result = ShellForSerial(serial, command, false);
+            if (!result.IsSuccess) return false;
+            if (string.IsNullOrWhiteSpace(result.StandardOutput)) return true;
+
+            var text = result.StandardOutput.Trim();
+            if (string.Equals(text, "null", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(text, "unknown", StringComparison.OrdinalIgnoreCase) ||
+                LooksLikeShellError(text))
+            {
+                return true;
+            }
+            value = text;
+            return true;
+        }
+
+        // A device whose adb shell is not Android (for example bash) prints
+        // "...: command not found" on stdout with exit code 0.
+        internal static bool LooksLikeShellError(string text)
+        {
+            return !string.IsNullOrEmpty(text) &&
+                (text.IndexOf("command not found", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 text.IndexOf("inaccessible or not found", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 text.StartsWith("/system/bin/sh:", StringComparison.Ordinal) ||
+                 text.StartsWith("/bin/", StringComparison.Ordinal));
         }
 
         public ProcessResult PushForSerial(

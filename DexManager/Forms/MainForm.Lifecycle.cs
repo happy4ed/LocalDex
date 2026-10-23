@@ -133,6 +133,8 @@ namespace DexManager.Forms
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _deviceMonitor.StateChanged -= DeviceMonitor_StateChanged;
+            _deviceMonitor.DeviceIdentityAliasFound -=
+                DeviceMonitor_DeviceIdentityAliasFound;
             _physicalDeviceRegistry.SnapshotChanged -=
                 PhysicalDeviceRegistry_SnapshotChanged;
             _scrcpyService.RunningChanged -= ScrcpyService_RunningChanged;

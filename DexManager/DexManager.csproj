@@ -17,7 +17,6 @@
     <!-- DX Companion is kept in the repo but excluded from the app build.
          Set NoCompanion=false to bundle and enable it again. -->
     <NoCompanion Condition="'$(NoCompanion)' == ''">true</NoCompanion>
-    <DefineConstants Condition="'$(NoCompanion)' == 'true'">$(DefineConstants);NO_COMPANION</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -39,6 +38,11 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <!-- 구성별 그룹이 DefineConstants 를 통째로 다시 쓰므로 반드시 그 뒤에 둔다
+       (localdex.11 은 앞에 있어서 NO_COMPANION 이 빠진 채 빌드됐다). -->
+  <PropertyGroup Condition="'$(NoCompanion)' == 'true'">
+    <DefineConstants>$(DefineConstants);NO_COMPANION</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -87,6 +91,9 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\MainForm.DeviceConnections.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MainForm.DeviceForget.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\MainForm.DeviceConnectionState.cs">

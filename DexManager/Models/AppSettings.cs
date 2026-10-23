@@ -951,6 +951,110 @@ namespace DexManager.Models
                 RegexOptions.IgnoreCase).Trim();
         }
 
+        // Moves everything saved for a phone from one identity to another
+        // (settings saved while the phone briefly had its android_id
+        // identity go back to its serial identity).  An entry that already
+        // exists for the target identity wins.  True when anything changed.
+        public bool ReplaceDeviceIdentity(string fromIdentity, string toIdentity)
+        {
+            var from = (fromIdentity ?? string.Empty).Trim();
+            var to = (toIdentity ?? string.Empty).Trim();
+            if (from.Length == 0 || to.Length == 0 ||
+                string.Equals(from, to, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var changed = false;
+            if (string.Equals(
+                    PreferredDeviceIdentity,
+                    from,
+                    System.StringComparison.OrdinalIgnoreCase))
+            {
+                PreferredDeviceIdentity = to;
+                changed = true;
+            }
+            changed |= ReplaceIdentityIn(
+                DeviceRunSettingsProfiles, p => p.DeviceIdentity,
+                (p, v) => p.DeviceIdentity = v, from, to);
+            changed |= ReplaceIdentityIn(
+                DeviceWirelessConnectionProfiles, p => p.DeviceIdentity,
+                (p, v) => p.DeviceIdentity = v, from, to);
+            if (InputHandoff != null)
+            {
+                changed |= ReplaceIdentityIn(
+                    InputHandoff.DeviceHotkeys, p => p.DeviceIdentity,
+                    (p, v) => p.DeviceIdentity = v, from, to);
+            }
+            return changed;
+        }
+
+        // Removes everything saved for a phone the user no longer uses
+        // (default phone, run settings, wireless profile, handoff shortcut).
+        public bool ForgetDeviceIdentity(string identity)
+        {
+            var id = (identity ?? string.Empty).Trim();
+            if (id.Length == 0) return false;
+
+            var changed = false;
+            if (string.Equals(
+                    PreferredDeviceIdentity,
+                    id,
+                    System.StringComparison.OrdinalIgnoreCase))
+            {
+                PreferredDeviceIdentity = string.Empty;
+                changed = true;
+            }
+            changed |= RemoveIdentityFrom(DeviceRunSettingsProfiles, p => p.DeviceIdentity, id);
+            changed |= RemoveIdentityFrom(DeviceWirelessConnectionProfiles, p => p.DeviceIdentity, id);
+            if (InputHandoff != null)
+                changed |= RemoveIdentityFrom(InputHandoff.DeviceHotkeys, p => p.DeviceIdentity, id);
+            return changed;
+        }
+
+        private static bool ReplaceIdentityIn<T>(
+            List<T> list,
+            System.Func<T, string> get,
+            System.Action<T, string> set,
+            string from,
+            string to) where T : class
+        {
+            if (list == null) return false;
+            var hasTarget = list.Any(item => item != null && string.Equals(
+                (get(item) ?? string.Empty).Trim(), to,
+                System.StringComparison.OrdinalIgnoreCase));
+            var changed = false;
+            for (var i = list.Count - 1; i >= 0; i--)
+            {
+                var item = list[i];
+                if (item == null || !string.Equals(
+                        (get(item) ?? string.Empty).Trim(), from,
+                        System.StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                if (hasTarget) list.RemoveAt(i);
+                else
+                {
+                    set(item, to);
+                    hasTarget = true;
+                }
+                changed = true;
+            }
+            return changed;
+        }
+
+        private static bool RemoveIdentityFrom<T>(
+            List<T> list,
+            System.Func<T, string> get,
+            string identity) where T : class
+        {
+            if (list == null) return false;
+            return list.RemoveAll(item => item != null && string.Equals(
+                (get(item) ?? string.Empty).Trim(), identity,
+                System.StringComparison.OrdinalIgnoreCase)) > 0;
+        }
+
         private static List<SingleWindowSlotSettings> CreateDefaultSingleWindowSlots()
         {
             return new List<SingleWindowSlotSettings>

@@ -116,6 +116,10 @@
   <data name="Device.Unauthorized" xml:space="preserve"><value>RSA 승인 필요</value></data>
   <data name="Device.Offline" xml:space="preserve"><value>오프라인</value></data>
   <data name="Device.Disconnected" xml:space="preserve"><value>연결 안 됨</value></data>
+  <data name="Device.Forget.Menu" xml:space="preserve"><value>목록에서 지우기</value></data>
+  <data name="Device.Forget.Title" xml:space="preserve"><value>휴대폰 지우기</value></data>
+  <data name="Device.Forget.Confirm" xml:space="preserve"><value>"{0}" 을(를) 목록에서 지우고 저장된 설정(기본 휴대폰 · 실행 설정 · 무선 연결 · 넘기기 단축키)도 삭제합니다. 다시 연결하면 새 휴대폰으로 나타납니다.</value></data>
+  <data name="Device.Forget.Hint" xml:space="preserve"><value>오른쪽 클릭: 목록에서 지우기</value></data>
   <data name="Error.AdbInit" xml:space="preserve"><value>ADB 초기화 실패: {0}</value></data>
   <data name="Error.ApplyLaunchSettings" xml:space="preserve"><value>실행 설정을 적용하지 못했습니다.</value></data>
   <data name="Error.StartDex" xml:space="preserve"><value>DeX를 시작하지 못했습니다.</value></data>
@@ -270,6 +274,8 @@
   <data name="Log.DeviceMonitor.DevicePinned" xml:space="preserve"><value>기본 연결 감시 기기를 선택했습니다: {0} ({1})</value></data>
   <data name="Log.DeviceMonitor.IgnoredOtherDevice" xml:space="preserve"><value>기본 연결 감시 대상이 아닌 추가 ADB 기기를 감지했습니다: {0}</value></data>
   <data name="Log.DeviceContext.Registered" xml:space="preserve"><value>기기 런타임 등록: {0} ({1}, {2})</value></data>
+  <data name="Log.DeviceForgotten" xml:space="preserve"><value>목록에서 휴대폰을 지웠습니다: {0} ({1})</value></data>
+  <data name="Log.DeviceIdentity.Merged" xml:space="preserve"><value>{0} 로 저장된 설정을 같은 휴대폰 {1} 로 옮겼습니다</value></data>
   <data name="Log.DeviceContext.Selected" xml:space="preserve"><value>현재 기기 탭 선택: {0} ({1}, {2})</value></data>
   <data name="Log.DeviceMonitor.PinnedTransportChanged" xml:space="preserve"><value>기본 연결 감시 기기의 ADB 연결 방식이 변경되었습니다: {0} -&gt; {1}</value></data>
   <data name="Log.Dex.OperationInProgress" xml:space="preserve"><value>DeX 작업이 이미 진행 중입니다.</value></data>

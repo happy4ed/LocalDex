@@ -116,6 +116,10 @@
   <data name="Device.Unauthorized" xml:space="preserve"><value>RSA approval required</value></data>
   <data name="Device.Offline" xml:space="preserve"><value>Offline</value></data>
   <data name="Device.Disconnected" xml:space="preserve"><value>Not connected</value></data>
+  <data name="Device.Forget.Menu" xml:space="preserve"><value>Remove from list</value></data>
+  <data name="Device.Forget.Title" xml:space="preserve"><value>Remove phone</value></data>
+  <data name="Device.Forget.Confirm" xml:space="preserve"><value>Remove "{0}" from the list and delete what was saved for it (default phone, run settings, wireless connection, handoff shortcut)? If it connects again it appears as a new phone.</value></data>
+  <data name="Device.Forget.Hint" xml:space="preserve"><value>Right-click: remove from list</value></data>
   <data name="Error.AdbInit" xml:space="preserve"><value>ADB initialization failed: {0}</value></data>
   <data name="Error.ApplyLaunchSettings" xml:space="preserve"><value>Could not apply launch settings.</value></data>
   <data name="Error.StartDex" xml:space="preserve"><value>Could not start DeX.</value></data>
@@ -270,6 +274,8 @@
   <data name="Log.DeviceMonitor.DevicePinned" xml:space="preserve"><value>Selected the initial connection-monitoring device: {0} ({1})</value></data>
   <data name="Log.DeviceMonitor.IgnoredOtherDevice" xml:space="preserve"><value>Detected an additional ADB device outside the initial connection-monitoring target: {0}</value></data>
   <data name="Log.DeviceContext.Registered" xml:space="preserve"><value>Registered device runtime: {0} ({1}, {2})</value></data>
+  <data name="Log.DeviceForgotten" xml:space="preserve"><value>Removed phone from the list: {0} ({1})</value></data>
+  <data name="Log.DeviceIdentity.Merged" xml:space="preserve"><value>Moved settings saved under {0} to the same phone {1}</value></data>
   <data name="Log.DeviceContext.Selected" xml:space="preserve"><value>Selected current device tab: {0} ({1}, {2})</value></data>
   <data name="Log.DeviceMonitor.PinnedTransportChanged" xml:space="preserve"><value>The initial connection-monitoring device changed ADB transport: {0} -&gt; {1}</value></data>
   <data name="Log.Dex.OperationInProgress" xml:space="preserve"><value>A DeX operation is already in progress.</value></data>

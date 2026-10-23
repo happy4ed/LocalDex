@@ -44,6 +44,8 @@ namespace DexManager.Forms
             {
                 if (device == null ||
                     string.IsNullOrWhiteSpace(device.Identity)) continue;
+                if (device.IsConnected)
+                    _forgottenDeviceIdentities.Remove(device.Identity);
 
                 var context = EnsureDeviceContext(device);
                 context.Device = device.Clone();
@@ -515,6 +517,12 @@ namespace DexManager.Forms
         {
             if (_exitInProgress || context == null ||
                 string.IsNullOrWhiteSpace(serial)) return;
+#if NO_COMPANION
+            // DX Companion 이 빌드에서 빠졌으면 공유 파일 받기·종료 보호를 준비하지 않는다
+            // (기기마다 adb 조회와 "Companion … unavailable" 로그만 남기던 일).
+            await Task.FromResult(0);
+            return;
+#else
             try
             {
                 await context.Runtime.PhoneTransfers.AttachAsync(
@@ -550,6 +558,7 @@ namespace DexManager.Forms
                     serial + ".",
                     ex);
             }
+#endif
         }
 
         private void ConfigurePhoneTransferReceiver(string serial)

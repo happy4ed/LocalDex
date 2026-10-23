@@ -149,6 +149,8 @@ namespace DexManager.Forms
                 string.Empty,
                 CreateHint(LocalizationService.Get(
                     "Settings.ManagedFileTransferHint")));
+#if !NO_COMPANION
+            // DX Companion 이 빌드에서 빠지면 그 앱이 있어야 되는 「공유한 파일 받기」도 숨긴다.
             _phoneToPcTransferBox = AddCheck(
                 paths,
                 LocalizationService.Get(
@@ -164,6 +166,7 @@ namespace DexManager.Forms
                 string.Empty,
                 CreateHint(LocalizationService.Get(
                     "Settings.PhoneToPcTransferHint")));
+#endif
             _logFolderBox = AddPath(paths, LocalizationService.Get("Settings.LogFolder"), false);
             AddCard(page, LocalizationService.Get("Settings.GroupStorage"), paths);
             return page;

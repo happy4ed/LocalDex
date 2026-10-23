@@ -97,12 +97,18 @@ namespace DexManager.Forms
             try
             {
                 while (_deviceTabsPanel.Controls.Count > 0)
-                    _deviceTabsPanel.Controls[0].Dispose();
+                {
+                    var old = _deviceTabsPanel.Controls[0];
+                    var menu = old.ContextMenuStrip;
+                    old.Dispose();
+                    if (menu != null) menu.Dispose();
+                }
                 _deviceTabsPanel.Controls.Clear();
                 _deviceTabButtons.Clear();
                 foreach (var item in GetDeviceContextEntries())
                 {
                     var context = item.Value;
+                    if (IsDeviceForgotten(context)) continue;
                     var device = context.Device;
                     var transport = GetContextTransport(context);
                     var connected = transport != null &&
@@ -142,10 +148,16 @@ namespace DexManager.Forms
                         _selectionAwaitingPreferred = false;
                         SelectDeviceContext(context);
                     };
+                    var removable = device == null || !device.IsConnected;
+                    if (removable)
+                        button.ContextMenuStrip = CreateForgetDeviceMenu(context);
                     _deviceTabToolTip.SetToolTip(
                         button,
                         GetContextDisplayName(context) +
-                            Environment.NewLine + statusText);
+                            Environment.NewLine + statusText +
+                            (removable
+                                ? Environment.NewLine + LocalizationService.Get("Device.Forget.Hint")
+                                : string.Empty));
                     _deviceTabButtons[item.Key] = button;
                     _deviceTabsPanel.Controls.Add(button);
                 }

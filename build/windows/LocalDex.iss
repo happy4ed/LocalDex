@@ -1,5 +1,5 @@
 #ifndef AppVersion
-  #define AppVersion "2.1.0-localdex.11"
+  #define AppVersion "2.1.0-localdex.12"
 #endif
 #ifndef PackageDir
   #define PackageDir "..\..\dist\LocalDex"
