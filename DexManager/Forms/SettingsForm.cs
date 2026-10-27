@@ -101,6 +101,7 @@ namespace DexManager.Forms
         private ThemedTextControl _wirelessHostBox;
         private ThemedNumberControl _wirelessPortBox;
         private CheckBox _wirelessAutoReconnectBox;
+        private CheckBox _usbFileTransferBox;
         private Label _wirelessStatusLabel;
         private ThemedNumberControl _pairingPortBox;
         private ThemedTextControl _pairingCodeBox;

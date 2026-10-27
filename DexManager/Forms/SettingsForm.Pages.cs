@@ -199,6 +199,9 @@ namespace DexManager.Forms
             };
             AddRow(connection, LocalizationService.Get("Settings.ConnectionMode"), _usbConnectionBox);
             AddRow(connection, string.Empty, _wirelessConnectionBox);
+            _usbFileTransferBox = AddCheck(
+                connection,
+                LocalizationService.Get("Settings.UsbFileTransferOnConnect"));
 
             _wirelessHostBox = AddText(connection, LocalizationService.Get("Settings.PhoneIp"));
             _wirelessPortBox = AddNumber(

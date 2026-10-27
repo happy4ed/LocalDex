@@ -1,5 +1,12 @@
 # Changelog
 
+## USB file transfer on plug-in — 2.1.0-localdex.13 (2026-10-27)
+
+A phone that already trusts this PC for USB debugging is switched from "charging only" to file transfer (svc usb setFunctions mtp) when plugged in, once per plug-in: the reconnection the switch causes does not switch again, and if the phone falls back to charging (locked) LocalDex stops until the phone is replugged. Settings -> Connection toggle, on by default. LocalDex itself still uses adb for everything.
+
+이 PC 를 USB 디버깅으로 신뢰한 폰을 꽂으면 「충전만」에서 파일 전송(svc usb setFunctions mtp)으로 바꿉니다. 꽂을 때 한 번만: 전환으로 생기는 재연결에서는 다시 바꾸지 않고, 폰이 충전으로 돌아가면(잠김) 다시 꽂을 때까지 멈춥니다. 설정 → 연결에서 켜고 끔(기본 켬). LocalDex 자체는 계속 adb 로 동작합니다.
+
+
 ## Version placement, no on-phone toast, watchdog-return fix, NO_COMPANION — 2.1.0-localdex.11 (2026-10-21)
 
 Three fixes from on-device feedback. The version string moved to the bottom-left of the main window so it no longer crowds and truncates the Settings button. The persistent "on phone" toast is gone -- only the brief arming progress shows before handing over. And the root of "returning away from the edge" is fixed: while on the phone the cursor/foreground watchdog that caused false mid-screen returns (release with returnDist>0, push=0 in the logs) was removed; a return now only happens from a real edge reach + dwell + push, the return shortcut, or a genuine safety event (the scrcpy process ending). Each release records its reason (edge / shortcut / scrcpy-exit / target-missing...) in the diagnostic log, and a low-frequency phone-pointer probe logs whether the real cursor position is readable. DX Companion is kept in the repo but excluded from the app build behind a NO_COMPANION flag.

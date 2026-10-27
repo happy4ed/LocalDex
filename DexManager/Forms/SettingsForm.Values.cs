@@ -34,6 +34,8 @@ namespace DexManager.Forms
                     break;
                 }
             }
+            _usbFileTransferBox.Checked = _settings.Connection == null ||
+                !_settings.Connection.LeaveUsbModeUnchanged;
             _automaticAdbBox.Checked =
                 _settings.Paths.AdbSelectionMode == AdbSelectionMode.Auto;
             _manualAdbBox.Checked = !_automaticAdbBox.Checked;
@@ -418,6 +420,8 @@ namespace DexManager.Forms
 
         private void SaveConnectionValues(AppSettings settings)
         {
+            if (settings.Connection != null)
+                settings.Connection.LeaveUsbModeUnchanged = !_usbFileTransferBox.Checked;
             if (_wirelessConnectionBox.Checked &&
                 string.IsNullOrWhiteSpace(_wirelessHostBox.Text))
             {

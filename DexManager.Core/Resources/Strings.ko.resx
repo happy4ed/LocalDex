@@ -274,6 +274,12 @@
   <data name="Log.DeviceMonitor.DevicePinned" xml:space="preserve"><value>기본 연결 감시 기기를 선택했습니다: {0} ({1})</value></data>
   <data name="Log.DeviceMonitor.IgnoredOtherDevice" xml:space="preserve"><value>기본 연결 감시 대상이 아닌 추가 ADB 기기를 감지했습니다: {0}</value></data>
   <data name="Log.DeviceContext.Registered" xml:space="preserve"><value>기기 런타임 등록: {0} ({1}, {2})</value></data>
+  <data name="Settings.UsbFileTransferOnConnect" xml:space="preserve"><value>이 PC 에 꽂으면 USB 를 파일 전송으로 바꾸기 (USB 디버깅을 허용한 PC 에서만)</value></data>
+  <data name="Log.UsbMode.Switching" xml:space="preserve"><value>USB 를 파일 전송으로 바꿉니다: {0} (현재 {1})</value></data>
+  <data name="Log.UsbMode.Switched" xml:space="preserve"><value>USB 가 파일 전송으로 바뀌었습니다: {0} ({1})</value></data>
+  <data name="Log.UsbMode.NotKept" xml:space="preserve"><value>USB 파일 전송이 유지되지 않아 다시 꽂을 때까지 바꾸지 않습니다(휴대폰 잠김 등): {0} ({1})</value></data>
+  <data name="Log.UsbMode.Unknown" xml:space="preserve"><value>USB 모드를 읽지 못해 바꾸지 않았습니다: {0} ({1})</value></data>
+  <data name="Log.UsbMode.Failed" xml:space="preserve"><value>USB 를 파일 전송으로 바꾸지 못했습니다: {0} ({1})</value></data>
   <data name="Log.DeviceForgotten" xml:space="preserve"><value>목록에서 휴대폰을 지웠습니다: {0} ({1})</value></data>
   <data name="Log.DeviceIdentity.Merged" xml:space="preserve"><value>{0} 로 저장된 설정을 같은 휴대폰 {1} 로 옮겼습니다</value></data>
   <data name="Log.DeviceContext.Selected" xml:space="preserve"><value>현재 기기 탭 선택: {0} ({1}, {2})</value></data>

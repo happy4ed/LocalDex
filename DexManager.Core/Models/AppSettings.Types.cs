@@ -99,6 +99,9 @@ namespace DexManager.Models
         [DataMember(Order = 2)] public string WirelessHost { get; set; }
         [DataMember(Order = 3)] public int WirelessPort { get; set; }
         [DataMember(Order = 4)] public bool AutoReconnect { get; set; }
+        // false (default, also for settings saved before this existed) =
+        // switch a phone plugged into this PC to file transfer (MTP)
+        [DataMember(Order = 5)] public bool LeaveUsbModeUnchanged { get; set; }
     }
 
     // PC keyboard and mouse handoff to the saved default phone over USB

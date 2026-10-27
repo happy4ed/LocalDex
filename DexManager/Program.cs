@@ -93,6 +93,17 @@ namespace DexManager
                 {
                     runtimeSessions.Reconcile(eventArgs.Current);
                 };
+                var usbFileTransferMode = new UsbFileTransferModeService(
+                    adbService,
+                    () => settings.Connection == null ||
+                        !settings.Connection.LeaveUsbModeUnchanged,
+                    logService);
+                physicalDeviceRegistry.SnapshotChanged += delegate(
+                    object sender,
+                    Models.DeviceRegistrySnapshotChangedEventArgs eventArgs)
+                {
+                    usbFileTransferMode.OnSnapshot(eventArgs.Current);
+                };
                 var wirelessAdbService = new WirelessAdbService(
                     adbService,
                     settingsService,
