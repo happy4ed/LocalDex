@@ -50,7 +50,10 @@ jobs:
         shell: pwsh
         run: |
           ./scripts/Update-Scrcpy.ps1
-          ./scripts/Prepare-Companion.ps1
+          # DX Companion is excluded from the app build (NoCompanion=true), so its
+          # APK is not needed; the upstream archive Prepare-Companion.ps1 fetched
+          # (maze-mei/DX-Manager v2.0.1) now returns 404. Run it again only when
+          # building with NoCompanion=false.
           $archive = Join-Path $env:RUNNER_TEMP 'net462.zip'
           Invoke-WebRequest 'https://api.nuget.org/v3-flatcontainer/microsoft.netframework.referenceassemblies.net462/1.0.3/microsoft.netframework.referenceassemblies.net462.1.0.3.nupkg' -OutFile $archive
           Expand-Archive $archive .build-tools/net462
